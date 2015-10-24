@@ -7,7 +7,7 @@ local chest_savegame_variable = "chest_" .. dungeon .. "_" .. x_coordinate .. "_
 local hero = entity:get_map():get_entity("hero")
 local sk_chest = game:get_value(chest_savegame_variable)
 
--- Hud notification
+-- Hud notification (WORK IN PROGRESS)
 entity:add_collision_test("touching", function()
    if sk_chest ~= 1 and hero:get_direction() == entity:get_direction() then
     game:set_custom_command_effect("action", "open")
