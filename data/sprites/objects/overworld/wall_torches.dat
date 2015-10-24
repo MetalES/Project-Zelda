@@ -1,0 +1,25 @@
+animation{
+  name = "DayTime",
+  src_image = "objects/overworld/wall_torches.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12 },
+  },
+}
+animation{
+  name = "DuskTime",
+  src_image = "objects/overworld/wall_torches.png",
+  frame_delay = 160,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 24, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12, num_frames = 4 },
+  },
+}
+animation{
+  name = "NightTime",
+  src_image = "objects/overworld/wall_torches.png",
+  frame_delay = 160,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 48, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12, num_frames = 4 },
+  },
+}

@@ -1,0 +1,12 @@
+animation{
+  name = "closed",
+  src_image = "",
+  directions = {
+  },
+}
+animation{
+  name = "open",
+  src_image = "",
+  directions = {
+  },
+}

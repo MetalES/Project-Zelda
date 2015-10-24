@@ -1,0 +1,9 @@
+animation{
+  name = "Default",
+  src_image = "objects/overworld/castle_fountain.png",
+  frame_delay = 150,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 48, frame_height = 40, origin_x = 16, origin_y = 20, num_frames = 4 },
+  },
+}

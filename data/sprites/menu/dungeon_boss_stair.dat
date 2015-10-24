@@ -1,0 +1,9 @@
+animation{
+  name = "default",
+  src_image = "menus/dungeon_boss_stair.png",
+  frame_delay = 200,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 12, frame_height = 16, origin_x = 8, origin_y = 8, num_frames = 21 },
+  },
+}

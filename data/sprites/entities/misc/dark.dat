@@ -1,0 +1,17 @@
+animation{
+  name = "normal",
+  src_image = "entities/misc/dark.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 640, frame_height = 480, origin_x = 320, origin_y = 240, num_frames = 4 },
+    { x = 0, y = 1440, frame_width = 481, frame_height = 640, origin_x = 108, origin_y = 72, num_frames = 4, num_columns = 1 },
+    { x = 0, y = 480, frame_width = 640, frame_height = 480, origin_x = 320, origin_y = 240, num_frames = 4 },
+    { x = 480, y = 1440, frame_width = 481, frame_height = 640, origin_x = 0, origin_y = 0, num_frames = 4, num_columns = 1 },
+  },
+}
+animation{
+  name = "no_oil",
+  src_image = "entities/misc/dark.png",
+  directions = {
+    { x = 0, y = 960, frame_width = 640, frame_height = 480, origin_x = 320, origin_y = 240, num_frames = 4 },
+  },
+}

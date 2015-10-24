@@ -1,0 +1,34 @@
+In each folders you will find a "common" folder or file.
+These only serve for entities that share the same ressources, avoiding double files
+
+common files are :
+
+- shared sound effects between entities (hit se, item attribute)
+- entities that only need 1-2 sounds to fully function (items are forbidden)
+
+Try avoiding putting the same sound for another ennemy in it's respective folder.
+Save as much space as possible
+
+
+
+------ Phantom Ganon --------
+
+
+
+It will be one kind to programm, since music will be dynamic with this one (depending on hit-rate, success and failure)
+and might be the only one atm
+
+phantom ganon has 5 music variation when it come to energy ball exchange (tennis)
+
+for i = 1 .. 5 do
+  if blabla exchange = 1 .. 5 then
+  return i
+play_music(i)
+end
+end
+
+for the failure : hero:on_taking_damage will help
+play_music(failure,function()
+play_music(loop)end)
+
+looks simple but not really ... 

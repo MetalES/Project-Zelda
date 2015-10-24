@@ -1,0 +1,9 @@
+animation{
+  name = "Default",
+  src_image = "objects/overworld/water_fountain.png",
+  frame_delay = 130,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 71, frame_height = 48, origin_x = 20, origin_y = 24, num_frames = 4 },
+  },
+}

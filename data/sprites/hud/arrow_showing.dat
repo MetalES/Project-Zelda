@@ -1,0 +1,36 @@
+animation{
+  name = "normal",
+  src_image = "hud/arrow_showing.png",
+  frame_delay = 160,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 63, frame_width = 18, frame_height = 16, origin_x = 8, origin_y = 4 },
+  },
+}
+animation{
+  name = "fire",
+  src_image = "hud/arrow_showing.png",
+  frame_delay = 160,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 17, frame_height = 26, origin_x = 8, origin_y = 12, num_frames = 3 },
+  },
+}
+animation{
+  name = "ice",
+  src_image = "hud/arrow_showing.png",
+  frame_delay = 160,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 26, frame_width = 17, frame_height = 18, origin_x = 8, origin_y = 8, num_frames = 4 },
+  },
+}
+animation{
+  name = "light",
+  src_image = "hud/arrow_showing.png",
+  frame_delay = 160,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 43, frame_width = 17, frame_height = 18, origin_x = 8, origin_y = 8, num_frames = 3 },
+  },
+}

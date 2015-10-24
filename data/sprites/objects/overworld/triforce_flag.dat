@@ -1,0 +1,11 @@
+animation{
+  name = "Default",
+  src_image = "objects/overworld/triforce_flag.png",
+  frame_delay = 110,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 71, frame_height = 72, origin_x = 40, origin_y = 36, num_frames = 8 },
+    { x = 0, y = 72, frame_width = 71, frame_height = 56, origin_x = 32, origin_y = 28, num_frames = 8 },
+    { x = 0, y = 128, frame_width = 71, frame_height = 64, origin_x = 36, origin_y = 32, num_frames = 8 },
+  },
+}

@@ -1,0 +1,27 @@
+animation{
+  name = "tunic1",
+  src_image = "menus/hero_head.png",
+  frame_delay = 200,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 18, frame_height = 16, origin_x = 0, origin_y = 4, num_frames = 8 },
+  },
+}
+animation{
+  name = "tunic2",
+  src_image = "menus/hero_head.png",
+  frame_delay = 200,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 16, frame_width = 18, frame_height = 16, origin_x = 0, origin_y = 0, num_frames = 8 },
+  },
+}
+animation{
+  name = "tunic3",
+  src_image = "menus/hero_head.png",
+  frame_delay = 200,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 32, frame_width = 18, frame_height = 16, origin_x = 0, origin_y = 0, num_frames = 8 },
+  },
+}

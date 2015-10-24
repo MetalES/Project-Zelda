@@ -1,0 +1,30 @@
+animation{
+  name = "default",
+  src_image = "hud/dialog_box.png",
+  frame_delay = 200,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 60, frame_width = 16, frame_height = 16, origin_x = 0, origin_y = 0, num_frames = 4 },
+    { x = 64, y = 60, frame_width = 16, frame_height = 16, origin_x = 0, origin_y = 3, num_frames = 4 },
+  },
+}
+animation{
+  name = "stone",
+  src_image = "hud/dialog_box_stone.png",
+  frame_delay = 100,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 60, frame_width = 16, frame_height = 16, origin_x = 0, origin_y = 0, num_frames = 4 },
+    { x = 64, y = 60, frame_width = 16, frame_height = 16, origin_x = 0, origin_y = 3, num_frames = 4 },
+  },
+}
+animation{
+  name = "wood",
+  src_image = "hud/dialog_box_wood.png",
+  frame_delay = 100,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 60, frame_width = 16, frame_height = 16, origin_x = 0, origin_y = 0, num_frames = 4 },
+    { x = 64, y = 60, frame_width = 16, frame_height = 16, origin_x = 0, origin_y = 3, num_frames = 4 },
+  },
+}

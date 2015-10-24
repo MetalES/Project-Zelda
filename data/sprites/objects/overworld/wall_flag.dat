@@ -1,0 +1,9 @@
+animation{
+  name = "Default",
+  src_image = "objects/overworld/wall_flag.png",
+  frame_delay = 250,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 22, frame_height = 24, origin_x = 12, origin_y = 12, num_frames = 3 },
+  },
+}

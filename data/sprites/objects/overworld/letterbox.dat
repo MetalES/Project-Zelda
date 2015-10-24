@@ -1,0 +1,24 @@
+animation{
+  name = "static",
+  src_image = "objects/overworld/letterbox.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 16 },
+  },
+}
+animation{
+  name = "delivering_mail",
+  src_image = "objects/overworld/letterbox.png",
+  frame_delay = 360,
+  directions = {
+    { x = 0, y = 32, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 16, num_frames = 3 },
+  },
+}
+animation{
+  name = "got_letter_to_deliver",
+  src_image = "objects/overworld/letterbox.png",
+  frame_delay = 120,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 16, num_frames = 8 },
+  },
+}
