@@ -10,8 +10,7 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 
 You might see some references to other Zelda.
 
-Version updates :
-
+#Version updates (advancement tracking) :
 # 0.01
 - Link's sprite are different from classic ALTTP (MoS)
 - Link's sprite are from Parallel Worlds (Euclid, Seth), some Link's sprites are new (items)
