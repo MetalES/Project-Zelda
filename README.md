@@ -25,6 +25,7 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Reworked Dialog Box, much wider
 - Reworked Dialog Icons, now supports 32x32 format, allows more pixel for items when showing them.
 - Chests can spawn like they spawn in OOT and M'sM if a enigma is solved (the round thing around the chest and then fade in)
+- Files are hierarchised in folders, organisation wise, it was a mess in the RPG Maker version to find files.
 
 #Planned
 - Shaders (Heat effect, clouds, etc), Solarus might get these one day.
@@ -33,4 +34,5 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - overhauled maps (compared to the RPG Maker's map)
 - Minigames, somes are already made.
 - Bosses (you might spoil yourself if you go on /data/music/dungeons/boss)
+- Item Skills
 - PSP port (but this one might take a while, let's focus on the game itself)
