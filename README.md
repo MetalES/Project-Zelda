@@ -36,3 +36,5 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Bosses (you might spoil yourself if you go on /data/music/dungeons/boss)
 - Item Skills
 - PSP port (but this one might take a while, let's focus on the game itself)
+
+Some ressource come from : Zelda BOM - wrightmat (https://github.com/wrightmat/zbom), still need to apply changes and move things
