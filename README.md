@@ -24,7 +24,7 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Reworked HUD
 - Reworked Dialog Box, much wider
 - Reworked Dialog Icons, now supports 32x32 format, allows more pixel for items when showing them.
-- Chests can spawn like they spawn in OOT and M'sM if a enigma is solved
+- Chests can spawn like they spawn in OOT and M'sM if a enigma is solved (the round thing around the chest and then fade in)
 
 #Planned
 - Shaders (Heat effect, clouds, etc), Solarus might get these one day.
