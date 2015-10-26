@@ -29,7 +29,7 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Reworked Dialog Icons, now supports 32x32 format, allows more pixel for items when showing them.
 - Chests can spawn like they spawn in OOT and M'sM if a enigma is solved (the round thing around the chest and then fade in)
 - Files are hierarchised in folders, organisation wise, it was a mess in the RPG Maker version to find files.
-- 
+
 # 0.1  -   started : October 25th 2015
 - Started working on some maps
 - Direction Fix for some items (Bow, Hookshot)
