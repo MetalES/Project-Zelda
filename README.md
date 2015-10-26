@@ -40,6 +40,7 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Still need improvement (Frame recheck while direction_fix)
 - Minecart system in WIP (Goron Sanctuary) TODO : Sprite
 - Still Test Maps
+- You can't pause while using bow, hookshot, problem restoring "action" value
 - Started learning PSP sdk
 
 #Planned
