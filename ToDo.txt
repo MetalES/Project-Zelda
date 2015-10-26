@@ -1,0 +1,15 @@
+Version 0.1 :
+
+-Make ALL of Link's needed sprites
+   - Climbing
+   - Items
+   - Rolling
+   - Cutscene poses
+- Work on some items, they don't need to be fully functionnal
+- Make .dat sprite of all items
+- import all other ressources from RPG Maker Version, this is secondary.
+- import NPC
+
+Version 0.2 :
+
+- Start making intro
