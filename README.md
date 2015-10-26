@@ -41,7 +41,6 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Minecart system in WIP (Goron Sanctuary) TODO : Sprite
 - Still Test Maps
 - Started learning PSP sdk
-- 
 
 #Planned
 - Day & Night, Weather (solution bellow)
