@@ -1,0 +1,55 @@
+animation{
+  name = "stopped",
+  src_image = "hero/item/bow/bow_tunic.png",
+  directions = {
+    { x = 150, y = 49, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 20 },
+    { x = 298, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 20 },
+    { x = 225, y = 49, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20 },
+    { x = 0, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16 },
+  },
+}
+animation{
+  name = "shooting",
+  src_image = "hero/item/bow/bow_tunic.png",
+  frame_delay = 100,
+  directions = {
+    { x = 225, y = 25, frame_width = 25, frame_height = 25, origin_x = 16, origin_y = 12, num_frames = 2 },
+    { x = 324, y = 50, frame_width = 25, frame_height = 25, origin_x = 16, origin_y = 12, num_frames = 2 },
+    { x = 100, y = 0, frame_width = 25, frame_height = 25, origin_x = 16, origin_y = 12, num_frames = 2 },
+    { x = 100, y = 0, frame_width = 25, frame_height = 25, origin_x = 16, origin_y = 12, num_frames = 2 },
+  },
+}
+animation{
+  name = "stopped_with_shield",
+  src_image = "hero/item/bow/bow_tunic.png",
+  directions = {
+    { x = 150, y = 49, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 20 },
+    { x = 298, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 20 },
+    { x = 225, y = 49, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20 },
+    { x = 0, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16 },
+  },
+}
+animation{
+  name = "walking",
+  src_image = "hero/item/bow/bow_tunic.png",
+  frame_delay = 120,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 150, y = 49, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 20, num_frames = 3 },
+    { x = 298, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 20, num_frames = 3 },
+    { x = 225, y = 49, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20, num_frames = 3 },
+    { x = 0, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16, num_frames = 3 },
+  },
+}
+animation{
+  name = "walking_with_shield",
+  src_image = "hero/item/bow/bow_tunic.png",
+  frame_delay = 120,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 150, y = 49, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 20, num_frames = 3 },
+    { x = 298, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 20, num_frames = 3 },
+    { x = 225, y = 49, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20, num_frames = 3 },
+    { x = 0, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16, num_frames = 3 },
+  },
+}

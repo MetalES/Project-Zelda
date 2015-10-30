@@ -1,0 +1,44 @@
+animation{
+  name = "stopped",
+  src_image = "hero/item/bow/bow_tunic.png",
+  directions = {
+    { x = 75, y = 75, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 20 },
+    { x = 225, y = 75, frame_width = 25, frame_height = 25, origin_x = 12, origin_y = 20 },
+    { x = 150, y = 75, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20 },
+    { x = 0, y = 75, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16 },
+  },
+}
+animation{
+  name = "stopped_with_shield",
+  src_image = "hero/item/bow/bow_tunic.png",
+  directions = {
+    { x = 75, y = 75, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 20 },
+    { x = 225, y = 75, frame_width = 25, frame_height = 25, origin_x = 12, origin_y = 20 },
+    { x = 150, y = 75, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20 },
+    { x = 0, y = 75, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16 },
+  },
+}
+animation{
+  name = "walking",
+  src_image = "hero/item/bow/bow_tunic.png",
+  frame_delay = 150,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 75, y = 75, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 19, num_frames = 3 },
+    { x = 225, y = 75, frame_width = 25, frame_height = 25, origin_x = 13, origin_y = 20, num_frames = 3 },
+    { x = 150, y = 74, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20, num_frames = 3 },
+    { x = 0, y = 75, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16, num_frames = 3 },
+  },
+}
+animation{
+  name = "walking_with_shield",
+  src_image = "hero/item/bow/bow_tunic.png",
+  frame_delay = 150,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 75, y = 75, frame_width = 25, frame_height = 25, origin_x = 11, origin_y = 19, num_frames = 3 },
+    { x = 225, y = 75, frame_width = 25, frame_height = 25, origin_x = 13, origin_y = 20, num_frames = 3 },
+    { x = 150, y = 74, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 20, num_frames = 3 },
+    { x = 0, y = 75, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 16, num_frames = 3 },
+  },
+}
