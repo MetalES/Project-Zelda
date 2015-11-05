@@ -1,0 +1,11 @@
+animation{
+  name = "walking",
+  src_image = "hero/action/roll/roll.tunic.png",
+  frame_delay = 150,
+  directions = {
+    { x = 68, y = 21, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 16, num_frames = 4 },
+    { x = 0, y = 20, frame_width = 17, frame_height = 20, origin_x = 8, origin_y = 16, num_frames = 4 },
+    { x = 68, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 16, num_frames = 4 },
+    { x = 0, y = 0, frame_width = 17, frame_height = 20, origin_x = 8, origin_y = 16, num_frames = 4 },
+  },
+}

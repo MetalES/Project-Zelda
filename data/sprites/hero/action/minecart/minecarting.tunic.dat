@@ -1,0 +1,12 @@
+animation{
+  name = "walking",
+  src_image = "hero/action/minecart/minecarting.tunic.png",
+  frame_delay = 50,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 60, y = 35, frame_width = 30, frame_height = 28, origin_x = 8, origin_y = 20, num_frames = 2 },
+    { x = 0, y = 0, frame_width = 20, frame_height = 35, origin_x = 8, origin_y = 20, num_frames = 2 },
+    { x = 0, y = 35, frame_width = 30, frame_height = 28, origin_x = 8, origin_y = 20, num_frames = 2 },
+    { x = 40, y = 0, frame_width = 20, frame_height = 35, origin_x = 8, origin_y = 20, num_frames = 2 },
+  },
+}

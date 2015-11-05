@@ -1,0 +1,11 @@
+animation{
+  name = "stopped",
+  src_image = "hero/item/bottle/bottle.swing.tunic.png",
+  frame_delay = 40,
+  directions = {
+    { x = 0, y = 50, frame_width = 32, frame_height = 24, origin_x = 16, origin_y = 12, num_frames = 8 },
+    { x = 0, y = 23, frame_width = 32, frame_height = 27, origin_x = 16, origin_y = 12, num_frames = 8 },
+    { x = 0, y = 0, frame_width = 32, frame_height = 23, origin_x = 16, origin_y = 12, num_frames = 8 },
+    { x = 0, y = 73, frame_width = 32, frame_height = 29, origin_x = 16, origin_y = 12, num_frames = 8 },
+  },
+}

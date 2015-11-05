@@ -1,0 +1,42 @@
+animation{
+  name = "stopped",
+  src_image = "hero/item/bottle/drinking.tunic.png",
+  frame_delay = 515,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 16, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12, num_frames = 2 },
+    { x = 16, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12, num_frames = 2 },
+    { x = 16, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12, num_frames = 2 },
+    { x = 16, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12, num_frames = 2 },
+  },
+}
+animation{
+  name = "end",
+  src_image = "hero/item/bottle/drinking.tunic.png",
+  directions = {
+    { x = 64, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12 },
+    { x = 64, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12 },
+    { x = 64, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12 },
+    { x = 64, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12 },
+  },
+}
+animation{
+  name = "potion_gone",
+  src_image = "hero/item/bottle/drinking.tunic.png",
+  directions = {
+    { x = 48, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12 },
+    { x = 48, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12 },
+    { x = 48, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12 },
+    { x = 48, y = 0, frame_width = 16, frame_height = 21, origin_x = 8, origin_y = 12 },
+  },
+}
+animation{
+  name = "start",
+  src_image = "hero/item/bottle/drinking.tunic.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 12 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 12 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 12 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 12 },
+  },
+}
