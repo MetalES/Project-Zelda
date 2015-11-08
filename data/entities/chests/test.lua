@@ -1,3 +1,14 @@
+--[[ this is a sample test for the chest, you can take it if you want, no credit needed.
+This chest system gimmick Zelda 3D chest system for ... 2d
+
+All you need for the small chest to work is : 
+- a sound for the chest
+- a "drop" animation for hero/tunicx (where x is a number between 1 and 3) 
+- a "chest_holding_before_brandish" for hero/tunicx (where x is a number between 1 and 3), optionnal, can be deleted - Line 91
+- The item received is customisable at Line 96 
+
+]]
+
 local entity = ...
 local game = entity:get_game()
 local map = entity:get_map()
