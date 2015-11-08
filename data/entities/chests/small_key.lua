@@ -5,11 +5,10 @@ local x_coordinate, y_coordinate, layer = entity:get_position()
 local dungeon = game:get_dungeon_index()
 local chest_savegame_variable = "chest_" .. dungeon .. "_" .. x_coordinate .. "_" .. y_coordinate
 local hero = entity:get_map():get_entity("hero")
-local sk_chest = game:get_value(chest_savegame_variable)
 
--- Hud notification (WORK IN PROGRESS)
+-- Hud notification
 entity:add_collision_test("touching", function()
-   if sk_chest ~= 1 and hero:get_direction() == entity:get_direction() then
+   if game:get_value(chest_savegame_variable) ~= true and hero:get_direction() == entity:get_direction() then
     game:set_custom_command_effect("action", "open")
    else
     game:set_custom_command_effect("action", nil)
@@ -20,18 +19,17 @@ function entity:on_created()
   self:set_drawn_in_y_order(true)
   self:set_can_traverse("hero", false)
   self:set_traversable_by("hero", false)
-   if sk_chest == 1 then
+   if game:get_value(chest_savegame_variable) == true then
     self:get_sprite():set_animation("open")
    end
 end
 
 function entity:on_interaction()
-
 local volume = sol.audio.get_music_volume() -- used later
 local x,y = entity:get_position()
 local hero = entity:get_map():get_entity("hero")
 
-  if hero:get_direction() == entity:get_direction() and sk_chest ~= 1 then
+  if hero:get_direction() == entity:get_direction() and game:get_value(chest_savegame_variable) ~= true then
        if entity:get_direction() == 0 then --right
            hero:set_position(x-16, y)
        elseif entity:get_direction() == 1 then --up
@@ -88,12 +86,12 @@ game:set_pause_allowed(false)
       hero:set_animation("brandish_alternate")
       game:set_pause_allowed(true) -- restore pause allowed
       hero:set_direction(entity:get_direction())
-      game:set_value(chest_savegame_variable, 1)
+      game:set_value(chest_savegame_variable, true)
     end)
 
 
-    elseif sk_chest ~= 1 then
-      game:start_dialog("gameplay.cannot_open_chest_side")
+    elseif game:get_value(chest_savegame_variable) ~= true then
+      game:start_dialog("gameplay.logic._cant_open_chest_wrong_dir")
  end
 end
 
