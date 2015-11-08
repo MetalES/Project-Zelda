@@ -53,7 +53,7 @@ local hero = self:get_map():get_entity("hero")
 local x,y = self:get_position()
 local direction = hero:get_direction()
 local dungeon = game:get_dungeon_index()
-local delay = 750
+local delay
 
 if game:get_value("dungeon_" .. dungeon .. "_boss_key") == true then
 --game:draw_bars()
