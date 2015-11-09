@@ -1,4 +1,14 @@
---[[ Minish Cap styled Boss Door System  ]]
+--[[ Minish Cap styled Boss Door System
+To make it work properly, you need to place your teleporter 24 pixel away from the custom
+entity, Link will go forward automatically, and thus, he will touch the load zone automatically.
+The HUD is not re-enabled, maybe you want to play a cutscene when you are in the boss room.
+You also need : The door sprite and the chain sprite that you will name "boss_door_chain" with 2 animations :
+- locked
+- unlocking
+The code do the rest for you.
+Variable delay analyse the savegame value "dungeon_" .. dungeon .. "boss_door_open", and put a certain value (customisable)]]
+
+--ToDo : Link's animation is freezed while moving
 
 local entity = ...
 local game = entity:get_game()
@@ -16,7 +26,7 @@ function entity:on_created()
   self:set_traversable_by("destructible", false)
  -- check if the door has been already open, if yes, delete the entity that represent the chain.
 local dungeon = game:get_dungeon_index()
-if game:get_value("dungeon_" .. dungeon .. "boss_door_open") == true then 
+if game:get_value("dungeon_" .. dungeon .. "_boss_door_open") == true then 
 sol.main.game:get_map():get_entity("boss_door_chain"):remove()
 end
 end
@@ -62,7 +72,7 @@ game:set_pause_allowed(false)
 hero:set_position(x, y+12)
 game:set_hud_enabled(false)
 
-if game:get_value("dungeon_" .. dungeon .. "boss_door_open") ~= true then
+if game:get_value("dungeon_" .. dungeon .. "_boss_door_open") ~= true then
 sol.main.game:get_map():get_entity("boss_door_chain"):get_sprite():set_animation("unlocking")
 sol.audio.play_sound("/common/boss_door_unlock")
 delay = 750
@@ -70,10 +80,8 @@ else
 delay = 0
 end
 
-
-
 sol.timer.start(delay,function()
-if game:get_value("dungeon_" .. dungeon .. "boss_door_open") ~= true then sol.main.game:get_map():get_entity("boss_door_chain"):remove() end
+if game:get_value("dungeon_" .. dungeon .. "_boss_door_open") ~= true then sol.main.game:get_map():get_entity("boss_door_chain"):remove() end
 sol.audio.play_sound("/common/door/stone_open")
 go_up()
 self:set_can_traverse("hero", true)
@@ -87,9 +95,8 @@ end)
 sol.timer.start((delay + 1900),function()
 sol.audio.play_sound("/common/door/stone_close")
 go_down()
-hero:unfreeze()
 game:set_pause_allowed(true)
-game:set_value("dungeon_" .. dungeon .. "boss_door_open", true)
+game:set_value("dungeon_" .. dungeon .. "_boss_door_open", true)
 end)
 
 sol.timer.start((delay + 2500),function()
@@ -98,6 +105,7 @@ end)
 
 sol.timer.start((delay + 2900),function()
 p_go_up()
+hero:unfreeze()
 end)
 else
 game:start_dialog("gameplay.logic._cant_open_boss_door")
