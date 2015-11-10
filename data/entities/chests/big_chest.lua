@@ -2,9 +2,7 @@ local entity = ...
 local game = entity:get_game()
 local map = entity:get_map()
 local x_coordinate, y_coordinate = entity:get_position()
-local dungeon = game:get_dungeon_index() -- dunno if I'm gonna keep it
-local mx, my = map:get_size()
-local big_chest_savegame = "big_chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. mx .. "_" .. my .. "_" .. x_coordinate .. "_" .. y_coordinate .. "_"
+local big_chest_savegame = "big_chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. x_coordinate .. "_" .. y_coordinate
 local hero = entity:get_map():get_entity("hero")
 
 -- Hud notification
