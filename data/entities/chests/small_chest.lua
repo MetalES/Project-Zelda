@@ -4,7 +4,7 @@ local map = entity:get_map()
 local x_coordinate, y_coordinate = entity:get_position()
 local dungeon = game:get_dungeon_index()
 local mx, my = map:get_size()
-local chest_savegame_variable = "chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. mx .. "_" .. my .. "_" .. x_coordinate .. "_" .. y_coordinate
+local chest_savegame_variable = "chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. x_coordinate .. "_" .. y_coordinate
 local hero = entity:get_map():get_entity("hero")
 
 entity:add_collision_test("touching", function()
