@@ -1,14 +1,15 @@
 local entity = ...
 local game = entity:get_game()
 local map = entity:get_map()
-local x_coordinate, y_coordinate, layer = entity:get_position()
-local dungeon = game:get_dungeon_index()
-local big_key_savegame = "boss_key_" .. dungeon .. "_" .. x_coordinate .. "_" .. y_coordinate
+local x_coordinate, y_coordinate = entity:get_position()
+local dungeon = game:get_dungeon_index() -- dunno if I'm gonna keep it
+local mx, my = map:get_size()
+local big_chest_savegame = "big_chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. mx .. "_" .. my .. "_" .. x_coordinate .. "_" .. y_coordinate .. "_"
 local hero = entity:get_map():get_entity("hero")
 
 -- Hud notification
 entity:add_collision_test("touching", function()
-   if game:get_value(big_key_savegame) ~= true and hero:get_direction() == entity:get_direction() then
+   if game:get_value(big_chest_savegame) ~= true and hero:get_direction() == entity:get_direction() then
     game:set_custom_command_effect("action", "open")
    else
     game:set_custom_command_effect("action", nil)
@@ -21,7 +22,8 @@ function entity:on_created()
   self:set_drawn_in_y_order(true)
   self:set_can_traverse("hero", false)
   self:set_traversable_by("hero", false)
-if game:get_value(big_key_savegame) == true then
+  self:set_traversable_by("custom_entity", false)
+if game:get_value(big_chest_savegame) == true then
   self:get_sprite():set_animation("open")
 end
 end
@@ -65,8 +67,9 @@ function entity:on_interaction()
 local volume = sol.audio.get_music_volume() -- used later
 local x,y = entity:get_position()
 local hero = entity:get_map():get_entity("hero")
+local treasure = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
 
-  if hero:get_direction() == 1 and game:get_value(big_key_savegame) ~= true then
+  if hero:get_direction() == 1 and game:get_value(big_chest_savegame) ~= true then
     hero:freeze()
     game:set_pause_allowed(false)
     hero:set_position(x, y+5)
@@ -148,13 +151,13 @@ local hero = entity:get_map():get_entity("hero")
 
     sol.timer.start(8100, function()
         game:set_hud_enabled(true)
-        hero:start_treasure("boss_key")
+        hero:start_treasure(treasure)
         game:set_pause_allowed(true)
-        game:set_value(big_key_savegame, true)
+        game:set_value(big_chest_savegame, true)
     end)
 
-    elseif game:get_value(big_key_savegame) ~= true then
-      game:start_dialog("gameplay.logic._cant_open_chest_wrong_dir")
+    elseif game:get_value(big_chest_savegame) ~= true then
+game:start_dialog("gameplay.logic._cant_open_chest_wrong_dir")
  end
 end
 

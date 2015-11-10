@@ -1,25 +1,14 @@
---[[ this is a sample test for the chest, you can take it if you want, no credit needed.
-This chest system gimmick Zelda 3D chest system for ... 2d
-
-All you need for the small chest to work is : 
-- a sound for the chest
-- a "drop" animation for hero/tunicx (where x is a number between 1 and 3) 
-- a "chest_holding_before_brandish" for hero/tunicx (where x is a number between 1 and 3), optionnal, can be deleted - Line 91
-- The item received is customisable at Line 96 
-
-]]
-
 local entity = ...
 local game = entity:get_game()
 local map = entity:get_map()
-local x_coordinate, y_coordinate, layer = entity:get_position()
+local x_coordinate, y_coordinate = entity:get_position()
 local dungeon = game:get_dungeon_index()
-local chest_savegame_variable = "chest_" .. dungeon .. "_" .. x_coordinate .. "_" .. y_coordinate
+local mx, my = map:get_size()
+local chest_savegame_variable = "chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. mx .. "_" .. my .. "_" .. x_coordinate .. "_" .. y_coordinate
 local hero = entity:get_map():get_entity("hero")
 
--- Hud notification, get hero and chest direction depending on savegame value.
 entity:add_collision_test("touching", function()
-   if game:get_value(chest_savegame_variable) ~= 1 and hero:get_direction() == entity:get_direction() then
+   if game:get_value(chest_savegame_variable) ~= true and hero:get_direction() == entity:get_direction() then
     game:set_custom_command_effect("action", "open")
    else
     game:set_custom_command_effect("action", nil)
@@ -30,8 +19,8 @@ function entity:on_created()
   self:set_drawn_in_y_order(true)
   self:set_can_traverse("hero", false)
   self:set_traversable_by("hero", false)
- -- if the chest has been opened then it's sprite is set to be open on map loading.
-   if game:get_value(chest_savegame_variable) == 1 then
+  self:set_traversable_by("custom_entity", false)
+   if game:get_value(chest_savegame_variable) == true then
     self:get_sprite():set_animation("open")
    end
 end
@@ -39,8 +28,9 @@ end
 function entity:on_interaction()
 local x,y = entity:get_position()
 local hero = entity:get_map():get_entity("hero")
+local treasure = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
 
-  if hero:get_direction() == entity:get_direction() and game:get_value(chest_savegame_variable) ~= 1 then
+  if hero:get_direction() == entity:get_direction() and game:get_value(chest_savegame_variable) ~= true then
        if entity:get_direction() == 0 then --right
            hero:set_position(x-16, y)
        elseif entity:get_direction() == 1 then --up
@@ -93,15 +83,15 @@ game:set_pause_allowed(false)
 
     sol.timer.start(1500, function()
       hero:unfreeze()
-      hero:start_treasure("small_key")
+      hero:start_treasure(treasure)
       hero:set_animation("brandish_alternate")
       game:set_pause_allowed(true) -- restore pause allowed
       hero:set_direction(entity:get_direction())
-      game:set_value(chest_savegame_variable, 1)
+      game:set_value(chest_savegame_variable, true)
     end)
 
 
-    elseif game:get_value(chest_savegame_variable) ~= 1 then
+    elseif game:get_value(chest_savegame_variable) ~= true then
       game:start_dialog("gameplay.logic._cant_open_chest_wrong_dir")
  end
 end
