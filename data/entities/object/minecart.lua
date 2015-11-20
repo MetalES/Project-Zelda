@@ -1,5 +1,21 @@
--- A minecart to be used by the hero on railroads.
--- from : Mercuri's Chest
+-- A minecart to be used by the hero on railroads. From Solarus.
+
+-- instructions : when the minecart reach "minecart_end", you need to dynamically switch it's direction. For turn events,
+-- dynamic event might be a temp solution (if minecart x,y == blabla then set entity with prefix enabled)
+
+-- Improvements made:
+-- The minecart can be stopped and eject the hero, without being destroyed (Minish Cap)
+-- The minecart can be destroyed if it reach "dead_end" event (Wip)
+-- Sound effects (Wip)
+-- Insane speed (500)
+
+-- How to use :
+-- Place the minecart in map with it's proper sprite in the entity box. (declaring the sprite here doesn't alter direction for some reason)
+-- To use turns, end, it need to be in the minecart passage area, set the direction needed in the custom entity box.
+-- simple as that
+
+-- todo : loop sound effect while in minecart
+--        destruction sound effect
 
 local minecart = ...
 local map = minecart:get_map()
