@@ -1,0 +1,5 @@
+if the boss life is at 0, the game start the explosion on the boss.
+the solution is :
+ - when life reach 1, start the cutscene
+ - play dying sound
+ - set enemy life to 0, explosion should work while ennemy is moving

@@ -1,0 +1,12 @@
+It will be one kind to programm, since music will be dynamic with this one (depending on hit-rate, success and failure)
+and might be the only one atm
+
+phantom ganon has 5 music variation when it come to energy ball exchange (tennis)
+
+each time PG send back the ball, increment the music value.
+
+for the failure : hero:on_taking_damage will help
+play_music(failure,function()
+play_music(loop)end)
+
+looks simple but not really ... 

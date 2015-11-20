@@ -1,0 +1,12 @@
+animation{
+  name = "stopped",
+  src_image = "hero/item/ocarina/learned.tunic.png",
+  frame_delay = 200,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 16, frame_height = 23, origin_x = 4, origin_y = 4, num_frames = 16 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 23, origin_x = 4, origin_y = 4, num_frames = 16 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 23, origin_x = 4, origin_y = 4, num_frames = 16 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 23, origin_x = 4, origin_y = 4, num_frames = 16 },
+  },
+}

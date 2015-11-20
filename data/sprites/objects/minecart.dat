@@ -1,0 +1,42 @@
+animation{
+  name = "stopped",
+  src_image = "objects/minecart.png",
+  directions = {
+    { x = 0, y = 28, frame_width = 23, frame_height = 17, origin_x = 12, origin_y = 12 },
+    { x = 0, y = 0, frame_width = 20, frame_height = 28, origin_x = 10, origin_y = 18 },
+    { x = 0, y = 28, frame_width = 23, frame_height = 17, origin_x = 12, origin_y = 12 },
+    { x = 0, y = 0, frame_width = 20, frame_height = 28, origin_x = 10, origin_y = 18 },
+  },
+}
+animation{
+  name = "destroy",
+  src_image = "objects/minecart.png",
+  frame_delay = 100,
+  directions = {
+    { x = 0, y = 96, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 20, num_frames = 6, num_columns = 3 },
+  },
+}
+animation{
+  name = "start",
+  src_image = "objects/minecart.png",
+  frame_delay = 50,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 28, frame_width = 24, frame_height = 17, origin_x = 12, origin_y = 12, num_frames = 2 },
+    { x = 0, y = 0, frame_width = 20, frame_height = 28, origin_x = 10, origin_y = 18, num_frames = 2 },
+    { x = 0, y = 28, frame_width = 24, frame_height = 17, origin_x = 12, origin_y = 12, num_frames = 2 },
+    { x = 0, y = 0, frame_width = 20, frame_height = 28, origin_x = 10, origin_y = 18, num_frames = 2 },
+  },
+}
+animation{
+  name = "turning_over",
+  src_image = "objects/minecart.png",
+  frame_delay = 150,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 71, frame_width = 26, frame_height = 24, origin_x = 128, origin_y = 12, num_frames = 4 },
+    { x = 0, y = 45, frame_width = 26, frame_height = 26, origin_x = 13, origin_y = 18, num_frames = 4 },
+    { x = 0, y = 71, frame_width = 26, frame_height = 24, origin_x = 12, origin_y = 12, num_frames = 4 },
+    { x = 0, y = 45, frame_width = 26, frame_height = 26, origin_x = 13, origin_y = 18, num_frames = 4 },
+  },
+}
