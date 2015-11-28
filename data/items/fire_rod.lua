@@ -1,22 +1,13 @@
 local item = ...
 local game = item:get_game()
 
--- fire rod - Four Swords Adventure style
-
--- Work in progress test phase
---[[
-dialogs = work  (attempt count : 1)
-treasure = work (attempt count : 3)
-on_using = work (attempt count : 20)
-playtest = work
---]]
+-- fire rod - Four Swords Adventure style - Work in Progress - 95%
 
 function item:on_created()
   self:set_savegame_variable("i1853")
   self:set_assignable(true)
   self:set_sound_when_picked(nil)
   self:set_sound_when_brandished("/common/big_item")
-  game:set_value("lamp_state", 0)
 end
 
 local function store_equipment()
@@ -53,7 +44,7 @@ return true
 end)
 
 fire_timer = sol.timer.start(50, function()
-if sol.input.is_key_pressed("x") then
+if sol.input.is_key_pressed("x") then -- add joypad and get the item slot.
 if self:get_game():get_magic() > 0 then self:shoot_fire() end
 else
 fire_timer:stop()
@@ -71,7 +62,6 @@ hero:unfreeze()
 
 self:set_finished()
 end
-  --self:create_fire()
   return true
 end)
 end)
@@ -97,7 +87,7 @@ function item:shoot_fire()
     x = x + dx,
     y = y + dy,
     layer = layer
-    --sprite = "entities/fire_burns"
+    --sprite = "entities/fire_burns" don't work...
   }
 
 local fire_mvt = sol.movement.create("straight")
