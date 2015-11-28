@@ -1,0 +1,21 @@
+animation{
+  name = "closed",
+  src_image = "entities/dungeon/small_door.png",
+  directions = {
+    { x = 0, y = 48, frame_width = 33, frame_height = 28, origin_x = 16, origin_y = 19 },
+    { x = 0, y = 25, frame_width = 56, frame_height = 25, origin_x = 28, origin_y = 16 },
+    { x = 0, y = 76, frame_width = 33, frame_height = 28, origin_x = 16, origin_y = 19 },
+    { x = 0, y = 0, frame_width = 56, frame_height = 25, origin_x = 28, origin_y = 16 },
+  },
+}
+animation{
+  name = "unlocking",
+  src_image = "entities/dungeon/small_door.png",
+  frame_delay = 100,
+  directions = {
+    { x = 0, y = 48, frame_width = 33, frame_height = 28, origin_x = 16, origin_y = 19, num_frames = 6 },
+    { x = 0, y = 25, frame_width = 56, frame_height = 25, origin_x = 28, origin_y = 16, num_frames = 6 },
+    { x = 0, y = 76, frame_width = 33, frame_height = 28, origin_x = 16, origin_y = 19, num_frames = 6 },
+    { x = 0, y = 0, frame_width = 56, frame_height = 25, origin_x = 28, origin_y = 16, num_frames = 6 },
+  },
+}

@@ -1,0 +1,9 @@
+animation{
+  name = "default",
+  src_image = "entities/dungeon/chest_appearing.png",
+  frame_delay = 45,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 64, frame_height = 64, origin_x = 32, origin_y = 32, num_frames = 15 },
+  },
+}

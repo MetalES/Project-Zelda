@@ -1,0 +1,9 @@
+animation{
+  name = "default",
+  src_image = "entities/dungeon/sky_dungeon/entities.png",
+  frame_delay = 100,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 16, y = 32, frame_width = 16, frame_height = 10, origin_x = 8, origin_y = 4, num_frames = 4 },
+  },
+}

@@ -1,0 +1,10 @@
+animation{
+  name = "default",
+  src_image = "entities/dungeon/boss_door.png",
+  directions = {
+    { x = 232, y = 99, frame_width = 32, frame_height = 56, origin_x = 28, origin_y = 16 },
+    { x = 198, y = 64, frame_width = 56, frame_height = 32, origin_x = 28, origin_y = 32 },
+    { x = 198, y = 99, frame_width = 32, frame_height = 56, origin_x = 28, origin_y = 16 },
+    { x = 254, y = 64, frame_width = 56, frame_height = 32, origin_x = 28, origin_y = 12 },
+  },
+}

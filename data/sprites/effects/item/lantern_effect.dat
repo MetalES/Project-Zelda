@@ -1,0 +1,8 @@
+animation{
+  name = "default",
+  src_image = "effects/item/lantern_fire.png",
+  frame_delay = 100,
+  directions = {
+    { x = 0, y = 0, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4, num_frames = 3 },
+  },
+}

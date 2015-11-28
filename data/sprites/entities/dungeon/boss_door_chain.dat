@@ -1,0 +1,21 @@
+animation{
+  name = "closed",
+  src_image = "entities/dungeon/boss_door.png",
+  directions = {
+    { x = 0, y = 66, frame_width = 33, frame_height = 56, origin_x = 28, origin_y = 16 },
+    { x = 0, y = 33, frame_width = 56, frame_height = 33, origin_x = 28, origin_y = 28 },
+    { x = 0, y = 122, frame_width = 33, frame_height = 56, origin_x = 28, origin_y = 16 },
+    { x = 0, y = 0, frame_width = 56, frame_height = 33, origin_x = 28, origin_y = 16 },
+  },
+}
+animation{
+  name = "unlocking",
+  src_image = "entities/dungeon/boss_door.png",
+  frame_delay = 100,
+  directions = {
+    { x = 0, y = 66, frame_width = 33, frame_height = 56, origin_x = 28, origin_y = 16, num_frames = 6 },
+    { x = 0, y = 33, frame_width = 56, frame_height = 33, origin_x = 28, origin_y = 16, num_frames = 6 },
+    { x = 0, y = 122, frame_width = 33, frame_height = 56, origin_x = 28, origin_y = 16, num_frames = 6 },
+    { x = 0, y = 0, frame_width = 56, frame_height = 33, origin_x = 28, origin_y = 16, num_frames = 6 },
+  },
+}

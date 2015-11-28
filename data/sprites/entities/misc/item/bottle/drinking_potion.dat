@@ -1,0 +1,75 @@
+animation{
+  name = "start_3",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20 },
+  },
+}
+animation{
+  name = "drinking_demi_3",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  frame_delay = 515,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 48, y = 0, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20, num_frames = 2 },
+  },
+}
+animation{
+  name = "drinking_demi_4",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  frame_delay = 515,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 48, y = 22, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20, num_frames = 2 },
+  },
+}
+animation{
+  name = "drinking_demi_6",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  frame_delay = 515,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 48, y = 44, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20, num_frames = 2 },
+  },
+}
+animation{
+  name = "drinking_full_3",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  frame_delay = 515,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 16, y = 0, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20, num_frames = 2 },
+  },
+}
+animation{
+  name = "drinking_full_4",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  frame_delay = 515,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 16, y = 22, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20, num_frames = 2 },
+  },
+}
+animation{
+  name = "drinking_full_6",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  frame_delay = 515,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 16, y = 44, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20, num_frames = 2 },
+  },
+}
+animation{
+  name = "start_4",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  directions = {
+    { x = 0, y = 22, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20 },
+  },
+}
+animation{
+  name = "start_6",
+  src_image = "entities/misc/item/bottle/drinking_potion.png",
+  directions = {
+    { x = 0, y = 44, frame_width = 16, frame_height = 22, origin_x = 8, origin_y = 20 },
+  },
+}
