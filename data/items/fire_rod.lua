@@ -1,6 +1,7 @@
 local item = ...
 local game = item:get_game()
 
+<<<<<<< HEAD
 -- fire rod - Four Swords Adventure style
 -- todo : timers are buggy
 -- Work in progress test phase
@@ -12,6 +13,9 @@ playtest = work
 
 #Issue 6 : hero animation is frozen, same as the rod
 --]]
+=======
+-- fire rod - Four Swords Adventure style - Work in Progress - 95%
+>>>>>>> origin/master
 
 function item:on_created()
   self:set_savegame_variable("i1853")
@@ -98,9 +102,15 @@ end
 return true
 end)
 
+<<<<<<< HEAD
 fire_timer = sol.timer.start(100, function()
 if sol.input.is_key_pressed("x") and game:get_value("is_cutscene") ~= true then
   if self:get_game():get_magic() > 0 then self:shoot_fire() end
+=======
+fire_timer = sol.timer.start(50, function()
+if sol.input.is_key_pressed("x") then -- add joypad and get the item slot.
+if self:get_game():get_magic() > 0 then self:shoot_fire() end
+>>>>>>> origin/master
 else
   hero:set_walking_speed(88)
   hero:set_tunic_sprite_id("hero/tunic" .. game:get_value("item_saved_tunic"))
@@ -116,7 +126,11 @@ else
   magic_timer:stop()
   self:set_finished()
 end
+<<<<<<< HEAD
 return true
+=======
+  return true
+>>>>>>> origin/master
 end)
 
 end)
@@ -145,11 +159,17 @@ function item:shoot_fire()
     model = "fire",
     x = x + dx,
     y = y + dy,
+<<<<<<< HEAD
     layer = layer,
     direction = direction,
   })
   
  sol.audio.play_sound("/items/rod/fire/shoot")
+=======
+    layer = layer
+    --sprite = "entities/fire_burns" don't work...
+  }
+>>>>>>> origin/master
 
 local fire_mvt = sol.movement.create("straight")
 fire_mvt:set_angle(hero:get_direction() * math.pi / 2)
@@ -158,6 +178,7 @@ fire_mvt:set_max_distance(32)
 fire_mvt:set_smooth(false)
 fire_mvt:start(fire)
 end
+<<<<<<< HEAD
 
 
 function item:set_finished()
@@ -227,3 +248,5 @@ local function initialize_meta()
 
 end
 initialize_meta()
+=======
+>>>>>>> origin/master
