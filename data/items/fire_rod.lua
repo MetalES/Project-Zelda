@@ -1,27 +1,25 @@
 local item = ...
 local game = item:get_game()
 
-<<<<<<< HEAD
--- fire rod - Four Swords Adventure style
--- todo : timers are buggy
--- Work in progress test phase
---[[
-dialogs = work  (attempt count : 1)
-treasure = work (attempt count : 3)
-on_using = work (attempt count : 20)
-playtest = work
+-- Fire Rod - Four Swords Adventure style
 
-#Issue 6 : hero animation is frozen, same as the rod
+--[[
+Un-solved Issue listing
+#Issue 7 : Direction Fix
 --]]
-=======
--- fire rod - Four Swords Adventure style - Work in Progress - 95%
->>>>>>> origin/master
 
 function item:on_created()
   self:set_savegame_variable("i1853")
   self:set_assignable(true)
   self:set_sound_when_picked(nil)
   self:set_sound_when_brandished("/common/big_item")
+end
+
+function item:on_map_changed()
+if fire_rod ~= nil then fire_rod:remove() end
+if fire_rod_process ~= nil then fire_rod_process:stop(); fire_rod_process = nil end 
+if rod_sync ~= nil then rod_sync:stop() end
+self:set_finished()
 end
 
 local function store_equipment()
@@ -43,14 +41,24 @@ function item:on_using()
 local map = game:get_map()
 local hero = game:get_hero()
 
---freeze_hero, play animation of arming the rod, and then unfreeze
--- hero can't pass stairs, jumpers, etcs
---debug test pass. It works perfectly.
+local new_x = 0
+local new_y = 0
 
-hero:set_animation("rod")
-  local x, y, layer = hero:get_position()
-  local direction = hero:get_direction()
-  
+local x, y, layer = hero:get_position()
+local direction = hero:get_direction()
+
+local tunic = game:get_ability("tunic")
+
+-- read the 2 item slot.
+local fire_rod_slot
+if game:get_value("_item_slot_1") == "fire_rod" then fire_rod_slot = "item_1"
+elseif game:get_value("_item_slot_2") == "fire_rod" then fire_rod_slot = "item_2" end
+print("1"..fire_rod_slot)
+-- we are starting the item. check if another item is currently used by the hero. If yes, destroy the other item in order to start this one. (WIP)
+if game:get_value("currently_using_item") == true then print("another item is on_using") end
+
+  hero:set_animation("rod")
+
   local fire_rod = map:create_custom_entity({
     x = x,
     y = y,
@@ -61,9 +69,9 @@ hero:set_animation("rod")
 
 -- pre-check function, if the player release the key, abandon.
 check = sol.timer.start(10, function()
-if sol.input.is_key_pressed("x") ~= true and game:get_value("is_cutscene") ~= true then
+if game:is_command_pressed(fire_rod_slot) ~= true and game:get_value("is_cutscene") ~= true then
 fire_rod:remove()
-if fire_rod_process ~= nil then fire_rod_process:stop(); fire_rod_process = nil end -- destroy the process (fix#5)
+if fire_rod_process ~= nil then fire_rod_process:stop(); fire_rod_process = nil end 
 if rod_sync ~= nil then rod_sync:stop() end
 self:set_finished()
 end
@@ -74,11 +82,10 @@ end)
 fire_rod_process = sol.timer.start(300,function()
 store_equipment()
 fire_rod:remove()
-hero:unfreeze()
 check:stop()
+hero:unfreeze()
 
-local tunic = game:get_ability("tunic")
-hero:set_tunic_sprite_id("hero/item/fire_rod/rod_moving.tunic_"..tunic)
+hero:set_tunic_sprite_id("hero/item/fire_rod/rod_moving_tunic_"..tunic)
 hero:set_walking_speed(55)
 
   local fire_rod_move = map:create_custom_entity({
@@ -88,29 +95,44 @@ hero:set_walking_speed(55)
     direction = direction,
     sprite = "hero/item/fire_rod/rod_moving",
   })
+  
 
 rod_sync = sol.timer.start(10, function()
+local lx, ly, layer = hero:get_position()
+--systeme d : when you collide with water or jumper, the hero is send 1 pixel away so the game had enough time to destroy the item and restore everything
+--Todo : when hero:on_direction_changed() will be back, delete this, and replace the whole thing by input checking and values instead of direction checking
+-- this is just a placeholder until the function will be back
+
+if hero:get_direction() == 0 then new_x = -1; new_y = 0 
+elseif hero:get_direction() == 1 then new_x = 0; new_y = 1 
+elseif hero:get_direction() == 2 then new_x = 1; new_y = 0 
+elseif hero:get_direction() == 3 then new_x = 0; new_y = -1
+end
+
 fire_rod_move:set_position(hero:get_position()) 
 fire_rod_move:set_direction(hero:get_direction()) 
+
+if hero:get_state() == "swimming" or hero:get_state() == "jumping" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:set_position(lx + new_x, ly + new_y); rod_sync:stop(); fire_rod_move:remove(); fire_timer:stop(); magic_timer:stop(); self:set_finished() end
+if hero:get_state() == "falling" or hero:get_state() == "stairs" then 
+  self:set_finished()  
+  rod_sync:stop()
+  fire_rod_move:remove()
+  fire_timer:stop()
+  magic_timer:stop()
+end
 return true
 end)
   
-magic_timer = sol.timer.start(300, function()
+magic_timer = sol.timer.start(200, function()
 if fire_timer ~= nil then
 self:get_game():remove_magic(1)
 end
 return true
 end)
 
-<<<<<<< HEAD
 fire_timer = sol.timer.start(100, function()
-if sol.input.is_key_pressed("x") and game:get_value("is_cutscene") ~= true then
+if game:is_command_pressed(fire_rod_slot) and game:get_value("is_cutscene") ~= true then
   if self:get_game():get_magic() > 0 then self:shoot_fire() end
-=======
-fire_timer = sol.timer.start(50, function()
-if sol.input.is_key_pressed("x") then -- add joypad and get the item slot.
-if self:get_game():get_magic() > 0 then self:shoot_fire() end
->>>>>>> origin/master
 else
   hero:set_walking_speed(88)
   hero:set_tunic_sprite_id("hero/tunic" .. game:get_value("item_saved_tunic"))
@@ -126,11 +148,7 @@ else
   magic_timer:stop()
   self:set_finished()
 end
-<<<<<<< HEAD
 return true
-=======
-  return true
->>>>>>> origin/master
 end)
 
 end)
@@ -159,17 +177,11 @@ function item:shoot_fire()
     model = "fire",
     x = x + dx,
     y = y + dy,
-<<<<<<< HEAD
     layer = layer,
     direction = direction,
   })
   
  sol.audio.play_sound("/items/rod/fire/shoot")
-=======
-    layer = layer
-    --sprite = "entities/fire_burns" don't work...
-  }
->>>>>>> origin/master
 
 local fire_mvt = sol.movement.create("straight")
 fire_mvt:set_angle(hero:get_direction() * math.pi / 2)
@@ -178,7 +190,6 @@ fire_mvt:set_max_distance(32)
 fire_mvt:set_smooth(false)
 fire_mvt:start(fire)
 end
-<<<<<<< HEAD
 
 
 function item:set_finished()
@@ -248,5 +259,3 @@ local function initialize_meta()
 
 end
 initialize_meta()
-=======
->>>>>>> origin/master
