@@ -1,6 +1,6 @@
 local item = ...
 local game = item:get_game()
-
+-- item configuration
 local item_name = "fire_rod"
 local slot
 local sound_played_on_brandish = "/common/big_item"
@@ -8,11 +8,33 @@ local sound_played_when_picked = nil
 local is_assignable = true
 local sound_dir = "/items/"..item_name.."/"
 
--- Fire Rod - Four Swords Adventure style
+-- Sample item code : Fire Rod (example)
 
---[[
-Un-solved Issue listing
-#Issue 7 : Direction Fix
+--[[ 
+Use this code if you need to rework or make any item.
+On_using only freeze the hero as stated by the api, but you can unfreeze him and extend the code (giving more gameplay features).
+
+item_manager is now obsolete, all items can be made within it's file without depending on /scripts/item/item_manager.
+
+rename item_name's value by the name of the file(without .lua)
+the input thing is stored in the slot variable listed above
+
+How it works technically :
+  - when the item starts, all variable are stored in a separated savestate value (local function store_equipment()).
+  - item_x (the opposite slot of the current item) is temporary disabled to avoid any confusion.
+  - a looping timed function check if the input is released during the starting animation, during this phase, on_using hero:freeze() is currently running (rod)
+  - savegame values in store_equipment are for reputting values for set_command_controller_binding, else they will be nil, even if savex.dat has their value and option menu in pause menu is corrupted.
+
+What you need :
+  - in the game savegame file creation, set values to :
+      - "item_saved_tunic" 1 
+	  - "item_saved_sword" 0
+	  - "item_saved_shield" 0
+      - inputs (stored in store_equipment)
+  - in /scripts/menus/pause_option, add a condition that dynamically change value for store_equipment() savegame values
+  - in /scripts/menus/savegames, initialize default values of store_equipment
+	  
+Support Joypad
 --]]
 
 function item:on_created()
