@@ -8,41 +8,59 @@ local sound_played_when_picked = nil
 local is_assignable = true
 local sound_dir = "/items/"..item_name.."/"
 
+local volume_bgm = game:get_value("old_volume")
+
 -- Fire Rod - Four Swords Adventure style
 
---[[
-Un-solved Issue listing
-#Issue 7 : Direction Fix
---]]
-
 function item:on_created()
-  self:set_savegame_variable(item_name.."_possession")
+  self:set_savegame_variable("item_"..item_name.."_possession")
   self:set_assignable(is_assignable)
   self:set_sound_when_picked(sound_played_when_picked)
   self:set_sound_when_brandished(sound_played_on_brandish)
+  game:set_value("item_"..item_name.."_state", 0)
+end
+
+function item:on_obtained()
+  if show_bars == true and not starting_cutscene then game:hide_bars() end
+  sol.audio.set_music_volume(volume_bgm)
 end
 
 function item:on_map_changed()
-local tunic = game:get_ability("tunic")
-local tunic_ref = game:get_value("item_saved_tunic") or tunic
-if fire_rod ~= nil then fire_rod:remove() end
-if fire_rod_process ~= nil then fire_rod_process:stop(); fire_rod_process = nil end 
-if rod_sync ~= nil then rod_sync:stop() end
-if game:get_hero():get_tunic_sprite_id() ~= "hero/tunic"..tunic_ref then game:get_hero():set_tunic_sprite_id("hero/tunic" ..tunic_ref) end
+if game:get_hero():get_tunic_sprite_id() ~= "hero/tunic"..game:get_value("item_saved_tunic") then game:get_hero():set_tunic_sprite_id("hero/tunic" ..game:get_value("item_saved_tunic")) end
 self:set_finished()
 end
 
-local function store_equipment()
-    local tunic = game:get_ability("tunic")
-    local sword = game:get_ability("sword")
-    local shield = game:get_ability("shield")
+function item:transit_to_finish()
+local hero = game:get_hero()
+hero:freeze()
+
+if fire_timer ~= nil then fire_timer:stop() end
+if magic_timer ~= nil then magic_timer:stop() end
+if check ~= nil then check:stop() end
+if rod_sync ~= nil then rod_sync:stop() end
+if fire_rod ~= nil then fire_rod:remove() end
+        
+game:set_custom_command_effect("attack", nil)
+
+hero:freeze()
+hero:set_walking_speed(88)
+
+sol.audio.play_sound("common/item_show")
+hero:set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield"))
+game:set_ability("shield", game:get_value("item_saved_shield"))
+game:set_ability("sword", game:get_value("item_saved_sword"))
+hero:set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
+self:set_finished()
+game:set_pause_allowed(true)
+end
+
+function item:store_equipment()
     local kb_action_key = game:get_command_keyboard_binding("action")
 	local kb_item_1_key = game:get_command_keyboard_binding("item_1")
 	local kb_item_2_key = game:get_command_keyboard_binding("item_2")
 	local jp_action_key = game:get_command_joypad_binding("action")
 	local jp_item_1_key = game:get_command_joypad_binding("item_1")
 	local jp_item_2_key = game:get_command_joypad_binding("item_2")
-	
 	
     game:set_ability("sword", 0)
     game:set_ability("shield", 0)
@@ -53,10 +71,7 @@ local function store_equipment()
 	if game:get_value("_item_slot_1") ~= item_name then game:set_command_keyboard_binding("item_1", nil); game:set_command_joypad_binding("item_1", nil) end
 	if game:get_value("_item_slot_2") ~= item_name then game:set_command_keyboard_binding("item_2", nil); game:set_command_joypad_binding("item_2", nil) end
 
-    game:set_value("item_saved_tunic", tunic)
-    game:set_value("item_saved_sword", sword)
-    game:set_value("item_saved_shield", shield)
-    game:set_value("item_saved_action", kb_action_key)
+    game:set_value("item_saved_kb_action", kb_action_key)
 	game:set_value("item_1_kb_slot", kb_item_1_key)
 	game:set_value("item_2_kb_slot", kb_item_2_key)
 	game:set_value("item_saved_jp_action", jp_action_key)
@@ -64,7 +79,6 @@ local function store_equipment()
 	game:set_value("item_2_jp_slot", jp_item_2_key)
 	
     game:set_pause_allowed(false)
-	
 end
 
 function item:on_using()
@@ -77,21 +91,24 @@ local new_y = 0 -- temp value (issue 7)
 local x, y, layer = hero:get_position()
 local direction = hero:get_direction()
 
-local tunic = game:get_ability("tunic")
+local tunic = game:get_value("item_saved_tunic")
+
+local function end_by_collision() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); if fire_timer ~= nil then fire_timer:stop() end if magic_timer ~= nil then magic_timer:stop(); item:set_finished() end if check ~= nil then check:stop(); item:set_finished() end if rod_sync ~= nil then rod_sync:stop(); item:set_finished() end if fire_rod ~= nil then fire_rod:remove(); item:set_finished() end item:set_finished(); game:set_pause_allowed(true) end
+local function end_by_pickable() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); item:set_finished(); game:set_pause_allowed(true) end
 
 -- read the 2 item slot.
   if game:get_value("_item_slot_1") == item_name then slot = "item_1"
   elseif game:get_value("_item_slot_2") == item_name then slot = "item_2" end
 
   hero:set_animation("rod")
-
-  local fire_rod = map:create_custom_entity({
+  fire_rod = map:create_custom_entity({
     x = x,
     y = y,
     layer = layer,
     direction = direction,
     sprite = "hero/item/fire_rod/rod",
   })
+  game:set_value("item_"..item_name.."_state", 1)
 
 -- pre-check function, if the player release the key, abandon.
 check = sol.timer.start(10, function()
@@ -104,24 +121,15 @@ end
 return true
 end)
 
-
 fire_rod_process = sol.timer.start(300,function()
-store_equipment()
-fire_rod:remove()
+item:store_equipment()
 check:stop()
 hero:unfreeze()
 
 hero:set_tunic_sprite_id("hero/item/fire_rod/rod_moving_tunic_"..tunic)
 hero:set_walking_speed(55)
 
-  local fire_rod_move = map:create_custom_entity({
-    x = x,
-    y = y,
-    layer = layer,
-    direction = direction,
-    sprite = "hero/item/fire_rod/rod_moving",
-  })
-  
+fire_rod:get_sprite():set_animation("walking")
 
 rod_sync = sol.timer.start(10, function()
 local lx, ly, layer = hero:get_position()
@@ -135,55 +143,39 @@ elseif hero:get_direction() == 2 then new_x = 1; new_y = 0
 elseif hero:get_direction() == 3 then new_x = 0; new_y = -1
 end
 
-fire_rod_move:set_position(hero:get_position()) 
-fire_rod_move:set_direction(hero:get_direction())
+fire_rod:set_position(hero:get_position()) 
+fire_rod:set_direction(hero:get_direction())
  
-if hero:get_state() == "hurt" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:start_hurt(0,0,0); rod_sync:stop(); fire_rod_move:remove(); fire_timer:stop(); magic_timer:stop(); self:set_finished() end
-if hero:get_state() == "swimming" or hero:get_state() == "jumping" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:set_position(lx + new_x, ly + new_y); rod_sync:stop(); fire_rod_move:remove(); fire_timer:stop(); magic_timer:stop(); self:set_finished() end
-if hero:get_state() == "falling" or hero:get_state() == "stairs" then 
-  self:set_finished()  
-  rod_sync:stop()
-  fire_rod_move:remove()
-  fire_timer:stop()
-  magic_timer:stop()
-end
+if hero:get_state() == "hurt" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:start_hurt(0,0,0); end_by_collision() end
+if hero:get_state() == "swimming" or hero:get_state() == "jumping" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:set_position(lx + new_x, ly + new_y); end_by_collision() end
+if hero:get_state() == "falling" or hero:get_state() == "stairs" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_collision() end
+if hero:get_state() == "treasure" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_pickable() end
 return true
 end)
   
 magic_timer = sol.timer.start(200, function()
 if fire_timer ~= nil then
-self:get_game():remove_magic(1)
+game:remove_magic(1)
 end
 return true
 end)
 
 fire_timer = sol.timer.start(100, function()
 if game:is_command_pressed(slot) and game:get_value("is_cutscene") ~= true then
-  if self:get_game():get_magic() > 0 then self:shoot_fire() end
+  if game:get_magic() > 0 then self:shoot_fire() end
 else
   hero:set_walking_speed(88)
   hero:set_tunic_sprite_id("hero/tunic" .. game:get_value("item_saved_tunic"))
   
-  game:set_ability("tunic", game:get_value("item_saved_tunic"))
-  game:set_ability("sword", game:get_value("item_saved_sword"))
-  game:set_ability("shield", game:get_value("item_saved_shield"))
-  
-game:set_command_keyboard_binding("action", game:get_value("item_saved_kb_action"))
-game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
-game:set_command_keyboard_binding("item_2", game:get_value("item_2_kb_slot"))
-
-game:set_command_joypad_binding("action", game:get_value("item_saved_jp_action"))
-game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
-game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
-
-
   game:set_pause_allowed(true)
   hero:unfreeze()
-  rod_sync:stop()
-  fire_rod_move:remove()
-  fire_timer:stop()
-  magic_timer:stop()
-  self:set_finished()
+  
+  rod_sync:stop(); rod_sync = nil
+  fire_rod:remove()
+  fire_timer:stop(); fire_timer = nil
+  magic_timer:stop(); magic_timer = nil
+  
+  self:transit_to_finish()
   
 end
 return true
@@ -197,7 +189,7 @@ end
 
 -- Creates some fire on the map.
 function item:shoot_fire()
-  local hero = self:get_game():get_hero()
+  local hero = game:get_hero()
   local direction = hero:get_direction()
   local dx, dy
   if direction == 0 then
@@ -211,8 +203,8 @@ function item:shoot_fire()
   end
 
   local x, y, layer = hero:get_position()
-  local fire = self:get_game():get_map():create_custom_entity({
-    model = "fire",
+  local fire = game:get_map():create_custom_entity({
+    model = "fire_beam",
     x = x + dx,
     y = y + dy,
     layer = layer,
@@ -235,24 +227,13 @@ if fire_timer ~= nil then fire_timer:stop() end
 if magic_timer ~= nil then magic_timer:stop() end
 if check ~= nil then check:stop() end
 if rod_sync ~= nil then rod_sync:stop() end
-if fire_rod_move ~= nil then fire_rod_move:remove() end
+if fire_rod ~= nil then fire_rod:remove() end
 
 local hero = game:get_hero()
-local tunic = game:get_ability("tunic")
-local shield = game:get_ability("shield")
-local sword = game:get_ability("sword")
--- if values doesn't exist, just grab the value in local above.
-local tunic_ref = game:get_value("item_saved_tunic") or tunic
-local shield_ref = game:get_value("item_saved_shield") or shield
-local sword_ref = game:get_value("item_saved_sword") or sword
 
 hero:unfreeze()
-hero:set_walking_speed(88)
-if hero:get_tunic_sprite_id() ~= "hero/tunic"..tunic_ref then hero:set_tunic_sprite_id("hero/tunic" ..tunic_ref) end
 
-game:set_ability("tunic", tunic_ref)
-game:set_ability("sword", sword_ref)
-game:set_ability("shield", shield_ref)
+game:set_value("item_"..item_name.."_state", 0)
 
 game:set_command_keyboard_binding("action", game:get_value("item_saved_kb_action"))
 game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
@@ -261,8 +242,6 @@ game:set_command_keyboard_binding("item_2", game:get_value("item_2_kb_slot"))
 game:set_command_joypad_binding("action", game:get_value("item_saved_jp_action"))
 game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
 game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
-
-game:set_pause_allowed(true)
 end
 
 
@@ -276,7 +255,7 @@ local function initialize_meta()
     return
   end
 
-  enemy_meta.fire_reaction = 3  -- 3 life points by default.
+  enemy_meta.fire_reaction = 2  -- 2 life points by default.
   enemy_meta.fire_reaction_sprite = {}
   function enemy_meta:get_fire_reaction(sprite)
 

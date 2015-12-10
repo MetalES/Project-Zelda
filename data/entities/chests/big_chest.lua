@@ -2,16 +2,24 @@ local entity = ...
 local game = entity:get_game()
 local map = entity:get_map()
 local x_coordinate, y_coordinate = entity:get_position()
-local big_chest_savegame = "big_chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. x_coordinate .. "_" .. y_coordinate
+local mx, my = map:get_size()
+local big_chest_savegame = "big_chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. mx .. "_" .. my .. "_" .. x_coordinate .. "_" .. y_coordinate
 local hero = entity:get_map():get_entity("hero")
 
+local hero_facing_chest = false
+local action_command_chest = false
+
 -- Hud notification
-entity:add_collision_test("touching", function()
-   if game:get_value(big_chest_savegame) ~= true and hero:get_direction() == entity:get_direction() then
+entity:add_collision_test("facing", function(big_chest, other)
+if other:get_type() == "hero" then 
+   hero_facing_chest = true
+   if game:get_value(big_chest_savegame) ~= true and hero:get_direction() == entity:get_direction() + 1 then
     game:set_custom_command_effect("action", "open")
+	action_command_chest = true
    else
     game:set_custom_command_effect("action", nil)
    end
+end
 end)
 
 function entity:on_created()
@@ -20,10 +28,21 @@ function entity:on_created()
   self:set_drawn_in_y_order(true)
   self:set_can_traverse("hero", false)
   self:set_traversable_by("hero", false)
-  self:set_traversable_by("custom_entity", false)
 if game:get_value(big_chest_savegame) == true then
   self:get_sprite():set_animation("open")
 end
+end
+
+function entity:is_hookshot_hook()
+return true
+end
+
+function entity:on_update()
+  if action_command_chest and not hero_facing_chest then
+    game:set_custom_command_effect("action", nil)
+    action_command_chest = false
+  end
+   hero_facing_chest = false
 end
 
 --movement manager
@@ -69,6 +88,7 @@ local treasure = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
 
   if hero:get_direction() == 1 and game:get_value(big_chest_savegame) ~= true then
     hero:freeze()
+	if not show_bars then game:show_bars() end
     game:set_pause_allowed(false)
     hero:set_position(x, y+5)
     --game:draw_bars()
@@ -155,9 +175,17 @@ local treasure = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
     end)
 
     elseif game:get_value(big_chest_savegame) ~= true then
-game:start_dialog("gameplay.logic._cant_open_chest_wrong_dir")
- end
+	  if not show_bars then game:show_bars(); sol.audio.play_sound("/common/bars_dungeon") end
+         game:start_dialog("gameplay.logic._cant_open_chest_wrong_dir", function() 
+		 if show_bars == true and not starting_cutscene then game:hide_bars() end 
+		 end)
+end
 end
 
-
-
+function entity:on_update()
+  if action_command_chest and not hero_facing_chest then
+    game:set_custom_command_effect("action", nil)
+    action_command_chest = false
+  end
+   hero_facing_chest = false
+end

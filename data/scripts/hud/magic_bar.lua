@@ -57,9 +57,7 @@ function magic_bar:check()
 
       -- Play the magic bar sound.
       if (magic - self.magic_displayed) % 10 == 1 then
-	sol.audio.play_sound("magic_bar")
-	--self.container_sprite.get_animation()
-	--self.container_sprite.set_animation("decreasing")
+		sol.audio.play_sound("magic_bar")
       end
     end
   end

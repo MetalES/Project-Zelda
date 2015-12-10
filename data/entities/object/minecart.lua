@@ -1,21 +1,5 @@
--- A minecart to be used by the hero on railroads. From Solarus.
-
--- instructions : when the minecart reach "minecart_end", you need to dynamically switch it's direction. For turn events,
--- dynamic event might be a temp solution (if minecart x,y == blabla then set entity with prefix enabled)
-
--- Improvements made:
--- The minecart can be stopped and eject the hero, without being destroyed (Minish Cap)
--- The minecart can be destroyed if it reach "dead_end" event (Wip)
--- Sound effects (Wip)
--- Insane speed (500)
-
--- How to use :
--- Place the minecart in map with it's proper sprite in the entity box. (declaring the sprite here doesn't alter direction for some reason)
--- To use turns, end, it need to be in the minecart passage area, set the direction needed in the custom entity box.
--- simple as that
-
--- todo : loop sound effect while in minecart
---        destruction sound effect
+-- A minecart to be used by the hero on railroads.
+-- from : Mercuri's Chest, customized to fit Minish Cap style.
 
 local minecart = ...
 local map = minecart:get_map()
@@ -27,6 +11,7 @@ local hero_facing_minecart = false
 local action_command_minecart = false
 
 minecart:set_drawn_in_y_order(true)
+minecart:set_traversable_by("custom_entity", false)
 
 -- Don't let the hero traverse the minecart.
 minecart:set_traversable_by("hero", false)
@@ -65,6 +50,11 @@ minecart:add_collision_test("containing", function(minecart, other)
     end
 	
 	if other:get_model() == "object/minecart_end" then
+	  if other:get_direction() == minecart:get_direction() then
+	  game:set_value("is_on_minecart", false)
+	  minecart_se:stop()
+	  link_se:stop()
+	  end
       local movement = hero:get_movement()
 	  local direction4 = hero:get_direction()
       if movement ~= nil then
@@ -92,7 +82,7 @@ minecart:add_collision_test("containing", function(minecart, other)
 	  minecart:set_traversable_by("hero", false)
 	  minecart:set_drawn_in_y_order(true)
 	  -- oppose the direction
-	  minecart:set_direction(hero:get_direction() % 2)
+	  minecart:set_direction(minecart:get_direction() - 2)
 	  end)
       end
     end
@@ -139,7 +129,8 @@ minecart:add_collision_test("containing", function(minecart, other)
 end)
 
 end
-end
+
+end -- get type
 
 end)
 
@@ -172,7 +163,6 @@ end
 
 local function store_equipment()
     local tunic = game:get_ability("tunic")
-    game:set_ability("tunic", 1)
     local sword = game:get_ability("sword")
     game:set_ability("sword", 0)
     local shield = game:get_ability("shield")
@@ -188,7 +178,7 @@ end
 -- Called when the hero presses the action command near the minecart.
 function minecart:on_interaction()
 
-  if minecart:get_sprite():get_animation() == "stopped" then
+  if self:get_sprite():get_animation() == "stopped" then
   local x,y = minecart:get_position()
   local tunic = game:get_ability("tunic")
   local direction4 = hero:get_direction()
@@ -212,7 +202,6 @@ function minecart:on_interaction()
 	minecart:set_drawn_in_y_order(false)    
 	store_equipment()
 	game:set_pause_allowed(false)
-	
 
 	if math.random(1) == 0 then 
 	sol.audio.play_sound("characters/link/voice/jump0")
@@ -227,25 +216,43 @@ function minecart:on_interaction()
 	jump_movement:set_direction8(direction4 * 2)
 	jump_movement:start(hero)
 	
-	sol.timer.start(300, function()
-	
+	sol.timer.start(200, function()	
 	sol.audio.play_sound("objects/minecart/preparing")
 	sol.audio.play_sound("objects/minecart/landing")
  
 	hero:set_tunic_sprite_id("hero/action/minecart/minecarting.tunic_"..tunic)
 	hero:set_animation("stopped")
-	hero:set_direction(minecart:get_direction())	
+	hero:set_direction(((minecart:get_direction() + 4)%4))
 	end)
 	
 	sol.timer.start(700, function()
     minecart:go()
+	
+	
+-- play the sound once, the rest is handled bellow
 	sol.audio.play_sound("characters/link/voice/fall1")
+	sol.audio.play_sound("objects/minecart/moving")
 	end)
   end
 end
 
 -- Starts driving the minecart.
 function minecart:go()
+
+if hero:get_movement() ~= nil then
+game:set_value("is_on_minecart", true)
+end
+
+if game:get_value("is_on_minecart") == true and hero:get_movement() ~= nil then
+link_se = sol.timer.start(1000, function()
+    sol.audio.play_sound("characters/link/voice/fall1")
+	return true
+	end)
+minecart_se = sol.timer.start(300, function()
+	sol.audio.play_sound("objects/minecart/moving")
+	return true
+	end)
+end
 
   hero:set_position(minecart:get_position())
   hero:set_animation("walking")
@@ -282,12 +289,18 @@ end
 function minecart:stop()
 
   local minecart_sprite = minecart:get_sprite()
+  
+  -- restore values
   game:set_ability("tunic", game:get_value("item_saved_tunic"))
   hero:set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
   game:set_ability("sword", game:get_value("item_saved_sword"))
   game:set_ability("shield", game:get_value("item_saved_shield"))
   game:set_command_keyboard_binding("action", game:get_value("item_saved_action"))
   game:set_pause_allowed(true)
+  
+  game:set_value("is_on_minecart", false)
+  minecart_se:stop()
+  link_se:stop()
   
   -- Break the minecart.
   local direction4 = hero:get_direction()

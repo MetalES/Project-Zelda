@@ -2,15 +2,19 @@ local entity = ...
 local game = entity:get_game()
 local map = entity:get_map()
 local x_coordinate, y_coordinate = entity:get_position()
-local chest_savegame_variable = "chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. x_coordinate .. "_" .. y_coordinate
+local dungeon = game:get_dungeon_index()
+local mx, my = map:get_size()
+local chest_savegame_variable = "chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. mx .. "_" .. my .. "_" .. x_coordinate .. "_" .. y_coordinate
 local hero = entity:get_map():get_entity("hero")
 
-entity:add_collision_test("touching", function()
-   if game:get_value(chest_savegame_variable) ~= true and hero:get_direction() == entity:get_direction() then
+entity:add_collision_test("touching", function(small_chest, other)
+  if other:get_type() == "hero"
+    if game:get_value(chest_savegame_variable) ~= true and hero:get_direction() == entity:get_direction() then
     game:set_custom_command_effect("action", "open")
    else
     game:set_custom_command_effect("action", nil)
    end
+  end
 end)
 
 function entity:on_created()

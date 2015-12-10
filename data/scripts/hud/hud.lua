@@ -3,6 +3,7 @@ local game = ...
 function game:initialize_hud()
 
   -- Set up the HUD.
+  local bars_builder = require("scripts/hud/cutscene_bars")
   local floor_builder = require("scripts/hud/floor")
   local rupees_builder = require("scripts/hud/rupees")
   local hearts_builder = require("scripts/hud/hearts")
@@ -14,60 +15,73 @@ function game:initialize_hud()
   local stamina_bar_builder = require("scripts/hud/stamina_bar")
   local attack_icon_builder = require("scripts/hud/attack_icon")
   local action_icon_builder = require("scripts/hud/action_icon")
-
+  local boss_life_builder = require("scripts/hud/boss_life")
+  
+  self.bars = {}
+  
   self.hud = {  -- Array for the hud elements, table for other hud info.
     showing_dialog = false,
     top_left_opacity = 255,
     custom_command_effects = {},
   }
+  
 
+  local bars = bars_builder:new(self)
+  bars:set_dst_position(186,30)
+  self.bars[#self.hud + 1] = bars
+  
   local menu = hearts_builder:new(self)
   menu:set_dst_position(15,12)
   self.hud[#self.hud + 1] = menu
 
-  menu = magic_bar_builder:new(self)
+  local menu = magic_bar_builder:new(self)
   menu:set_dst_position(15,33)
   self.hud[#self.hud + 1] = menu
 
-  menu = stamina_bar_builder:new(self)
+  local menu = stamina_bar_builder:new(self)
   menu:set_dst_position(15, 40)
   self.hud[#self.hud + 1] = menu
 
-  menu = rupees_builder:new(self)
+  local menu = rupees_builder:new(self)
   menu:set_dst_position(8, -20)
   self.hud[#self.hud + 1] = menu
 
-  menu = pickables_builder:new(self)
+  local menu = pickables_builder:new(self)
   menu:set_dst_position(-255, -30)
   self.hud[#self.hud + 1] = menu
 
-  menu = small_keys_builder:new(self)
-  menu:set_dst_position(8, -40)
+  local menu = small_keys_builder:new(self)
+  menu:set_dst_position(8, -33)
   self.hud[#self.hud + 1] = menu
 
-  menu = floor_builder:new(self)
+  local menu = floor_builder:new(self)
   menu:set_dst_position(5, 70)
   self.hud[#self.hud + 1] = menu
 
-  menu = item_icon_builder:new(self, 1)
+  local menu = item_icon_builder:new(self, 1)
   menu:set_dst_position(232, 12)
   self.hud[#self.hud + 1] = menu
   self.hud.item_icon_1 = menu
 
-  menu = item_icon_builder:new(self, 2)
+  local menu = item_icon_builder:new(self, 2)
   menu:set_dst_position(276,12)
   self.hud[#self.hud + 1] = menu
   self.hud.item_icon_2 = menu
 
-  menu = attack_icon_builder:new(self)
+  local menu = attack_icon_builder:new(self)
   menu:set_dst_position(230,30)
   self.hud[#self.hud + 1] = menu
   self.hud.attack_icon = menu
 
-  menu = action_icon_builder:new(self)
+  local menu = action_icon_builder:new(self)
   menu:set_dst_position(186,30)
   self.hud[#self.hud + 1] = menu
   self.hud.action_icon = menu
+  
+  local menu = boss_life_builder:new(game)
+  menu:set_dst_position(110, 220)
+  self.hud[#self.hud + 1] = menu
+  self.hud.boss_life = menu
 
   self:set_hud_enabled(true)
   self:check_hud()
@@ -79,6 +93,7 @@ function game:quit_hud()
     self:set_hud_enabled(false)
   end
   self.hud = nil
+  self.bars = nil
 end
 
 function game:check_hud()
@@ -92,7 +107,7 @@ function game:check_hud()
     local y = hero_y - camera_y
     local opacity = nil
 
-    if hud.top_left_opacity == 255
+    if self.hud.top_left_opacity == 255
         and not self:is_suspended()
         and x > 225
         and y < 70 then
@@ -166,6 +181,10 @@ function game:set_hud_enabled(hud_enabled)
   if hud_enabled ~= self.hud_enabled then
     game.hud_enabled = hud_enabled
 
+	for _, bars in ipairs(self.bars) do
+        sol.menu.start(self, bars)
+    end
+	
     for _, menu in ipairs(self.hud) do
       if hud_enabled then
         sol.menu.start(self, menu)
@@ -173,6 +192,7 @@ function game:set_hud_enabled(hud_enabled)
         sol.menu.stop(menu)
       end
     end
+
   end
 end
 

@@ -10,11 +10,11 @@ local console = {
   history_position = 1,    -- Current position when browsing the history.
   input_text_surface = sol.text_surface.create{
     font = "lttp",
-    font_size = 8,
+    font_size = 12,
   },
   output_text_surface = sol.text_surface.create{
     font = "lttp",
-    font_size = 8,
+    font_size = 12,
   },
 }
 

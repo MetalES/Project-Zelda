@@ -1,8 +1,15 @@
 local item = ...
 local game = item:get_game()
-local volume_bgm = sol.audio.get_music_volume()
 
---local hero = self:get_map():get_entity("hero")
+local item_name = "lamp"
+local slot
+local sound_played_on_brandish = "/common/big_item"
+local sound_played_when_picked = nil
+local is_assignable = true
+local sound_dir = "/items/"..item_name.."/"
+
+local volume_bgm = game:get_value("old_volume")
+local lamp_active = false
 
 -- Script of the Lamp
 
@@ -10,19 +17,11 @@ item.temporary_lit_torches = {} -- List of torches that will be unlit by timers 
 item.was_dark_room = false
 
 function item:on_created()
-  self:set_savegame_variable("i1818")
-  self:set_assignable(true)
-  self:set_sound_when_picked(nil)
-  self:set_sound_when_brandished("/common/big_item")
-  game:set_value("lamp_state", 0)
-end
-
-function item:on_obtaining() 
-  sol.audio.set_music_volume(0)
-end
-
-function item:on_started()
-  game:set_value("lamp_state", 0)
+  self:set_savegame_variable("item_"..item_name.."_possession")
+  self:set_assignable(is_assignable)
+  self:set_sound_when_picked(sound_played_when_picked)
+  self:set_sound_when_brandished(sound_played_on_brandish)
+  game:set_value("item_"..item_name.."_state", 0)
 end
 
 function item:on_finished()
@@ -30,132 +29,187 @@ local map = game:get_map()
 local hero = map:get_hero()
   game:set_ability("tunic", game:get_value("item_saved_tunic"))
   game:set_ability("shield", game:get_value("item_saved_shield"))
-  game:set_value("lamp_state", 0)
+  game:set_value("item_"..item_name.."_state", 0)
   self:set_finished()
 end
 
-function game:on_map_changed() -- if the lantern is on then keep updating it, even on map changement
-local map = game:get_map()
-local hero = map:get_hero()
-  game:set_ability("tunic", game:get_value("item_saved_tunic"))
-  game:set_ability("shield", game:get_value("item_saved_shield"))
-  game:set_value("lamp_state", 0)
-  self:set_finished()
+function item:on_map_changed() -- if the lantern is on then keep updating it, even on map changement
+local hero = game:get_hero()
+
+if particle_timer ~= nil then particle_timer:stop(); particle_timer = nil end
+if lamp_check_timer ~= nil then lamp_check_timer:stop(); lamp_check_timer = nil end
+if oil_timer ~= nil then oil_timer:stop(); oil_timer = nil end
+if particle ~= nil then particle:remove() end
+if fire_burst ~= nil then fire_burst:remove() end
+
+lamp_active = false
+
+if game:get_magic() > 0 then if game:get_value("item_"..item_name.."_state") ~= 0 then game:set_value("item_"..item_name.."_state", 3); self:on_using() end else self:set_finished() end
+
+self.temporary_lit_torches = {}
+self.was_dark_room = false
 end
 
-local function store_equipment()
-    local tunic = game:get_ability("tunic")
-    local shield = game:get_ability("shield")
+function item:store_equipment()
     game:set_ability("shield", 0)
-    game:set_value("item_saved_tunic", tunic)
-    game:set_value("item_saved_shield", shield)
+end
+
+function item:transit_to_finish()
+local hero = game:get_hero()
+sol.audio.play_sound("common/item_show")
+sol.audio.play_sound(sound_dir.."/off")
+
+if particle_timer ~= nil then particle_timer:stop(); particle_timer = nil end
+if lamp_check_timer ~= nil then lamp_check_timer:stop(); lamp_check_timer = nil end
+if oil_timer ~= nil then oil_timer:stop(); oil_timer = nil end
+if particle ~= nil then particle:remove() end
+if fire_burst ~= nil then fire_burst:remove() end
+if lamp_check_magic_timer ~= nil then lamp_check_magic_timer:stop(); lamp_check_magic_timer = nil end
+
+lamp_active = false
+
+hero:set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
+game:set_value("item_"..item_name.."_state", 0)
+
+item:set_finished(); 
+end
+
+function item:set_finished()
+if particle_timer ~= nil then particle_timer:stop(); particle_timer = nil end
+if lamp_check_timer ~= nil then lamp_check_timer:stop(); lamp_check_timer = nil end
+if oil_timer ~= nil then oil_timer:stop(); oil_timer = nil end
+if particle ~= nil then particle:remove() end
+if fire_burst ~= nil then fire_burst:remove() end
+if lamp_check_magic_timer ~= nil then lamp_check_magic_timer:stop(); lamp_check_magic_timer = nil end
+
+lamp_active = false
 end
 
 -- Called when the hero uses the Lamp.
 function item:on_using()
-  local lamp_state = game:get_value("lamp_state")
-  local hero = self:get_map():get_entity("hero")
+  local hero = game:get_hero()
+  local x,y,layer = hero:get_position()
+  local tunic = game:get_value("item_saved_tunic")
   
- if lamp_state == 0 then
-
---TODO : freeze hero, play animation of him turning lamp on and then unfreeze
---TODO : Add light particle from the lantern
-
+ if game:get_value("item_"..item_name.."_state") == 0 then
   hero:unfreeze()
-  store_equipment()
-  sol.audio.play_sound("items/lantern/on")
-  hero:set_tunic_sprite_id("hero/item/lantern.tunic1")
-  
--- fire_burst effect : effect played when starting the lamp
-local x,y,layer = hero:get_position()
-local ex = 0
-local ey = 0
---extra fire_burst position
-if     hero:get_direction() == 0 then ex = 2;     ey = - 5 -- right
-elseif hero:get_direction() == 1 then ey = - 12;  ex = 2   -- up
-elseif hero:get_direction() == 2 then ex = - 11;  ey = - 5 -- left
-elseif hero:get_direction() == 3 then ey = - 3;   ex = - 9 end -- down
-
-  local fire_burst = self:get_game():get_map():create_custom_entity({
-      x = x + ex,
-      y = y + ey,
-      layer = layer,
-      direction = 0,
-      sprite = "entities/fire_burst",
-    }) 
---remove it after 100 ms
-fire_burst:set_drawn_in_y_order(true)
-sol.timer.start(300, function() fire_burst:remove() end)
--- end fire_burst
-
-  game:set_value("lamp_state", 1)
-  check_timer = sol.timer.start(10, function()
-  --self:create_fire()
+  item:store_equipment()
+  lamp_check_magic_timer = sol.timer.start(100, function()
+  if game:get_magic() > 0 then if not lamp_active then self:call_extra(); lamp_active = true end else if not show_bars then game:show_bars(); game:start_dialog("gameplay.logic._lantern_no_oil", function() if show_bars == true and not starting_cutscene then game:hide_bars() end; self:transit_to_finish() end) end end
   return true
   end)
-
-  particle_timer = sol.timer.start(100,function()
-  -- fire_burst effect : effect played when starting the lamp
-  local x,y,layer = hero:get_position()
-  local px = 0
-  local py = 0
-  --extra fire_burst position
-  if     hero:get_direction() == 0 then px = 6;     py = - 2 -- right
-  elseif hero:get_direction() == 1 then py = - 5;  px = 5   -- up
-  elseif hero:get_direction() == 2 then px = - 6;  py = - 2 -- left
-  elseif hero:get_direction() == 3 then py = - 3;   px = - 4 end -- down
-
-  local particle = self:get_game():get_map():create_custom_entity({
-      x = x + px,
-      y = y + py,
-      layer = layer + 1,
-      direction = 0,
-      sprite = "effects/item/lantern_effect",
-    }) 
--- avoid multiple custom entity on the map causing lags.
-sol.timer.start(200, function() particle:remove() end)
-
-return true
-end)
-
-  local oil_need = 1
-  item:get_game():remove_magic(oil_need)
-  oil_timer = sol.timer.start(2500, function() item:get_game():remove_magic(oil_need); return true; end)
+  sol.audio.play_sound(sound_dir.."on")
+  hero:set_tunic_sprite_id("hero/item/lantern.tunic"..tunic)
 
    -- the state is "on"
-  elseif lamp_state == 1 then
+  elseif game:get_value("item_"..item_name.."_state") == 1 then
   hero:unfreeze()
-  sol.audio.play_sound("items/lantern/off")
-  oil_timer:stop()
-  check_timer:stop()
-  particle_timer:stop()
-  hero:set_tunic_sprite_id("hero/tunic" .. game:get_value("item_saved_tunic"))
-  game:set_value("lamp_state", 0)
+  self:transit_to_finish()
+  
+  else 
+  hero:set_tunic_sprite_id("hero/item/lantern.tunic"..tunic)
+  lamp_check_magic_timer = sol.timer.start(100, function()
+  if game:get_magic() > 0 then if not lamp_active then self:call_extra(); lamp_active = true end else if not show_bars then game:show_bars(); game:start_dialog("gameplay.logic._lantern_no_oil", function() if show_bars == true and not starting_cutscene then game:hide_bars() end; self:transit_to_finish() end) end end
+  return true
+  end)
   end
 end
 
+function item:call_extra()
+local hero = game:get_hero()
+local x,y,layer = hero:get_position()
+local tunic = game:get_value("item_saved_tunic")
+
+  local function end_by_collision() hero:set_walking_speed(88); item:transit_to_finish(); game:set_pause_allowed(true) end
+
+		-- fire_burst effect : effect played when starting the lamp
+			local ex = 0
+			local ey = 0
+			--extra fire_burst position
+			if     hero:get_direction() == 0 then ex = 2;     ey = - 5 -- right
+			elseif hero:get_direction() == 1 then ey = - 12;  ex = 2   -- up
+			elseif hero:get_direction() == 2 then ex = - 11;  ey = - 5 -- left
+			elseif hero:get_direction() == 3 then ey = - 3;   ex = - 9 end -- down
+
+			local fire_burst = game:get_map():create_custom_entity({
+				x = x + ex,
+				y = y + ey,
+				layer = layer,
+				direction = 0,
+				sprite = "entities/fire_burst",
+			}) 
+			--remove it after 100 ms
+		    fire_burst:set_drawn_in_y_order(true)			
+			sol.timer.start(300, function() fire_burst:remove() end)
+
+			game:set_value("item_"..item_name.."_state", 1)
+			
+			lamp_check_timer = sol.timer.start(50, function()
+			item:create_fire()
+			local lx, ly, layer = hero:get_position()
+				
+				if hero:get_direction() == 0 then new_x = -1; new_y = 0 
+				elseif hero:get_direction() == 1 then new_x = 0; new_y = 1 
+				elseif hero:get_direction() == 2 then new_x = 1; new_y = 0 
+				elseif hero:get_direction() == 3 then new_x = 0; new_y = -1
+				end
+				
+				if hero:get_state() == "falling" then self:on_map_changed() end
+				if hero:get_state() == "jumping" or hero:get_state() == "swimming" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:set_position(lx + new_x, ly + new_y); end_by_collision() end
+				return true
+			end)
+
+			particle_timer = sol.timer.start(100,function()
+			-- fire_burst effect : effect played when starting the lamp
+			local px = 0
+			local py = 0
+			--extra fire_burst position
+			if     hero:get_direction() == 0 then px = 6;     py = - 2 -- right
+			elseif hero:get_direction() == 1 then py = - 5;  px = 5   -- up
+			elseif hero:get_direction() == 2 then px = - 6;  py = - 2 -- left
+			elseif hero:get_direction() == 3 then py = - 3;   px = - 4 end -- down
+
+			local particle = game:get_map():create_custom_entity({
+			  x = x + px,
+			  y = y + py,
+			  layer = layer + 1,
+			  direction = 0,
+			  sprite = "effects/item/lantern_effect",
+			}) 
+			particle:set_position(hero:get_position())
+			-- avoid multiple custom entity on the map causing lags.
+			sol.timer.start(200, function() particle:remove() end)
+			return true
+			end)
+
+			local oil_need = 1
+			game:remove_magic(oil_need)
+			oil_timer = sol.timer.start(2500, function() item:get_game():remove_magic(oil_need); return true; end)
+end
 
 
 -- Creates some fire on the map.
 function item:create_fire()
-  local hero = self:get_map():get_entity("hero")
+  local hero = game:get_hero()
   local direction = hero:get_direction()
+  local map = game:get_map()
   local dx, dy
   if direction == 0 then
-    dx, dy = 8, -4
+    dx, dy = 18, 4
   elseif direction == 1 then
-    dx, dy = 0, -14
+    dx, dy = 0, -12
   elseif direction == 2 then
-    dx, dy = -12, -4
+    dx, dy = -20, 4
   else
-    dx, dy = 0, 6
+    dx, dy = 0, 16
   end
-
   local x, y, layer = hero:get_position()
-  self:get_map():create_fire{
+  map:create_custom_entity{
+    model = "lamp_fire",
     x = x + dx,
     y = y + dy,
-    layer = layer
+    layer = layer,
+    direction = 0,
   }
 end
 
@@ -176,25 +230,13 @@ end
 
 -- Called when the player obtains the Lamp.
 function item:on_obtained(variant, savegame_variable)
-
   sol.audio.set_music_volume(volume_bgm)
-
- -- Add Lamp Oil bar and variant TODO 
-
- -- problem : it add magic even if there's no command, weird, so let variant to 0
+  if show_bars == true and not starting_cutscene then game:hide_bars() end
 
    local magic_bar = self:get_game():get_item("magic_bar")
    if not magic_bar:has_variant() then
     magic_bar:set_variant(0)
   end
-
- --
-end
-
--- Called when the current map changes.
-function item:on_map_changed()
-  self.temporary_lit_torches = {}
-  self.was_dark_room = false
 end
 
 -- Called when the hero presses the action key in front of an NPC

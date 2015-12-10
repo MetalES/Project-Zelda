@@ -1,14 +1,17 @@
 local item = ...
 local game = item:get_game()
 -- item configuration
-local item_name = "fire_rod"
-local slot
-local sound_played_on_brandish = "/common/big_item"
-local sound_played_when_picked = nil
-local is_assignable = true
-local sound_dir = "/items/"..item_name.."/"
+local item_name = ""                                  -- name your item here, used fot the savegame variable
+local slot                                            -- don't touch it !
+local sound_played_on_brandish = "/common/big_item"   -- play a sound when you get this item from a chest ? (nil = no sound)
+local sound_played_when_picked = nil                  -- play a sound whe picked ? (nil = no sound)
+local is_assignable = true                            -- can be assigned in the inventory meny ?
+local sound_dir = "/items/"..item_name.."/"           -- define where is your item in the sounds folder
 
--- Sample item code : Fire Rod (example)
+local volume bgm = sol.audio.get_music_volume()       -- memorize the volume of the music.
+
+-- extra state bellow
+-- Sample item code
 
 --[[ 
 Use this code if you need to rework or make any item.
@@ -45,19 +48,10 @@ function item:on_created()
 end
 
 function item:on_map_changed()
-local tunic = game:get_ability("tunic")
-local tunic_ref = game:get_value("item_saved_tunic") or tunic
-if fire_rod ~= nil then fire_rod:remove() end
-if fire_rod_process ~= nil then fire_rod_process:stop(); fire_rod_process = nil end 
-if rod_sync ~= nil then rod_sync:stop() end
-if game:get_hero():get_tunic_sprite_id() ~= "hero/tunic"..tunic_ref then game:get_hero():set_tunic_sprite_id("hero/tunic" ..tunic_ref) end
 self:set_finished()
 end
 
-local function store_equipment()
-    local tunic = game:get_ability("tunic")
-    local sword = game:get_ability("sword")
-    local shield = game:get_ability("shield")
+function item:store_equipment()
     local kb_action_key = game:get_command_keyboard_binding("action")
 	local kb_item_1_key = game:get_command_keyboard_binding("item_1")
 	local kb_item_2_key = game:get_command_keyboard_binding("item_2")
@@ -75,9 +69,6 @@ local function store_equipment()
 	if game:get_value("_item_slot_1") ~= item_name then game:set_command_keyboard_binding("item_1", nil); game:set_command_joypad_binding("item_1", nil) end
 	if game:get_value("_item_slot_2") ~= item_name then game:set_command_keyboard_binding("item_2", nil); game:set_command_joypad_binding("item_2", nil) end
 
-    game:set_value("item_saved_tunic", tunic)
-    game:set_value("item_saved_sword", sword)
-    game:set_value("item_saved_shield", shield)
     game:set_value("item_saved_action", kb_action_key)
 	game:set_value("item_1_kb_slot", kb_item_1_key)
 	game:set_value("item_2_kb_slot", kb_item_2_key)
@@ -86,7 +77,6 @@ local function store_equipment()
 	game:set_value("item_2_jp_slot", jp_item_2_key)
 	
     game:set_pause_allowed(false)
-	
 end
 
 function item:on_using()

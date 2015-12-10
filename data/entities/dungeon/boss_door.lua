@@ -1,17 +1,20 @@
---[[ Minish Cap styled Boss Door System
-To make it work properly, you need to place your teleporter 24 pixel away from the custom
-entity, Link will go forward automatically, and thus, he will touch the load zone automatically.
-The HUD is not re-enabled, maybe you want to play a cutscene when you are in the boss room.
-You also need : The door sprite and the chain sprite that you will name "boss_door_chain" with 2 animations :
-- locked
-- unlocking
-The code do the rest for you.
-Variable delay analyse the savegame value "dungeon_" .. dungeon .. "boss_door_open", and put a certain value (customisable)]]
-
---ToDo : Link's animation is freezed while moving
-
 local entity = ...
 local game = entity:get_game()
+local hero = entity:get_map():get_entity("hero")
+
+-- Hud notification
+entity:add_collision_test("touching", function(boss_door, other)
+if other:get_type() == "hero" then 
+if game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") ~= true and game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_key") ~= true and hero:get_direction() == entity:get_direction() then
+game:set_custom_command_effect("action", "look")
+elseif game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") == true and hero:get_direction() == entity:get_direction() then
+game:set_custom_command_effect("action", "open")
+elseif game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") ~= true and game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_key") == true and hero:get_direction() == entity:get_direction() then
+game:set_custom_command_effect("action", "open")
+else game:set_custom_command_effect("action", nil)
+end
+end
+end)
 
 -- Boss door
 
@@ -24,37 +27,10 @@ function entity:on_created()
   self:set_traversable_by("arrow", false)
   self:set_can_traverse("arrow", false)
   self:set_traversable_by("destructible", false)
- -- check if the door has been already open, if yes, delete the entity that represent the chain.
 local dungeon = game:get_dungeon_index()
 if game:get_value("dungeon_" .. dungeon .. "_boss_door_open") == true then 
 sol.main.game:get_map():get_entity("boss_door_chain"):remove()
 end
-end
-
-function go_up()
-  local m = sol.movement.create("straight")
-  m:set_ignore_obstacles(true)
-  m:set_speed(50)
-  m:set_angle(math.pi / 2)
-  m:set_max_distance(32)
-  m:start(entity)
-end
-
-function p_go_up()
-  local m = sol.movement.create("straight")
-  m:set_speed(50)
-  m:set_angle(math.pi / 2)
-  m:set_max_distance(512)
-  m:start(sol.main.game:get_hero())
-end
-
-function go_down()
-  local m = sol.movement.create("straight")
-  m:set_ignore_obstacles(true)
-  m:set_speed(50)
-  m:set_angle(3 * math.pi / 2)
-  m:set_max_distance(32)
-  m:start(entity)
 end
 
 function entity:on_interaction()
@@ -65,8 +41,10 @@ local direction = hero:get_direction()
 local dungeon = game:get_dungeon_index()
 local delay
 
+  if not show_bars then game:show_bars(); sol.audio.play_sound("common/bars_dungeon")end
+
 if game:get_value("dungeon_" .. dungeon .. "_boss_key") == true then
---game:draw_bars()
+
 hero:freeze()
 game:set_pause_allowed(false)
 hero:set_position(x, y+12)
@@ -80,22 +58,45 @@ else
 delay = 0
 end
 
+
 sol.timer.start(delay,function()
 if game:get_value("dungeon_" .. dungeon .. "_boss_door_open") ~= true then sol.main.game:get_map():get_entity("boss_door_chain"):remove() end
 sol.audio.play_sound("/common/door/stone_open")
-go_up()
+
+  local m = sol.movement.create("straight")
+  m:set_ignore_obstacles(true)
+  m:set_speed(50)
+  m:set_angle(self:get_direction() * math.pi / 2)
+  m:set_max_distance(32)
+  m:start(self)
+
 self:set_can_traverse("hero", true)
- self:set_traversable_by("hero", true)
+self:set_traversable_by("hero", true)
 end)
 
 sol.timer.start((delay + 850),function()
-p_go_up()
+
+  local m = sol.movement.create("straight")
+  m:set_speed(50)
+  m:set_angle(hero:get_direction() * math.pi / 2)
+  m:set_max_distance(48)
+  m:start(hero)
+  
+if game:get_value("i1820") >= 1 then hero:set_animation("walking_with_shield") else hero:set_animation("walking") end
 end)
 
 sol.timer.start((delay + 1900),function()
 sol.audio.play_sound("/common/door/stone_close")
-go_down()
-game:set_pause_allowed(true)
+self:set_can_traverse("hero", true)
+self:set_traversable_by("hero", true)
+
+local m = sol.movement.create("straight")
+  m:set_ignore_obstacles(true)
+  m:set_speed(50)
+  m:set_angle((self:get_direction() - 2) * math.pi / 2)
+  m:set_max_distance(32)
+  m:start(self)
+  
 game:set_value("dungeon_" .. dungeon .. "_boss_door_open", true)
 end)
 
@@ -103,12 +104,24 @@ sol.timer.start((delay + 2500),function()
 sol.audio.play_sound("/common/door/stone_slam")
 end)
 
-sol.timer.start((delay + 2900),function()
-p_go_up()
-hero:unfreeze()
+
+sol.timer.start((delay + 3200),function()
+
+  local m = sol.movement.create("straight")
+  m:set_speed(50)
+  m:set_angle(hero:get_direction() * math.pi / 2)
+  m:set_max_distance(48)
+  m:start(hero)
+  
+game:set_pause_allowed(true)
 end)
+
 else
-game:start_dialog("gameplay.logic._cant_open_boss_door")
+sol.timer.start(50, function()
+game:start_dialog("gameplay.logic._cant_open_boss_door", function()
+if show_bars == true and not starting_cutscene then game:hide_bars()end
+end)
+end)
 end
 end
 

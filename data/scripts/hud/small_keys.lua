@@ -1,36 +1,44 @@
--- Allows small keys to be displayed on maps with small keys enabled.
--- Done in ALBW style, a key icon is shown for each key obtained (no counter or icon)
+-- The small keys counter shown during dungeons or maps with small keys enabled.
 
 local small_keys = {}
-local icon_img = sol.surface.create("hud/small_key.png")
 
 function small_keys:new(game)
+
   local object = {}
   setmetatable(object, self)
   self.__index = self
 
   object:initialize(game)
+
   return object
 end
 
 function small_keys:initialize(game)
-  local nb_keys_displayed = 0
 
   self.game = game
   self.visible = false
-  self.surface = sol.surface.create(80, 16)
+  self.surface = sol.surface.create(32, 64)
+  self.icon_img = sol.surface.create("hud/small_key_icon.png")
+  self.digits_text = sol.text_surface.create{
+    font = "white_digits",
+    horizontal_alignment = "center",
+    vertical_alignment = "middle",
+  }
 
   self:check()
   self:rebuild_surface()
 end
 
 function small_keys:check()
+
   local need_rebuild = false
 
   -- Check the number of small keys.
   if self.game:are_small_keys_enabled() then
     local nb_keys = self.game:get_num_small_keys()
+    local nb_keys_displayed = tonumber(self.digits_text:get_text())
     if nb_keys_displayed ~= nb_keys then
+      self.digits_text:set_text(nb_keys)
       need_rebuild = true
     end
   end
@@ -53,17 +61,10 @@ function small_keys:check()
 end
 
 function small_keys:rebuild_surface()
+
   self.surface:clear()
-  if self.game:are_small_keys_enabled() then
-    for i=0,self.game:get_num_small_keys()-1 do
-      icon_img:draw(self.surface,i*14)
-      if nb_keys_displayed ~= nil then
-        nb_keys_displayed = nb_keys_displayed + 1
-      else
-        nb_keys_displayed = 1
-      end
-    end
-  end
+  self.icon_img:draw(self.surface)
+  self.digits_text:draw(self.surface, 24, 7)
 end
 
 function small_keys:set_dst_position(x, y)
@@ -72,6 +73,7 @@ function small_keys:set_dst_position(x, y)
 end
 
 function small_keys:on_draw(dst_surface)
+
   if self.visible then
     local x, y = self.dst_x, self.dst_y
     local width, height = dst_surface:get_size()
@@ -81,8 +83,10 @@ function small_keys:on_draw(dst_surface)
     if y < 0 then
       y = height + y
     end
+
     self.surface:draw(dst_surface, x, y)
   end
 end
 
 return small_keys
+

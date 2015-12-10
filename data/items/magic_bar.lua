@@ -6,7 +6,7 @@ end
 
 function item:on_variant_changed(variant)
   -- Obtaining a magic bar changes the max magic.
-  local max_magics = {51, 104}--{42, 84}
+  local max_magics = {52, 104}--{42, 84}
   local max_magic = max_magics[variant]
   if max_magic == nil then
     error("Invalid variant '" .. variant .. "' for item 'magic_bar'")

@@ -17,11 +17,20 @@ local effect = map:create_custom_entity({
 end
 
 -- we need to test if the hero is on the teleporter, if yes, start interaction automatically, no input needed.
+-- when he is warped, he will land 8 pixel away from the other room's warp
 entity:add_collision_test("origin", function()
-entity:on_interaction()
+if entity:overlaps(entity:get_game():get_hero()) then entity:on_interaction() end
 end)
 
+
 function entity:on_interaction()
-local hero = sol.main.game:get_map():get_hero()
-hero:teleport(self:get_name(), "_same", "fade")
+local hero = entity:get_game():get_hero()
+local warp_dst = "teleporter_" ..self:get_name()
+local delay
+
+sol.audio.play_sound("/objects/warp/warp_pad_teleport_out")
+-- todo : animate this
+hero:freeze()
+
+hero:teleport(self:get_name(), warp_dst, "fade")
 end
