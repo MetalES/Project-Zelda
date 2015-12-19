@@ -1,17 +1,17 @@
-# ZeldaES-Solarus-Edition
+# Solarus Engine : Project Zelda
 Port from RPG Maker to the Solarus Engine.
 Files are incomplete but this is wanted, game will be playable when there will be "main.lua" in /data.
 
-Repo Update rate : each week.
+Repo Update rate : After Christmas, time to decompress.
 Advancement tracking : each major version.
 
 Do not ask for any feature request, the game already had enough feature to programm, and it's already a mess. /ffs
 
-Welcome to Zelda Eternal Struggle Solarus Edition's Git. Here you can find the files of the game currently beind made.
+Welcome to Solarus Engine : Project Zelda's Git. Here you can find the files of the game currently beind made.
 This game is being made using the Solarus engine*
 
-The game is currently in version 0.1
-Currently working on : Hero Sprites
+The game is currently in version 0.15
+Currently working on : Enemies
 
 To run: Windows: execute "solarus.exe" Linux: download executable or compile source available at http://www.solarus-games.org         Mac: download executable or compile source available at http://www.solarus-games.org
 Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Solarus DX written in C++ that interprete LUA code for running user quest(s) (https://github.com/christopho).
@@ -40,18 +40,29 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Still need improvement (Frame recheck while direction_fix)
 - Minecart system in WIP (Goron Sanctuary) TODO : Sprite
 - Still Test Maps
-- You can't pause while using bow, hookshot, problem restoring "action" value
+- You can't pause while using bow, hookshot
 - Started learning PSP sdk
+
+# 0.15 - December 19th  2015
+- overhauled everyting.
+- 3 items remains
+- cutscene bars added ( used items that work in 2 times & cutscenes )
+- all items has been overhauled
+- Minecart working
+- Equipment status screen added
+- WIP : Ocarina
+- Joypad support
+- Working on some dungeons
+- Link Voice added
 
 #Planned
 - Day & Night, Weather (solution bellow)
 - Shaders (Heat effect, clouds, etc), Solarus might get these one day.
 - Horse, with archery and sword, similar to Twilight Princess
-- More items (Megaton Hammer, FSA styled rod, roc's cape, net, bottle overhaul, etc)
 - overhauled maps (compared to the RPG Maker's map)
 - Minigames, somes are already made.
 - Bosses (you might spoil yourself if you go on /data/music/dungeons/boss)
 - Item Skills
 - PSP port (but this one might take a while, let's focus on the game itself)
 
-Some ressource come from : Zelda BOM - wrightmat (https://github.com/wrightmat/zbom), still need to apply changes and move things
+Some ressource (including scripts) come from : Zelda BOM - wrightmat (https://github.com/wrightmat/zbom)
