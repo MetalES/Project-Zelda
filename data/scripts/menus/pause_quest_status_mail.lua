@@ -1,6 +1,22 @@
 local submenu = require("scripts/menus/pause_submenu")
 local mail_submenu = submenu:new()
 
+--Mail Menu.
+--Instructions.
+ --[[
+ The mail menu is declared as a submenu, not a menu declared in game_manager.
+ 
+ It is not finished (mail name spawn, but I didn't have programmed the text)
+ 
+ Things to do.
+ 
+ -Change gfx when highlighting a new mail
+ -Change gfx when mail was opened
+ -Display mail content
+ -Limit the cursor to the number of total_mail value
+ --]]
+ 
+
 function mail_submenu:on_started()
 
   submenu.on_started(self)
