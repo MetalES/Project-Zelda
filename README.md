@@ -2,7 +2,7 @@
 Port from RPG Maker to the Solarus Engine.
 Files are incomplete but this is wanted, game will be playable when there will be "main.lua" in /data.
 
-Repo Update rate : After Christmas, time to decompress.
+Repo Update rate : Each Week.
 Advancement tracking : each major version.
 
 Do not ask for any feature request, the game already had enough feature to programm, and it's already a mess. /ffs
@@ -11,7 +11,7 @@ Welcome to Solarus Engine : Project Zelda's Git. Here you can find the files of 
 This game is being made using the Solarus engine*
 
 The game is currently in version 0.15
-Currently working on : Enemies
+Currently working on : Menus
 
 To run: Windows: execute "solarus.exe" Linux: download executable or compile source available at http://www.solarus-games.org         Mac: download executable or compile source available at http://www.solarus-games.org
 Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Solarus DX written in C++ that interprete LUA code for running user quest(s) (https://github.com/christopho).
