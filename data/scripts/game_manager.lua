@@ -10,6 +10,8 @@ sol.main.load_file("scripts/hud/hud")(game)
 sol.main.load_file("scripts/dungeons")(game)
 sol.main.load_file("scripts/equipment")(game)
 sol.main.load_file("scripts/particle_emitter")(game)
+sol.main.load_file("scripts/menus/credits")(game)
+sol.main.load_file("entities/object/shop/shop_manager")(game)
 local camera_manager = require("scripts/camera_manager")
 local condition_manager = require("scripts/hero_condition")
 
@@ -19,28 +21,26 @@ function game:on_started()
   self:initialize_dialog_box()
   self:initialize_hud()
   camera = camera_manager:create(game)
+  if show_bars == true and self:get_value("starting_cutscene") ~= true then game:hide_bars() end
 end
 
 function game:on_finished()
-  if show_bars == true and not starting_cutscene then game:hide_bars() end
-  sol.audio.set_music_volume(game:get_value("old_volume"))
-  
+  sol.audio.set_music_volume(self:get_value("old_volume"))
+  if show_bars == true and self:get_value("starting_cutscene") ~= true then game:hide_bars() end
+  self:set_value("starting_cutscene", false)
+
   self:quit_hud()
   self:quit_dialog_box()
   camera = nil
-
   self:set_ability("tunic", game:get_value("item_saved_tunic"))
   self:set_ability("sword", game:get_value("item_saved_sword"))
   self:set_ability("shield", game:get_value("item_saved_shield"))
-
   self:set_command_keyboard_binding("action", self:get_value("item_saved_kb_action"))
   self:set_command_keyboard_binding("item_1", self:get_value("item_1_kb_slot"))
   self:set_command_keyboard_binding("item_2", self:get_value("item_2_kb_slot"))
-
   self:set_command_joypad_binding("action", self:get_value("item_saved_jp_action"))
   self:set_command_joypad_binding("item_1", self:get_value("item_1_jp_slot"))
   self:set_command_joypad_binding("item_2", self:get_value("item_2_jp_slot"))
-  
 end
 
 -- This event need to be call when you start a cutscene
@@ -67,11 +67,55 @@ bars_dispose = true
 end
 
 function game:start_cutscene()
-starting_cutscene = true
+self:set_value("starting_cutscene", true) --todo on entity & game_over
 end
 
 function game:stop_cutscene()
-starting_cutscene = false
+self:set_value("starting_cutscene", false)
+end
+
+function game:is_skill_learned(skill_index)
+  return self:get_value("skill_" .. skill_index .. "_learned")
+end
+
+function game:set_skill_learned(skill_index, learned)
+  if learned == nil then
+    learned = true
+  end
+  self:set_value("skill_" .. skill_index .. "_learned", learned)
+end
+
+function game:is_ocarina_song_learned(song_index)
+  return self:get_value("song_" .. song_index .. "_learned")
+end
+
+function game:set_ocarina_song_learned(song_index, learned)
+  if learned == nil then
+    learned = true
+  end
+  self:set_value("song_" .. song_index .. "_learned", learned)
+end
+
+function game:set_hour(hour, minute, day)
+--if none have been declared then set to 0
+  if hour == nil then
+    hour = 0
+  elseif minute == nil then 
+    minute = 0
+  elseif day == nil then 
+    day = self:get_value("current_day")
+  end
+  self:set_value("current_hour", hour)
+  self:set_value("current_minute", minute)
+  self:set_value("current_day", day)
+end
+
+function game:using_item(value)
+self:set_value("using_item", true) -- todo on item
+end
+
+function game:item_finished()
+self:set_value("using_item", false)
 end
 
 -- This event is called when a new map has just become active.
@@ -133,6 +177,91 @@ function game:switch_time_of_day()
     game:set_value("time_of_day", "day")
   end
   return true
+end
+
+function game:enable_all_input()
+game:set_command_keyboard_binding("up", game:get_value("kb_up")) 
+game:set_command_keyboard_binding("down", game:get_value("kb_down"))  
+game:set_command_keyboard_binding("left", game:get_value("kb_left"))
+game:set_command_keyboard_binding("right", game:get_value("kb_right")) 
+game:set_command_keyboard_binding("action", game:get_value("kb_action"))
+game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
+game:set_command_keyboard_binding("item_2", game:get_value("item_2_kb_slot"))
+game:set_command_keyboard_binding("attack", game:get_value("kb_attack"))
+game:set_command_keyboard_binding("pause", game:get_value("kb_pause"))
+
+game:set_command_joypad_binding("up", game:get_value("jp_up")) 
+game:set_command_joypad_binding("down", game:get_value("jp_down"))  
+game:set_command_joypad_binding("left", game:get_value("jp_left"))   
+game:set_command_joypad_binding("right", game:get_value("jp_right")) 
+game:set_command_joypad_binding("action", game:get_value("jp_action"))
+game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
+game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
+game:set_command_joypad_binding("attack", game:get_value("jp_attack"))
+game:set_command_joypad_binding("pause", game:get_value("jp_pause"))
+end
+
+function game:disable_all_input()
+local kb_up = game:get_command_keyboard_binding("up") 
+local kb_down = game:get_command_keyboard_binding("down") 
+local kb_left = game:get_command_keyboard_binding("left") 
+local kb_right = game:get_command_keyboard_binding("right") 
+local kb_attack = game:get_command_keyboard_binding("attack") 
+local kb_action = game:get_command_keyboard_binding("action") 
+local kb_pause = game:get_command_keyboard_binding("pause") 
+local jp_up = game:get_command_joypad_binding("up") 
+local jp_down = game:get_command_joypad_binding("down") 
+local jp_left = game:get_command_joypad_binding("left") 
+local jp_right = game:get_command_joypad_binding("right") 
+local jp_attack = game:get_command_joypad_binding("attack") 
+local jp_action = game:get_command_joypad_binding("action") 
+local jp_pause = game:get_command_joypad_binding("pause") 
+
+game:set_value("kb_up", kb_up)
+game:set_value("kb_down", kb_down)
+game:set_value("kb_left", kb_left)
+game:set_value("kb_right", kb_right)
+game:set_value("kb_attack", kb_attack)
+game:set_value("kb_action", kb_action)
+game:set_value("kb_pause", kb_pause)
+
+game:set_value("jp_up", jp_up)
+game:set_value("jp_down", jp_down)
+game:set_value("jp_left", jp_left)
+game:set_value("jp_right", jp_right)
+game:set_value("jp_attack", jp_attack)
+game:set_value("jp_action", jp_action)
+game:set_value("jp_pause", jp_pause)
+
+game:set_command_keyboard_binding("up", nil) 
+game:set_command_keyboard_binding("down", nil)  
+game:set_command_keyboard_binding("left", nil)  
+game:set_command_keyboard_binding("right", nil)  
+game:set_command_keyboard_binding("item_1", nil)
+game:set_command_keyboard_binding("item_2", nil)
+game:set_command_keyboard_binding("attack", nil)
+game:set_command_keyboard_binding("action", nil)
+game:set_command_keyboard_binding("pause", nil)
+
+game:set_command_joypad_binding("up", nil)  
+game:set_command_joypad_binding("down", nil)  
+game:set_command_joypad_binding("left", nil)  
+game:set_command_joypad_binding("right", nil) 
+game:set_command_joypad_binding("item_1", nil)
+game:set_command_joypad_binding("item_2", nil)
+game:set_command_joypad_binding("action", nil)
+game:set_command_joypad_binding("attack", nil)
+game:set_command_joypad_binding("pause", nil)
+
+-- Make sure all input are released
+game:simulate_command_released("attack")
+game:simulate_command_released("action")
+game:simulate_command_released("item_1")
+game:simulate_command_released("item_2")
+game:simulate_command_released("up")
+game:simulate_command_released("down")
+game:simulate_command_released("left")
+game:simulate_command_released("right")
 end
 -- Run the game.
 sol.main.game = game
