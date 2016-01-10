@@ -1,6 +1,7 @@
 local submenu = require("scripts/menus/pause_submenu")
 local bomber_notebook_submenu = submenu:new()
-
+-- Menu Advancement :
+ -- Nothing has been done yet.
 function bomber_notebook_submenu:on_started()
 
   submenu.on_started(self)
