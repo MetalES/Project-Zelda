@@ -4,6 +4,7 @@ function game:initialize_hud()
 
   -- Set up the HUD.
   local bars_builder = require("scripts/hud/cutscene_bars")
+  local map_name_builder = require("scripts/hud/map_name")
   local floor_builder = require("scripts/hud/floor")
   local rupees_builder = require("scripts/hud/rupees")
   local hearts_builder = require("scripts/hud/hearts")
@@ -25,10 +26,13 @@ function game:initialize_hud()
     custom_command_effects = {},
   }
   
+  local map_name = map_name_builder:new(self)
+  map_name:set_dst_position(0,0)
+  self.bars[#self.bars + 1] = map_name
 
   local bars = bars_builder:new(self)
   bars:set_dst_position(186,30)
-  self.bars[#self.hud + 1] = bars
+  self.bars[#self.bars + 1] = bars
   
   local menu = hearts_builder:new(self)
   menu:set_dst_position(15,12)
@@ -182,7 +186,7 @@ function game:set_hud_enabled(hud_enabled)
     game.hud_enabled = hud_enabled
 
 	for _, bars in ipairs(self.bars) do
-        sol.menu.start(self, bars)
+        sol.menu.start(self, bars, false)
     end
 	
     for _, menu in ipairs(self.hud) do
@@ -194,6 +198,12 @@ function game:set_hud_enabled(hud_enabled)
     end
 
   end
+end
+
+function game:show_map_name(map_name, display_extra)
+  game.map_name_string = map_name or nil
+  game.display_extra = display_extra or nil
+  self:set_value("previous_map_name_displayed", game.map_name_string)
 end
 
 function game:get_custom_command_effect(command)

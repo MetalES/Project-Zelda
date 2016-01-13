@@ -72,15 +72,6 @@ local function initialize_enemies()
 	local damage_factors = { 1, 2, 4, 8 }  -- Damage factor of each sword.
     local damage_factor = damage_factors[sword]
 	
-	--RESERVED FOR HERO MODE----------------
-	-- if hero:get_state() == "sword spin attack" then
-      -- damage_factor = damage_factor        -- Damage in hero mode are ridiculous
-    -- end
-	-- if hero:get_state() == "sword swinging" then
-      -- damage_factor = damage_factor * 0.6 -- Damage in hero mode are ridiculous
-    -- end
-    ----------------------------------------
-	
     if hero:get_state() == "sword spin attack" then
       damage_factor = damage_factor * 2  -- The spin attack is twice as powerful, but costs more stamina.
     end 
@@ -112,6 +103,7 @@ local function initialize_npcs()
   -- Give default dialog styles to certain entities.
   function npc_meta:on_interaction()
     local name = self:get_name()
+	local game = self:get_game()
     if name:match("^sign_") then game:set_dialog_style("wood")
     elseif name:match("^mailbox_") then game:set_dialog_style("wood")
     elseif name:match("^hint_") then game:set_dialog_style("stone")
@@ -147,36 +139,48 @@ local function initialize_timer()
   local timer
   local timer2
   local timer3
+  local timer4
   
-  function timer_meta:set_with_effect(boolean)
+  
+  function timer_meta:set_with_sound_effect(boolean)  
     if boolean == true then
+	
+	-- if another switch is pressed, then stop the timer 1,  2 and 3.
+	   if timer ~= nil then timer:stop() end 
+	   if timer2 ~= nil then timer2:stop() end
+	   if timer3 ~= nil then timer3:stop() end
+	   if timer4 ~= nil then timer4:stop() end
+		
 	   sol.audio.play_sound("timer")
 	   timer = sol.timer.start(self, 1525, function()
-	     if self:get_remaining_time()  > 7500 and not sol.main.game:is_paused() then
+	     if self:get_remaining_time()  > 6100 and not sol.main.game:is_paused() then --7500
 		  sol.audio.play_sound("timer")
 		 end
 		  return true
 		end)
 		
 		timer2 = sol.timer.start(self, 755, function()
-		  if self:get_remaining_time() <= 7500 and self:get_remaining_time() >= 3500 and not sol.main.game:is_paused() then
+		  if self:get_remaining_time() <= 6100 and self:get_remaining_time() >= 3465 and not sol.main.game:is_paused() then
 		     timer:stop()
 		     sol.audio.play_sound("timer_hurry")
 		  end
 		return true
 		end)
 		
-		timer3 = sol.timer.start(self, 385, function()
-		  if self:get_remaining_time() <= 3500 and not sol.main.game:is_paused() then
+		timer3 = sol.timer.start(self, 380, function()
+		  if self:get_remaining_time() <= 3080 and not sol.main.game:is_paused() then --3500
 		     timer2:stop()
 		     sol.audio.play_sound("timer_almost_end")
 		  end
 		return true
 		end)
 		
-		timer4 = sol.timer.start(self, 100, function()
+		timer4 = sol.timer.start(self, 30, function()
+		 if self:get_remaining_time() <= 6100 and self:get_remaining_time() >= 3465 then timer:stop() end
+		 if self:get_remaining_time() <= 3080 then timer2:stop() end
 		  if self:get_remaining_time() == 0 and not sol.main.game:is_paused() then
 		    timer3:stop()
+			if sol.audio.get_music_volume() ~= sol.main.game:get_value("old_volume") then sol.audio.set_music_volume(sol.main.game:get_value("old_volume")) end
 		    if timer ~= nil then timer:stop() end
 			if timer2 ~= nil then timer2:stop() end
 		    if timer3 ~= nil then timer3:stop() end
@@ -191,17 +195,17 @@ end
 
 local function initialize_maps()
   local map_metatable = sol.main.get_metatable("map")
-  local night_overlay = nil
   local heat_timer, swim_timer
-  local shop
-
+  
   function map_metatable:on_started()
     local game = self:get_game()
+	
+	-- de-comment this when day/night system would be finished, this is to avoid any corruption / error while making the script.
 
-    local function random_8(lower, upper)
-      math.randomseed(os.time() - os.clock() * 1000)
-      return math.random(math.ceil(lower/8), math.floor(upper/8))*8
-    end
+    -- local function random_8(lower, upper)
+      -- math.randomseed(os.time() - os.clock() * 1000)
+      -- return math.random(math.ceil(lower/8), math.floor(upper/8))*8
+    -- end
 
     -- Night time is more dangerous - add various enemies.
     -- if game:get_map():get_world() == "outside_world" and
@@ -323,6 +327,12 @@ local function initialize_maps()
       if swimming_trail ~= nil then swimming_trail:stop() swimming_trail = nil end
 	 end		
   end
+  
+  function map_metatable:on_finished()
+	self:get_game():clear_map_name()
+	self:get_game():clear_fog()
+  end
+
 end
 
 local function initialize_hero()
@@ -462,26 +472,8 @@ end
 
 local function initialize_sprite()
 local sprite_meta = sol.main.get_metatable("sprite")
-local bow_dir = "hero/item/bow/"
-local hookshot_dir = "hero/item/hookshot/"
-local boomerang_dir = "hero/item/boomerang/"
 
--- test
--- function sprite_meta:on_animation_changed(animation)
-	-- if animation == "walking_with_shield" or animation == "walking" then
-		-- local game = sol.main.game
-		-- is_walking = true
-			-- if game:get_value("using_item") ~= true then
-				-- game:set_custom_command_effect("action", "roll")
-			-- end
-	-- elseif animation == "stopped" or animation == "stopped_with_shield" then
-		-- local game = sol.main.game
-		-- is_walking = false
-			-- if game:get_value("using_item") ~= true then
-				-- game:set_custom_command_effect("action", nil)
-			-- end
-	-- end
--- end
+-- This part is reserved for later. Implementing rolling function depending on the animation.
 
 -- the rolling animation should be enabled, no matter the frame of the animation, on animation changed is only called when the new animation start at frame 0
 -- function sprite_meta:on_frame_changed(animation, frame)
