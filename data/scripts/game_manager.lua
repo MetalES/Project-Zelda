@@ -11,6 +11,10 @@ sol.main.load_file("scripts/dungeons")(game)
 sol.main.load_file("scripts/equipment")(game)
 sol.main.load_file("scripts/particle_emitter")(game)
 sol.main.load_file("scripts/menus/credits")(game)
+sol.main.load_file("scripts/hud/map_name")(game)
+sol.main.load_file("scripts/gameplay/fog")(game)
+sol.main.load_file("scripts/gameplay/time_system")(game)
+sol.main.load_file("scripts/gameplay/ocarina")(game)
 sol.main.load_file("entities/object/shop/shop_manager")(game)
 local camera_manager = require("scripts/camera_manager")
 local condition_manager = require("scripts/hero_condition")
@@ -28,7 +32,8 @@ function game:on_finished()
   sol.audio.set_music_volume(self:get_value("old_volume"))
   if show_bars == true and self:get_value("starting_cutscene") ~= true then game:hide_bars() end
   self:set_value("starting_cutscene", false)
-
+  self:set_value("current_fog", nil)
+  
   self:quit_hud()
   self:quit_dialog_box()
   camera = nil
@@ -85,31 +90,6 @@ function game:set_skill_learned(skill_index, learned)
   self:set_value("skill_" .. skill_index .. "_learned", learned)
 end
 
-function game:is_ocarina_song_learned(song_index)
-  return self:get_value("song_" .. song_index .. "_learned")
-end
-
-function game:set_ocarina_song_learned(song_index, learned)
-  if learned == nil then
-    learned = true
-  end
-  self:set_value("song_" .. song_index .. "_learned", learned)
-end
-
-function game:set_hour(hour, minute, day)
---if none have been declared then set to 0
-  if hour == nil then
-    hour = 0
-  elseif minute == nil then 
-    minute = 0
-  elseif day == nil then 
-    day = self:get_value("current_day")
-  end
-  self:set_value("current_hour", hour)
-  self:set_value("current_minute", minute)
-  self:set_value("current_day", day)
-end
-
 function game:using_item(value)
 self:set_value("using_item", true) -- todo on item
 end
@@ -118,9 +98,40 @@ function game:item_finished()
 self:set_value("using_item", false)
 end
 
+function game:fade_audio(type_of, time_between_update, volume_per_period)
+local type_of = type_of or nil
+local time_between_update = time_between_update or 10
+local volume_per_period = volume_per_period or 1
+
+  if type_of == fade_in then
+	sol.timer.start(time_between_update,function()
+		local volume = volume_per_period + 1
+		if sol.audio.get_music_volume() == self:get_value("old_volume") then return false end
+		sol.audio.set_music_volume(volume)
+	return true
+	end)
+  elseif type_of == fade_out then 
+    sol.timer.start(time_between_update,function()
+		local volume = volume_per_period + 1
+		if sol.audio.get_music_volume() == 0 then return false end
+		sol.audio.set_music_volume(volume)
+	return true
+	end)
+  end
+end
+
+function game:clear_map_name()
+  self:set_value("map_name_displaying", false)
+  self:set_value("previous_map_name_displayed", nil)
+  self.display_boss_name = false
+  self.clear_all_map_name = true
+end
+
 -- This event is called when a new map has just become active.
 function game:on_map_changed(map)
   -- Notify the hud.
+  self:start_tone_system()
+  self.is_new_map = true
   self:hud_on_map_changed(map)
 end
 
@@ -155,28 +166,6 @@ end
 -- Returns whether the current map is in a dungeon.
 function game:is_in_dungeon()
   return self:get_dungeon() ~= nil
-end
-
--- Returns/sets the current time of day
-function game:get_time_of_day()
-  if game:get_value("time_of_day") == nil then game:set_value("time_of_day", "day") end
-  return game:get_value("time_of_day")
-end
-
-function game:set_time_of_day(tod)
-  if tod == "day" or tod == "night" then
-    game:set_value("time_of_day", tod)
-  end
-  return true
-end
-
-function game:switch_time_of_day()
-  if game:get_value("time_of_day") == "day" then
-    game:set_value("time_of_day", "night")
-  else
-    game:set_value("time_of_day", "day")
-  end
-  return true
 end
 
 function game:enable_all_input()

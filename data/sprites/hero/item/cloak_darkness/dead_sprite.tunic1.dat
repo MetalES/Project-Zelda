@@ -1,0 +1,7 @@
+animation{
+  name = "default",
+  src_image = "hero/item/cloak_darkness/dead_link_mdl.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 24, frame_height = 24, origin_x = 12, origin_y = 19 },
+  },
+}

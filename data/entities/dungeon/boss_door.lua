@@ -2,17 +2,24 @@ local entity = ...
 local game = entity:get_game()
 local hero = entity:get_map():get_entity("hero")
 
+local hero_facing_door = false
+local action_command_door = false
+
 -- Hud notification
-entity:add_collision_test("touching", function(boss_door, other)
+entity:add_collision_test("facing", function(boss_door, other)
 if other:get_type() == "hero" then 
-if game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") ~= true and game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_key") ~= true and hero:get_direction() == entity:get_direction() then
-game:set_custom_command_effect("action", "look")
-elseif game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") == true and hero:get_direction() == entity:get_direction() then
-game:set_custom_command_effect("action", "open")
-elseif game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") ~= true and game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_key") == true and hero:get_direction() == entity:get_direction() then
-game:set_custom_command_effect("action", "open")
-else game:set_custom_command_effect("action", nil)
-end
+   hero_facing_door = true
+	if game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") ~= true and game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_key") ~= true and hero:get_direction() == entity:get_direction() then
+	game:set_custom_command_effect("action", "look")
+		action_command_door = true
+	elseif game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") == true and hero:get_direction() == entity:get_direction() then
+	game:set_custom_command_effect("action", "open")
+		action_command_door = true
+	elseif game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_door_open") ~= true and game:get_value("dungeon_" .. game:get_dungeon_index() .. "_boss_key") == true and hero:get_direction() == entity:get_direction() then
+	game:set_custom_command_effect("action", "open")
+		action_command_door = true
+	else game:set_custom_command_effect("action", nil)
+	end
 end
 end)
 
@@ -41,7 +48,7 @@ local direction = hero:get_direction()
 local dungeon = game:get_dungeon_index()
 local delay
 
-  if not show_bars then game:show_bars(); sol.audio.play_sound("common/bars_dungeon")end
+  if not show_bars then game:show_bars() end
 
 if game:get_value("dungeon_" .. dungeon .. "_boss_key") == true then
 
@@ -106,22 +113,28 @@ end)
 
 
 sol.timer.start((delay + 3200),function()
-
   local m = sol.movement.create("straight")
   m:set_speed(50)
   m:set_angle(hero:get_direction() * math.pi / 2)
   m:set_max_distance(48)
   m:start(hero)
-  
-game:set_pause_allowed(true)
+  game:set_pause_allowed(true)
 end)
 
 else
+sol.audio.play_sound("common/bars_dungeon")
 sol.timer.start(50, function()
 game:start_dialog("gameplay.logic._cant_open_boss_door", function()
-if show_bars == true and not starting_cutscene then game:hide_bars()end
+if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
 end)
 end)
 end
 end
 
+function entity:on_update()
+  if action_command_door and not hero_facing_door then
+    game:set_custom_command_effect("action", nil)
+    action_command_door = false
+  end
+   hero_facing_door = false
+end

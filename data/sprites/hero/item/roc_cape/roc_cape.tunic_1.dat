@@ -1,0 +1,11 @@
+animation{
+  name = "test",
+  src_image = "hero/item/roc_cape/roc_cape.tunic.png",
+  frame_delay = 50,
+  frame_to_loop_on = 2,
+  directions = {
+    { x = 59, y = 0, frame_width = 34, frame_height = 32, origin_x = 12, origin_y = 16, num_frames = 3 },
+    { x = 173, y = 0, frame_width = 32, frame_height = 32, origin_x = 12, origin_y = 16, num_frames = 5 },
+    { x = 416, y = 0, frame_width = 32, frame_height = 32, origin_x = 12, origin_y = 16, num_frames = 3 },
+  },
+}

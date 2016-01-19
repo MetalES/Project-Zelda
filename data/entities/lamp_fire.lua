@@ -39,6 +39,7 @@ fire.apply_cliffs = true
 fire:add_collision_test("touching", function(fire, entity)
 
   local map = fire:get_map()
+  local is_bush = entity
 
   if entity:get_type() == "destructible" then
     if not is_bush(entity) then

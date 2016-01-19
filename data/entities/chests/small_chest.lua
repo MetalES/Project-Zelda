@@ -2,19 +2,24 @@ local entity = ...
 local game = entity:get_game()
 local map = entity:get_map()
 local x_coordinate, y_coordinate = entity:get_position()
-local dungeon = game:get_dungeon_index()
 local mx, my = map:get_size()
 local chest_savegame_variable = "chest_" .. entity:get_name() .. "_" .. map:get_world() .. "_" .. mx .. "_" .. my .. "_" .. x_coordinate .. "_" .. y_coordinate
 local hero = entity:get_map():get_entity("hero")
 
-entity:add_collision_test("touching", function(small_chest, other)
-  if other:get_type() == "hero"
-    if game:get_value(chest_savegame_variable) ~= true and hero:get_direction() == entity:get_direction() then
+local hero_facing_chest = false
+local action_command_chest = false
+
+-- Hud notification
+entity:add_collision_test("facing", function(small_chest, other)
+if other:get_type() == "hero" then 
+   hero_facing_chest = true
+   if game:get_value(chest_savegame_variable) ~= true and hero:get_direction() == entity:get_direction() then
     game:set_custom_command_effect("action", "open")
+	action_command_chest = true
    else
     game:set_custom_command_effect("action", nil)
    end
-  end
+end
 end)
 
 function entity:on_created()
@@ -24,7 +29,21 @@ function entity:on_created()
   self:set_traversable_by("custom_entity", false)
    if game:get_value(chest_savegame_variable) == true then
     self:get_sprite():set_animation("open")
+    self:set_direction(0)
+	self:set_drawn_in_y_order(false)
    end
+end
+
+function entity:is_hookshot_hook()
+return true
+end
+
+function entity:on_update()
+  if action_command_chest and not hero_facing_chest then
+    game:set_custom_command_effect("action", nil)
+    action_command_chest = false
+  end
+   hero_facing_chest = false
 end
 
 function entity:on_interaction()
@@ -44,6 +63,7 @@ local treasure = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
        end
 
 hero:freeze()
+game:start_cutscene()
 game:set_pause_allowed(false)
  
     sol.timer.start(1,function()
@@ -63,6 +83,7 @@ game:set_pause_allowed(false)
             hero:set_animation("stopped")
            end
       self:get_sprite():set_animation("open")
+      self:get_sprite():set_direction(0)
       sol.audio.play_sound("/common/chest_open")
     end)
      
@@ -84,9 +105,12 @@ game:set_pause_allowed(false)
     end)
 
     sol.timer.start(1500, function()
+	  if not show_bars and not is_cutscene then game:show_bars() end
       hero:unfreeze()
       hero:start_treasure(treasure)
       hero:set_animation("brandish_alternate")
+	  self:set_drawn_in_y_order(false)
+	  game:stop_cutscene()
       game:set_pause_allowed(true) -- restore pause allowed
       hero:set_direction(entity:get_direction())
       game:set_value(chest_savegame_variable, true)

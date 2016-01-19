@@ -1,0 +1,9 @@
+animation{
+  name = "default",
+  src_image = "menus/selection/background/common/bird.png",
+  frame_delay = 60,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 0, frame_width = 22, frame_height = 16, origin_x = 12, origin_y = 8, num_frames = 8 },
+  },
+}

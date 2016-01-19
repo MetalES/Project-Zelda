@@ -7,4 +7,46 @@ animation{
     { x = 0, y = 0, frame_width = 30, frame_height = 30, origin_x = 15, origin_y = 15, num_frames = 6 },
   },
 }
-
+animation{
+  name = "42",
+  src_image = "menus/pause_cursor.png",
+  frame_delay = 100,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 61, frame_width = 30, frame_height = 29, origin_x = 15, origin_y = 15, num_frames = 6 },
+  },
+}
+animation{
+  name = "letter",
+  src_image = "menus/quest_status_mail_system.png",
+  frame_delay = 400,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 209, y = 0, frame_width = 17, frame_height = 11, origin_x = 8, origin_y = 8, num_frames = 2, num_columns = 1 },
+  },
+}
+animation{
+  name = "ocarina",
+  src_image = "menus/pause_cursor.png",
+  frame_delay = 100,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 0, y = 30, frame_width = 18, frame_height = 19, origin_x = 9, origin_y = 10, num_frames = 6 },
+  },
+}
+animation{
+  name = "skill",
+  src_image = "menus/pause_cursor.png",
+  frame_delay = 100,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 109, y = 30, frame_width = 18, frame_height = 31, origin_x = 9, origin_y = 15, num_frames = 6 },
+  },
+}
+animation{
+  name = "skill_dsp",
+  src_image = "menus/pause_cursor.png",
+  directions = {
+    { x = 0, y = 50, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+  },
+}

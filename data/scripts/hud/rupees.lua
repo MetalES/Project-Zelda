@@ -25,7 +25,7 @@ function rupees:initialize(game)
   self.rupee_icons_img = sol.surface.create("hud/rupee_icon.png")
   self.rupee_bag_displayed = self.game:get_item("rupee_bag"):get_variant()
   self.money_displayed = self.game:get_money()
-
+  
   self:check()
   self:rebuild_surface()
 end
@@ -58,7 +58,7 @@ function rupees:check()
       sol.audio.play_sound("rupee_counter_end")
 
     -- While the counter is scrolling, play a sound every 3 values.
-    elseif self.money_displayed % 3 == 0 then
+    elseif self.money_displayed % 1 == 0 then
       sol.audio.play_sound("rupee_counter_end")
     end
   end
@@ -69,7 +69,7 @@ function rupees:check()
   end
 
   -- Schedule the next check.
-  sol.timer.start(self.game, 40, function()
+  sol.timer.start(self.game, 50, function()
     self:check()
   end)
 end
@@ -79,7 +79,7 @@ function rupees:rebuild_surface()
   self.surface:clear()
 
   -- Max money (icon).
-  self.rupee_icons_img:draw_region((self.rupee_bag_displayed - 1) * 12, 0, 17, 12, self.surface)
+  self.rupee_icons_img:draw_region((self.rupee_bag_displayed - 1) * 17, 0, 17, 12, self.surface) --12
 
   -- Current rupee (counter).
   local max_money = self.game:get_max_money()
@@ -107,7 +107,6 @@ function rupees:on_draw(dst_surface)
   if y < 0 then
     y = height + y
   end
-
   self.surface:draw(dst_surface, x, y)
 end
 

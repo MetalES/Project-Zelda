@@ -33,10 +33,6 @@ if game:get_value(big_chest_savegame) == true then
 end
 end
 
-function entity:is_hookshot_hook()
-return true
-end
-
 function entity:on_update()
   if action_command_chest and not hero_facing_chest then
     game:set_custom_command_effect("action", nil)
@@ -89,9 +85,9 @@ local treasure = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
   if hero:get_direction() == 1 and game:get_value(big_chest_savegame) ~= true then
     hero:freeze()
 	if not show_bars then game:show_bars() end
+	game:start_cutscene()
     game:set_pause_allowed(false)
     hero:set_position(x, y+5)
-    --game:draw_bars()
     game:set_hud_enabled(false)
     sol.audio.set_music_volume(0)
     sol.audio.play_sound("/common/chest_opening")
@@ -171,6 +167,7 @@ local treasure = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
         game:set_hud_enabled(true)
         hero:start_treasure(treasure)
         game:set_pause_allowed(true)
+		game:stop_cutscene()
         game:set_value(big_chest_savegame, true)
     end)
 

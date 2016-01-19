@@ -9,13 +9,18 @@ local sound_played_on_brandish = "/common/big_item"
 local sound_played_when_picked = nil
 local is_assignable = true
 local sound_dir = "/items/"..item_name.."/"
-
 local volume_bgm = game:get_value("old_volume")
+
+local state = 0
+local arrow_type = 0 --normal, 1 = fire, 2 = ice, 3 = light
+local can_shoot = false
+local avoid_return = false
+local bow_sync
+local bow_timer
 
 -- TODO : -Elemental Arrows (Fire, Ice, Light is already made, wrightmat's default code include it)
 --        -Direction Fix
 --        -disable hero heatures while using the item (pushing, pulling, etc)
---        -initialisation of the bow mechanism
 
 function item:on_created()
   self:set_savegame_variable("item_"..item_name.."_possession")
@@ -23,24 +28,26 @@ function item:on_created()
   self:set_assignable(is_assignable)
   self:set_sound_when_picked(sound_played_when_picked)
   self:set_sound_when_brandished(sound_played_on_brandish)
-  game:set_value("item_"..item_name.."_state", 0)
-  game:set_value("item_"..item_name.."_type", 0) --normal, 1 = fire, 2 = ice, 3 = light
 end
 
 function item:on_obtained()
-  if show_bars == true and not starting_cutscene then game:hide_bars() end
+  if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
   sol.audio.set_music_volume(volume_bgm)
 end
 
-function item:on_started()
-  game:set_value("item_"..item_name.."_state", 0)
-end
-
 function item:on_map_changed()
-game:get_hero():set_animation("stopped")
+if state > 0 then 
+-- freeze the hero reset it to frame 0 so it avoid the frame error
+game:get_hero():freeze()
+game:get_hero():set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
+game:set_ability("sword", game:get_value("item_saved_sword"))
 game:get_hero():set_walking_speed(88)
-if show_bars == true and not starting_cutscene then game:hide_bars() end
+if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
+if game:get_value("starting_cutscene") ~= true then game:set_pause_allowed(true) game:get_hero():set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield")); game:set_ability("shield", game:get_value("item_saved_shield")) end
+game:set_custom_command_effect("attack", nil)
+game:get_hero():unfreeze()
 self:set_finished()
+end
 end
 
 function item:transit_to_finish()
@@ -61,13 +68,13 @@ hero:set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield"))
 game:set_ability("shield", game:get_value("item_saved_shield"))
 hero:set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
 
-if show_bars == true and not starting_cutscene then game:hide_bars() end
+if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
 
 hero:set_animation("bow_shoot", function()
 hero:unfreeze(); 
 game:set_ability("sword", game:get_value("item_saved_sword"));
+if game:get_value("starting_cutscene") ~= true then game:set_pause_allowed(true); hero:unfreeze() end;
 item:set_finished(); 
-game:set_pause_allowed(true) 
 end)
 end
 
@@ -103,30 +110,30 @@ end
 function item:on_using()  
 local map = game:get_map()
 local hero = game:get_hero()
-local tunic = game:get_ability("tunic")
+local tunic = game:get_value("item_saved_tunic")
 
--- read the 2 item slot.
-  if game:get_value("_item_slot_1") == item_name then slot = "item_1"
-  elseif game:get_value("_item_slot_2") == item_name then slot = "item_2" end
+if game:get_value("_item_slot_1") == item_name then slot = "item_1"
+elseif game:get_value("_item_slot_2") == item_name then slot = "item_2" end
+game:using_item()
 
 --logical functions
 local function recheck()
 sol.timer.start(40, function()
 hero:set_tunic_sprite_id("hero/item/bow/bow_moving_free_tunic"..tunic)
-game:set_value("item_"..item_name.."_state", 1)
-game:set_value("item_"..item_name.."_can_shoot", false)
-game:set_value("item_"..item_name.."_avoid_return", false)
+state = 1
+can_shoot = false
+avoid_return = false
 hero:unfreeze()
 hero:set_walking_speed(40)
 end)
 end
 
-local function end_by_collision() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); if show_bars == true and not starting_cutscene then game:hide_bars() end;  item:set_finished(); game:set_pause_allowed(true) end
+local function end_by_collision() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end;  item:set_finished(); game:set_pause_allowed(true) end
 local function end_by_pickable() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); item:set_finished(); game:set_pause_allowed(true) end
 
 -- item
 
-if game:get_value("item_"..item_name.."_state") == 0 then 
+if state == 0 then 
 	item:store_equipment()
 
 	  if not show_bars then game:show_bars() end
@@ -137,7 +144,7 @@ if game:get_value("item_"..item_name.."_state") == 0 then
 	sol.timer.start(40, function()
 	hero:set_walking_speed(40)
 	hero:unfreeze()
-	game:set_value("item_"..item_name.."_state", 1)
+	state = 1
 	hero:set_tunic_sprite_id("hero/item/bow/bow_moving_free_tunic"..tunic)
 		
 bow_sync = sol.timer.start(10, function()
@@ -158,8 +165,9 @@ bow_sync = sol.timer.start(10, function()
 	if hero:get_state() == "swimming" or hero:get_state() == "jumping" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:set_position(lx + new_x, ly + new_y); end_by_collision() end
 	if hero:get_state() == "falling" or hero:get_state() == "stairs" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_collision() end
 	if hero:get_state() == "treasure" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_pickable() end
+	if hero:get_animation() == "swimming_stopped" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_collision() end
 
-	if game:is_command_pressed("attack") and game:get_value("item_"..item_name.."_avoid_return") ~= true then
+	if game:is_command_pressed("attack") and not avoid_return then
     	hero:freeze()
 	    game:set_custom_command_effect("attack", nil)
 	if bow_sync ~= nil then bow_sync:stop(); bow_sync = nil; item:transit_to_finish() end
@@ -169,11 +177,10 @@ end) --bow_sync
 end) --sol.timer.start
       
 	  
-elseif game:get_value("item_"..item_name.."_state") == 1 then
+elseif state == 1 then
 
 if game:is_command_pressed(slot) then
-
-game:set_value("item_"..item_name.."_avoid_return", true)
+avoid_return = true
 hero:set_tunic_sprite_id("hero/tunic"..tunic)
   if item:get_amount() == 0 then
 	hero:set_animation("bow_arming_no_arrow")
@@ -182,8 +189,8 @@ hero:set_tunic_sprite_id("hero/tunic"..tunic)
 			hero:set_animation("stopped")
 		    hero:set_tunic_sprite_id("hero/item/bow/bow_moving_no_arrow_tunic"..tunic)
 		    hero:unfreeze()
-		    game:set_value("item_"..item_name.."_can_shoot", true)
-			game:set_value("item_"..item_name.."_avoid_return", false)
+		    can_shoot = true
+			avoid_return = false
 		    hero:set_walking_speed(28)
 		  end)
    else
@@ -193,16 +200,15 @@ hero:set_tunic_sprite_id("hero/tunic"..tunic)
 		hero:set_animation("stopped")
 		hero:set_tunic_sprite_id("hero/item/bow/bow_moving_with_arrow_tunic"..tunic)
 		hero:unfreeze()
-		game:set_value("item_"..item_name.."_can_shoot", true)
-		game:set_value("item_"..item_name.."_avoid_return", false)
+		can_shoot = true
+		avoid_return = false
 		hero:set_walking_speed(28)
 	  end)
     end
 	
-bow_timer = sol.timer.start(10, function()
-if not game:is_command_pressed(slot) and game:get_value("item_"..item_name.."_can_shoot") == true then
-    game:set_value("item_"..item_name.."_avoid_return", true)
---forced to re-use set_tunic_sprite_id, set_animation does something weird (animation not played)
+bow_timer = sol.timer.start(30, function() --10
+if not game:is_command_pressed(slot) and can_shoot then
+    avoid_return = true
 	hero:set_tunic_sprite_id("hero/item/bow/bow_shoot_tunic"..tunic)
 		if item:get_amount() > 0 then
 			shoot_arrow()
@@ -213,6 +219,7 @@ if not game:is_command_pressed(slot) and game:get_value("item_"..item_name.."_ca
 			sol.audio.play_sound(sound_dir.."no_arrows_shoot")
 			if bow_timer ~= nil then bow_timer:stop(); bow_timer = nil; recheck() end
 		end
+game:using_item()
 end
 return true 
 end)
@@ -249,6 +256,7 @@ function item:set_finished()
 if bow_timer ~= nil then bow_timer:stop(); bow_timer = nil end
 if bow_sync ~= nil then bow_sync:stop(); bow_sync = nil end
 
+game:item_finished()
 game:set_command_keyboard_binding("action", game:get_value("item_saved_kb_action"))
 game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
 game:set_command_keyboard_binding("item_2", game:get_value("item_2_kb_slot"))
@@ -257,8 +265,9 @@ game:set_command_joypad_binding("action", game:get_value("item_saved_jp_action")
 game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
 game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
 
-game:set_value("item_"..item_name.."_state", 0)
-game:set_value("item_"..item_name.."_can_shoot", false)
+state = 0
+can_shoot = false
+avoid_return = false
 end
 
 -- things bellow are logical item function, untouched

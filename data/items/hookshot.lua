@@ -7,24 +7,26 @@ local sound_played_on_brandish = "/common/big_item"
 local sound_played_when_picked = nil
 local is_assignable = true
 local sound_dir = "/items/"..item_name.."/"
-
 local volume_bgm = game:get_value("old_volume")
 
--- Extra item config bellow
-
-local distance = 220 -- 222
+local distance = 220
 local speed = 220
 local catchable_entity_types = { "pickable" }
 local hook_entity_types = {}
 
--- Hookshot 
+local state = 0
+local can_shoot = false
+local avoid_return = false
+local hookshot_sync
+local hookshot_timer
+
+-- Hookshot. Made by Christopho, heavily edited. Do not take it now, still WIP
 
 function item:on_created()
   self:set_savegame_variable("item_"..item_name.."_possession")
   self:set_assignable(is_assignable)
   self:set_sound_when_picked(sound_played_when_picked)
   self:set_sound_when_brandished(sound_played_on_brandish)
-  game:set_value("item_"..item_name.."_state", 0)
 end
 
 function item:on_obtaining() 
@@ -33,14 +35,22 @@ end
 
 function item:on_obtained()
 sol.audio.set_music_volume(volume_bgm)
-if show_bars == true and not starting_cutscene then game:hide_bars() end
+if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
 end
 
 function item:on_map_changed()
-game:get_hero():set_animation("stopped")
+if state > 0 then 
+-- freeze the hero reset it to frame 0 so it avoid the frame error
+game:get_hero():freeze()
+game:get_hero():set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
+game:set_ability("sword", game:get_value("item_saved_sword"))
 game:get_hero():set_walking_speed(88)
-if show_bars == true and not starting_cutscene then game:hide_bars() end
+if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
+if game:get_value("starting_cutscene") ~= true then game:set_pause_allowed(true) game:get_hero():set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield")); game:set_ability("shield", game:get_value("item_saved_shield")) end
+game:get_hero():unfreeze()
+game:set_custom_command_effect("attack", nil)
 self:set_finished()
+end
 end
 
 function item:store_equipment()
@@ -73,56 +83,46 @@ end
 function item:transit_to_finish()
 local hero = game:get_hero()
 hero:freeze()
-
 if hookshot_timer ~= nil then hookshot_timer:stop(); hookshot_timer = nil end
-if hookshot_sync ~= nil then hookshot_sync:stop(); hookshot_sync = nil end
-        
+if hookshot_sync ~= nil then hookshot_sync:stop(); hookshot_sync = nil end       
 game:set_custom_command_effect("attack", nil)
-
 hero:freeze()
 hero:set_walking_speed(88)
-
 sol.audio.play_sound("common/item_show")
-
 hero:set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
-
-if show_bars == true and not starting_cutscene then game:hide_bars() end
-
+if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
 hero:set_animation("hookshot_intro", function() 
 hero:unfreeze(); 
 hero:set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield"))
 game:set_ability("shield", game:get_value("item_saved_shield"))
-game:set_ability("sword", game:get_value("item_saved_sword")); 
-item:set_finished(); 
-game:set_pause_allowed(true)
+game:set_ability("sword", game:get_value("item_saved_sword"))
+if game:get_value("starting_cutscene") ~= true then game:set_pause_allowed(true); hero:unfreeze() end
+item:set_finished()
 end)
 end
 
 function item:on_using()  
   local hero = game:get_hero()
   local tunic = game:get_value("item_saved_tunic")
-  
-  local function end_by_collision() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); if show_bars == true and not starting_cutscene then game:hide_bars() end; item:set_finished(); game:set_pause_allowed(true) end
+  local function end_by_collision() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end; item:set_finished(); game:set_pause_allowed(true) end
   local function end_by_pickable() hero:set_walking_speed(88); game:set_custom_command_effect("attack", nil); game:set_ability("sword", game:get_value("item_saved_sword")); game:set_ability("shield", game:get_value("item_saved_shield")); item:set_finished(); game:set_pause_allowed(true) end
 
-  -- read the 2 item slot.
   if game:get_value("_item_slot_1") == item_name then slot = "item_1"
   elseif game:get_value("_item_slot_2") == item_name then slot = "item_2" end
   
-if game:get_value("item_"..item_name.."_state") == 0 then
+  game:using_item() -- used for the Boomerang
+  
+if state == 0 then
 	item:store_equipment()
-	
 	if not show_bars then game:show_bars() end
 
 	sol.audio.play_sound("common/bars_dungeon")
 	sol.audio.play_sound("common/item_show")
 	hero:set_animation("hookshot_intro", function()	
-      -- sol.timer.start(40, function()
 	    hero:set_walking_speed(40)
 		hero:unfreeze()
-		game:set_value("item_"..item_name.."_state", 1)
+		state = 1
 		hero:set_tunic_sprite_id("hero/item/hookshot/hookshot_moving_free_tunic"..tunic)
-		
            hookshot_sync = sol.timer.start(10, function()
 			local lx, ly, layer = hero:get_position()
 			game:set_custom_command_effect("attack", "return")
@@ -143,7 +143,7 @@ if game:get_value("item_"..item_name.."_state") == 0 then
 			if hero:get_state() == "falling" or hero:get_state() == "stairs" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_collision() end
 			if hero:get_state() == "treasure" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_pickable() end
 			
-			if game:is_command_pressed("attack") and game:get_value("item_"..item_name.."_avoid_return") ~= true then
+			if game:is_command_pressed("attack") and not avoid_return then
 			if hookshot_timer ~= nil then hookshot_timer:stop(); hookshot_timer = nil; item:transit_to_finish() end
 			if hookshot_sync ~= nil then hookshot_sync:stop(); hookshot_sync = nil; item:transit_to_finish() end
 
@@ -152,25 +152,25 @@ if game:get_value("item_"..item_name.."_state") == 0 then
 		   end)
 	    end)
 		
-  elseif game:get_value("item_"..item_name.."_state") == 1 then
+  elseif state == 1 then
   
-  if game:is_command_pressed(slot) and game:get_value("is_cutscene") ~= true then
+  if game:is_command_pressed(slot) and game:get_value("starting_cutscene") ~= true then
    hero:freeze()
-   game:set_value("item_"..item_name.."_avoid_return", true)
+   avoid_return = true
    sol.audio.play_sound(sound_dir.."arming")
    hero:set_tunic_sprite_id("hero/item/hookshot/hookshot_moving_concentrate_tunic"..tunic)
    hero:set_walking_speed(25)
    hero:unfreeze()
-   game:set_value("item_"..item_name.."_can_shoot", true)
-   game:set_value("item_"..item_name.."_avoid_return", false)
+   can_shoot = true
+   avoid_return = false
   end
   
   
 hookshot_timer = sol.timer.start(10, function()
-	if not game:is_command_pressed(slot) and game:get_value("item_"..item_name.."_can_shoot") == true and game:get_value("is_cutscene") ~= true then
+	if not game:is_command_pressed(slot) and can_shoot and game:get_value("starting_cutscene") ~= true then
 		hero:set_tunic_sprite_id("hero/tunic"..tunic)
 		hero:set_animation("hookshot_shoot")
-		if hookshot_timer ~= nil then hookshot_timer:stop(); hookshot_timer = nil; self:start_hookshot() end
+		if hookshot_timer ~= nil then hookshot_timer:stop(); hookshot_timer = nil; self:start_hookshot(); game:using_item() end
 	end
 	return true 
 	end)
@@ -181,11 +181,13 @@ end
 function item:set_finished()
 		if hookshot_timer ~= nil then hookshot_timer:stop(); hookshot_timer = nil end
 		if hookshot_sync ~= nil then hookshot_sync:stop(); hookshot_sync = nil end
+		if falling_detection_timer ~= nil then falling_detection_timer:stop(); falling_detection_timer = nil end
 		
-		game:set_value("item_"..item_name.."_can_shoot", false)
-		game:set_value("item_"..item_name.."_state", 0)
-		game:set_value("item_"..item_name.."_avoid_return", false)
-
+		can_shoot = false
+		state = 0
+		avoid_return = false
+		
+		game:item_finished()
 		game:set_custom_command_effect("attack", nil)
 		game:set_command_keyboard_binding("action", game:get_value("item_saved_kb_action"))
 		game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
@@ -196,7 +198,7 @@ function item:set_finished()
 end
 
 function item:start_hookshot()
-local going_back = false
+  local going_back = false
   local sound_timer
   local direction
   local map = item:get_map()
@@ -215,9 +217,34 @@ local going_back = false
   local hook_to_entity
   local stop
   local tunic = game:get_value("item_saved_tunic")
+  local hookshot_hook_timer
+  local hookshot_sprite_x, hookshot_sprite_y = x, y
+  local link_hook_x, link_hook_y
+  local correct_origin = 0
+  local falling_detection_timer
   
-  game:set_value("item_"..item_name.."_avoid_return", true)
+  avoid_return = true
   game:set_pause_allowed(false)
+  
+  falling_detection_timer = sol.timer.start(10, function()
+    if hero:get_state() == "falling" then
+	  	hero:set_tunic_sprite_id("hero/tunic"..tunic)
+        if hookshot ~= nil then sound_timer:stop(); hookshot:remove() end
+        if leader ~= nil then leader:remove() end
+		if hookshot_sync ~= nil then hookshot_sync:stop(); hookshot_sync = nil end
+		if hookshot_timer ~= nil then hookshot_timer:stop(); hookshot_timer = nil end
+		if hookshot_hook_timer ~= nil then hookshot_hook_timer:stop(); hookshot_hook_timer = nil end
+		if falling_detection_timer ~= nil then falling_detection_timer:stop(); falling_detection_timer = nil end
+		game:get_hero():set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield")); game:set_ability("shield", game:get_value("item_saved_shield"))
+		game:set_pause_allowed(true)
+		game:set_ability("shield", game:get_value("item_saved_shield"))
+		game:set_ability("sword", game:get_value("item_saved_sword"))
+		if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
+		game:set_custom_command_effect("attack", nil)
+		item:set_finished()
+    end
+    return true
+  end)
 
   -- Sets what can be traversed by the hookshot.
   -- Also used for the invisible leader entity used when hooked.
@@ -277,8 +304,7 @@ local going_back = false
     movement:start(hookshot)
 
     function movement:on_obstacle_reached()
-	if hookshot_timer ~= nil then hookshot_timer:stop() end
-	local link_hook_x, link_hook_y
+	if hookshot_hook_timer ~= nil then hookshot_hook_timer:stop(); hookshot_hook_timer = nil end
 	
 	if hero:get_direction() == 0 then link_hook_x = 10; link_hook_y = -5 
 	elseif hero:get_direction() == 1 then link_hook_x = 0; link_hook_y = -15
@@ -317,12 +343,13 @@ local going_back = false
       return
     end
 
-    local movement = sol.movement.create("straight")
+    local movement = sol.movement.create("target") -- straight
     local angle = (direction + 2) * math.pi / 2
     movement:set_speed(speed)
-    movement:set_angle(angle)
+	movement:set_target(hero)
+    -- movement:set_angle(angle)
     movement:set_smooth(false)
-    movement:set_max_distance(hookshot:get_distance(hero))
+    -- movement:set_max_distance(hookshot:get_distance(hero))
     movement:set_ignore_obstacles(true)
     movement:start(hookshot)
     going_back = true
@@ -349,12 +376,6 @@ local going_back = false
     hookshot:stop_movement()
     sol.audio.play_sound(sound_dir.."hit_valid_target")
 	sol.audio.play_sound(sound_dir.."link_tracted")
-
-    -- Create a new custom entity on the hero, move that entity towards the entity
-    -- hooked and make the hero follow that custom entity.
-    -- Using this intermediate custom entity rather than directly moving the hero
-    -- allows better control on what can be traversed.
-	
 	local direction_fix_hook_y
 	
 	if hero:get_direction() == 1 then direction_fix_hook_y =  0.5 elseif hero:get_direction() == 3 then direction_fix_hook_y = - 0.5 else direction_fix_hook_y = 0 end
@@ -422,18 +443,19 @@ local going_back = false
 	if hookshot_hook_timer ~= nil then hookshot_hook_timer:stop(); hookshot_hook_timer = nil end
 	hero:set_tunic_sprite_id("hero/item/hookshot/hookshot_moving_free_tunic"..tunic)
 	hero:set_walking_speed(40)
-	game:set_value("item_"..item_name.."_state", 1)
-	game:set_value("item_"..item_name.."_avoid_return", false)
+	state = 1
+	avoid_return = false
+	game:item_finished()
   end
   
-    function stop_hooked()
+  function stop_hooked()
 	hero:set_tunic_sprite_id("hero/tunic"..tunic)
     if hookshot ~= nil then sound_timer:stop(); hookshot:remove() end
     if leader ~= nil then leader:remove() end
 	if hookshot_sync ~= nil then hookshot_sync:stop(); hookshot_sync = nil end
 	if hookshot_timer ~= nil then hookshot_timer:stop(); hookshot_timer = nil end
 	if hookshot_hook_timer ~= nil then hookshot_hook_timer:stop(); hookshot_hook_timer = nil end
-
+    game:item_finished()
 	item:transit_to_finish()
   end
 
@@ -445,6 +467,8 @@ local going_back = false
   hookshot_sprite_x, hookshot_sprite_y = hookshot:get_position()
   return true
   end)
+  	
+if hero:get_direction() == 1 then correct_origin = 1 end
   
   -- Create the hookshot.
   hookshot = map:create_custom_entity({
@@ -455,7 +479,7 @@ local going_back = false
     width = 16,
     height = 16,
   })
-  hookshot:set_origin(8, 12)
+  hookshot:set_origin(8, 12 - correct_origin)
   hookshot:set_drawn_in_y_order(true)
 
   -- Set up hookshot sprites.
@@ -467,7 +491,7 @@ local going_back = false
 
   function hookshot:on_pre_draw()
     -- Draw the links.
-    local num_links = 24--25--
+    local num_links = 24
     local dxy = {
       {  16,  -6 },
       {   0, -14 },
@@ -544,11 +568,6 @@ local going_back = false
     {  0,  8 },
   }
 
-  -- Custom collision test for hooks: there is a collision with a hook if
-  -- the facing point of the hookshot overlaps the hook's bounding box.
-  -- We cannot use the built-in "facing" collision mode because it would
-  -- test the facing point of the hook, not the one of of the hookshot.
-  -- And we cannot reverse the test because the hook is not necessarily a custom entity.
   local function test_hook_collision(hookshot, entity)
     if hooked or going_back then
       return      -- No need to check coordinates, we are already hooked.
@@ -587,7 +606,6 @@ local going_back = false
       go_back()
     end
   end)
-
   -- Start the movement.
   go()
  end

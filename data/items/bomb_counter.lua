@@ -6,6 +6,14 @@ function item:on_created()
   self:set_assignable(true)
 end
 
+function item:on_map_changed()
+self:transit_to_finish()
+end
+
+function item:transit_to_finish()
+self:set_finished()
+end
+
 -- Called when the player uses the bombs of his inventory by pressing the corresponding item key.
 function item:on_using()
   if self:get_amount() == 0 then

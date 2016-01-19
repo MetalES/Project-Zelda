@@ -1,0 +1,181 @@
+background_color{ 255, 255, 255 }
+tile_pattern{
+  id = "1",
+  ground = "wall",
+  default_layer = 0,
+  x = 0,
+  y = 0,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "10",
+  ground = "wall",
+  default_layer = 0,
+  x = 0,
+  y = 64,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "11",
+  ground = "wall",
+  default_layer = 0,
+  x = 0,
+  y = 48,
+  width = 32,
+  height = 16,
+}
+
+tile_pattern{
+  id = "12",
+  ground = "wall",
+  default_layer = 0,
+  x = 0,
+  y = 32,
+  width = 32,
+  height = 16,
+}
+
+tile_pattern{
+  id = "13",
+  ground = "wall",
+  default_layer = 0,
+  x = 0,
+  y = 96,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "14",
+  ground = "wall",
+  default_layer = 0,
+  x = 32,
+  y = 96,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "15",
+  ground = "wall",
+  default_layer = 0,
+  x = 32,
+  y = 128,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "16",
+  ground = "wall",
+  default_layer = 0,
+  x = 0,
+  y = 128,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "17",
+  ground = "traversable",
+  default_layer = 0,
+  x = 32,
+  y = 32,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "18",
+  ground = "wall",
+  default_layer = 0,
+  x = 64,
+  y = 96,
+  width = 8,
+  height = 8,
+}
+
+tile_pattern{
+  id = "2",
+  ground = "wall",
+  default_layer = 0,
+  x = 32,
+  y = 0,
+  width = 16,
+  height = 32,
+}
+
+tile_pattern{
+  id = "3",
+  ground = "wall",
+  default_layer = 0,
+  x = 48,
+  y = 0,
+  width = 16,
+  height = 32,
+}
+
+tile_pattern{
+  id = "4",
+  ground = "wall",
+  default_layer = 0,
+  x = 64,
+  y = 0,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "5",
+  ground = "wall",
+  default_layer = 0,
+  x = 64,
+  y = 32,
+  width = 32,
+  height = 16,
+}
+
+tile_pattern{
+  id = "6",
+  ground = "wall",
+  default_layer = 0,
+  x = 64,
+  y = 48,
+  width = 32,
+  height = 16,
+}
+
+tile_pattern{
+  id = "7",
+  ground = "wall",
+  default_layer = 0,
+  x = 64,
+  y = 64,
+  width = 32,
+  height = 32,
+}
+
+tile_pattern{
+  id = "8",
+  ground = "wall",
+  default_layer = 0,
+  x = 48,
+  y = 64,
+  width = 16,
+  height = 32,
+}
+
+tile_pattern{
+  id = "9",
+  ground = "wall",
+  default_layer = 0,
+  x = 32,
+  y = 64,
+  width = 16,
+  height = 32,
+}
+

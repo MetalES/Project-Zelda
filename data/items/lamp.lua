@@ -139,7 +139,10 @@ local tunic = game:get_value("item_saved_tunic")
 				sprite = "entities/fire_burst",
 			}) 
 			--remove it after 100 ms
-		    fire_burst:set_drawn_in_y_order(true)			
+		    if hero:get_direction() ~= 1 then
+			fire_burst:set_drawn_in_y_order(true)
+			fire_burst:bring_to_front()
+			end		
 			sol.timer.start(300, function() fire_burst:remove() end)
 
 			game:set_value("item_"..item_name.."_state", 1)
@@ -151,32 +154,36 @@ local tunic = game:get_value("item_saved_tunic")
 				if hero:get_direction() == 0 then new_x = -1; new_y = 0 
 				elseif hero:get_direction() == 1 then new_x = 0; new_y = 1 
 				elseif hero:get_direction() == 2 then new_x = 1; new_y = 0 
-				elseif hero:get_direction() == 3 then new_x = 0; new_y = -1
+				else new_x = 0; new_y = -1
 				end
-				
 				if hero:get_state() == "falling" then self:on_map_changed() end
 				if hero:get_state() == "jumping" or hero:get_state() == "swimming" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:set_position(lx + new_x, ly + new_y); end_by_collision() end
 				return true
 			end)
 
 			particle_timer = sol.timer.start(100,function()
-			-- fire_burst effect : effect played when starting the lamp
-			local px = 0
-			local py = 0
-			--extra fire_burst position
-			if     hero:get_direction() == 0 then px = 6;     py = - 2 -- right
+			local hx,hy = hero:get_position()
+			local px, py
+			if     hero:get_direction() == 0 then px = 6;   py = - 2 -- right
 			elseif hero:get_direction() == 1 then py = - 5;  px = 5   -- up
 			elseif hero:get_direction() == 2 then px = - 6;  py = - 2 -- left
-			elseif hero:get_direction() == 3 then py = - 3;   px = - 4 end -- down
+			else py = - 3;   px = - 4 end -- down
 
 			local particle = game:get_map():create_custom_entity({
 			  x = x + px,
 			  y = y + py,
-			  layer = layer + 1,
+			  layer = layer,
 			  direction = 0,
 			  sprite = "effects/item/lantern_effect",
 			}) 
-			particle:set_position(hero:get_position())
+			if hero:get_direction() ~= 1 then
+			particle:set_drawn_in_y_order(true)
+			particle:bring_to_front()
+			else 
+			particle:set_drawn_in_y_order(false)
+			particle:bring_to_front()
+			end
+			particle:set_position(hx + px, hy + py)
 			-- avoid multiple custom entity on the map causing lags.
 			sol.timer.start(200, function() particle:remove() end)
 			return true

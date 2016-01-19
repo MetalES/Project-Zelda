@@ -10,18 +10,26 @@ local sound_dir = "/items/bottle/" -- avoir duplicate between bottles
 
 local volume_bgm = game:get_value("old_volume")
 
-function item:on_created()
+function item:on_created(variant, savegame_variable)
+if variant == 1 then 
+self:set_sound_when_brandished("/common/big_item")
+else
+self:set_sound_when_brandished("/common/minor_item")
+end 
   self:set_assignable(true)
   self:set_savegame_variable("item_"..item_name.."_possession")
-  self:set_sound_when_brandished("/common/big_item")
 end
 
-function item:on_obtaining() 
+function item:on_obtaining(variant, savegame_variable)
+ if variant > 1 then
+ game:get_hero():set_animation("brandish_alternate")
+ end
   sol.audio.set_music_volume(0)
 end
 
 function item:on_obtained()
 sol.audio.set_music_volume(volume_bgm)
+if show_bars and not starting_cutscene then game:hide_bars() end
 end
 
 function item:on_using()
@@ -36,7 +44,11 @@ local bottle_link_snd = math.random(1)
     
  if variant == 1 then -- swing, detectors are here
  
-  hero:set_animation("bottle_swing")
+  hero:set_animation("bottle_swing", function()
+  	hero:unfreeze()
+	game:set_pause_allowed(true)
+    self:set_finished()
+end)
   
   if bottle_link_snd == 0 then 
   sol.audio.play_sound("items/bottle/swing0")
@@ -58,23 +70,15 @@ local bottle_link_snd = math.random(1)
 	model = "bottle"
   }
 
-	sol.timer.start(300,function()
-	hero:unfreeze()
-	game:set_pause_allowed(true)
-    self:set_finished()
-	end)
-
     --####################### water #######################--
   elseif variant == 2 then
     -- ask the hero to pour away the water
-    game:start_dialog("use_bottle_with_water", function(answer)
-      if answer == 1 then
-	-- empty the water
-	self:set_variant(1) -- make the bottle empty
-	sol.audio.play_sound("item_in_water")
-      end
-      self:set_finished()
-    end)
+	  self:set_variant(1) -- make the bottle empty
+	  sol.audio.play_sound("item_in_water")
+	  sol.timer.start(10, function()
+	  hero:unfreeze()
+      self:set_finished() end)
+  
 
     --####################### red potion #######################--
   elseif variant == 3 then
@@ -303,6 +307,8 @@ hero:set_animation("bottle_drink_start")
       layer = layer
     }
     self:set_variant(1) -- make the bottle empty
+	hero:unfreeze()
+	game:set_pause_allowed(true)
     self:set_finished()
 
     -- poe soul

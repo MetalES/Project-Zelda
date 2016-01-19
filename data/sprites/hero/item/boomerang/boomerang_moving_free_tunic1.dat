@@ -1,0 +1,75 @@
+animation{
+  name = "stopped",
+  src_image = "hero/item/boomerang/boomerang_no_boomerang_tunic.png",
+  directions = {
+    { x = 150, y = 0, frame_width = 34, frame_height = 24, origin_x = 11, origin_y = 20 },
+    { x = 166, y = 30, frame_width = 25, frame_height = 25, origin_x = 9, origin_y = 24 },
+    { x = 0, y = 28, frame_width = 34, frame_height = 24, origin_x = 22, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 25, frame_height = 28, origin_x = 14, origin_y = 21 },
+  },
+}
+animation{
+  name = "brandish",
+  src_image = "hero/miscellaneous.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+  },
+}
+animation{
+  name = "shoot",
+  src_image = "hero/item/boomerang/boomerang_no_boomerang_tunic.png",
+  frame_delay = 40,
+  directions = {
+    { x = 271, y = 0, frame_width = 19, frame_height = 24, origin_x = 11, origin_y = 20, num_frames = 2 },
+    { x = 238, y = 30, frame_width = 23, frame_height = 25, origin_x = 13, origin_y = 21, num_frames = 3 },
+    { x = 102, y = 28, frame_width = 20, frame_height = 24, origin_x = 11, origin_y = 20, num_frames = 3 },
+    { x = 76, y = 0, frame_width = 20, frame_height = 28, origin_x = 14, origin_y = 21, num_frames = 3 },
+  },
+}
+animation{
+  name = "stopped_with_shield",
+  src_image = "hero/item/boomerang/boomerang_no_boomerang_tunic.png",
+  directions = {
+    { x = 150, y = 0, frame_width = 34, frame_height = 24, origin_x = 11, origin_y = 20 },
+    { x = 166, y = 30, frame_width = 25, frame_height = 25, origin_x = 9, origin_y = 24 },
+    { x = 0, y = 28, frame_width = 34, frame_height = 24, origin_x = 22, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 25, frame_height = 28, origin_x = 14, origin_y = 21 },
+  },
+}
+animation{
+  name = "swimming_stopped",
+  src_image = "effects/hero/beam_explosion.png",
+  directions = {
+    { x = 24, y = 16, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+    { x = 24, y = 16, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+    { x = 24, y = 16, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+    { x = 24, y = 16, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+  },
+}
+animation{
+  name = "walking",
+  src_image = "hero/item/boomerang/boomerang_no_boomerang_tunic.png",
+  frame_delay = 120,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 150, y = 0, frame_width = 34, frame_height = 24, origin_x = 11, origin_y = 20, num_frames = 3 },
+    { x = 166, y = 30, frame_width = 25, frame_height = 25, origin_x = 9, origin_y = 24, num_frames = 3 },
+    { x = 0, y = 28, frame_width = 34, frame_height = 24, origin_x = 22, origin_y = 20, num_frames = 3 },
+    { x = 0, y = 0, frame_width = 25, frame_height = 28, origin_x = 14, origin_y = 21, num_frames = 3 },
+  },
+}
+animation{
+  name = "walking_with_shield",
+  src_image = "hero/item/boomerang/boomerang_no_boomerang_tunic.png",
+  frame_delay = 120,
+  frame_to_loop_on = 0,
+  directions = {
+    { x = 150, y = 0, frame_width = 34, frame_height = 24, origin_x = 12, origin_y = 19, num_frames = 3 },
+    { x = 166, y = 30, frame_width = 25, frame_height = 25, origin_x = 9, origin_y = 24, num_frames = 3 },
+    { x = 0, y = 28, frame_width = 34, frame_height = 24, origin_x = 22, origin_y = 20, num_frames = 3 },
+    { x = 0, y = 0, frame_width = 25, frame_height = 28, origin_x = 14, origin_y = 21, num_frames = 3 },
+  },
+}

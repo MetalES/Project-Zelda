@@ -8,14 +8,15 @@ local speed = 25
 local time_stopped = 1000
 
 function entity:on_created()
+local size_x, size_y = self:get_size()
   self:create_sprite("entities/platform")
-  self:set_size(32, 32)
+  self:set_size(size_x, size_y) -- default is 32,32
   self:set_origin(16, 16)
   self:set_can_traverse("jumper", true)
   self:set_can_traverse_ground("hole", true)
   self:set_can_traverse_ground("deep_water", true)
   self:set_can_traverse_ground("lava", true)
-  self:set_can_traverse_ground("traversable", false)
+  self:set_can_traverse_ground("traversable", true)
   self:set_can_traverse_ground("shallow_water", false)
   self:set_can_traverse_ground("wall", false)
   self:set_modified_ground("traversable")

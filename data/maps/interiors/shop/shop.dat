@@ -1,0 +1,136 @@
+properties{
+  x = 0,
+  y = 0,
+  width = 320,
+  height = 240,
+  world = "shop",
+  tileset = "cave",
+  music = "dungeons/god_temple_loop",
+}
+
+tile{
+  layer = 0,
+  x = 0,
+  y = 0,
+  width = 320,
+  height = 240,
+  pattern = "664",
+}
+
+destination{
+  layer = 0,
+  x = 168,
+  y = 149,
+  direction = 1,
+}
+
+custom_entity{
+  name = "entities/arrow",
+  layer = 0,
+  x = 168,
+  y = 101,
+  direction = 0,
+  model = "object/shop/shop",
+}
+
+switch{
+  name = "dd",
+  layer = 0,
+  x = 96,
+  y = 104,
+  subtype = "walkable",
+  sprite = "entities/switch_star",
+  sound = "objects/on_switch",
+  needs_block = false,
+  inactivate_when_leaving = false,
+}
+
+teletransporter{
+  layer = 0,
+  x = 104,
+  y = 8,
+  width = 16,
+  height = 16,
+  destination_map = "dungeons/d_water_ice/2/boss_preroom_rel",
+}
+
+switch{
+  name = "dd_2",
+  layer = 0,
+  x = 96,
+  y = 56,
+  subtype = "walkable",
+  sprite = "entities/switch_star",
+  sound = "objects/on_switch",
+  needs_block = false,
+  inactivate_when_leaving = false,
+}
+
+npc{
+  name = "shop_item",
+  layer = 0,
+  x = 152,
+  y = 61,
+  direction = 3,
+  subtype = 1,
+  sprite = "enemies/aquadracini",
+}
+
+npc{
+  name = "shop_item_2",
+  layer = 0,
+  x = 168,
+  y = 61,
+  direction = 3,
+  subtype = 1,
+}
+
+npc{
+  name = "shop_item_3",
+  layer = 0,
+  x = 184,
+  y = 61,
+  direction = 3,
+  subtype = 1,
+}
+
+custom_entity{
+  name = "avoid_guard_2",
+  layer = 0,
+  x = 224,
+  y = 189,
+  direction = 0,
+  sprite = "npc/location/common/guard_0",
+  model = "object/guard/guard",
+}
+
+custom_entity{
+  name = "avoid_guard_3",
+  layer = 0,
+  x = 48,
+  y = 181,
+  direction = 1,
+  sprite = "npc/location/common/guard_0",
+  model = "object/guard/guard",
+}
+
+custom_entity{
+  name = "avoid_guard_4",
+  layer = 0,
+  x = 240,
+  y = 85,
+  direction = 2,
+  sprite = "npc/location/common/guard_0",
+  model = "object/guard/guard",
+}
+
+custom_entity{
+  name = "s",
+  layer = 0,
+  x = 72,
+  y = 117,
+  direction = 2,
+  sprite = "npc/location/common/guard_0",
+  model = "object/guard/guard",
+}
+

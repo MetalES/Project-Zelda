@@ -40,9 +40,12 @@ end
 
 -- Hurt enemies.
 bombchu:add_collision_test("sprite", function(bombchu, entity)
-
   if entity:get_type() == "enemy" then
-    bombchu:explode()
+    if not explosion then 
+		bombchu:explode()
+		bombchu:remove()
+		explosion = true
+	end
   end
 end)
 
@@ -55,12 +58,12 @@ bombchu:set_can_traverse("stairs", false)
 bombchu:set_can_traverse("stream", true)
 bombchu:set_can_traverse("switch", true)
 bombchu:set_can_traverse("teletransporter", true)
-bombchu:set_can_traverse_ground("deep_water", true)
+bombchu:set_can_traverse_ground("deep_water", false)
 bombchu:set_can_traverse_ground("shallow_water", true)
-bombchu:set_can_traverse_ground("hole", true)
-bombchu:set_can_traverse_ground("lava", true)
+bombchu:set_can_traverse_ground("hole", false)
+bombchu:set_can_traverse_ground("lava", false)
 bombchu:set_can_traverse_ground("prickles", true)
-bombchu:set_can_traverse_ground("low_wall", true)
+bombchu:set_can_traverse_ground("low_wall", false)
 bombchu.apply_cliffs = true
 
 function bombchu:explode()

@@ -342,6 +342,13 @@ local pushing_timer, pulling_timer
 local pulling_snd_timer, pushing_snd_timer, low_life_snd_timer
 local using_bow, using_hookshot, using_boomerang
 
+local function stop_pushing_pulling()
+  if pushing_timer ~= nil then pushing_timer:stop(); pushing_timer = nil end
+  if pulling_timer ~= nil then pulling_timer:stop(); pulling_timer = nil end
+  if pushing_snd_timer ~= nil then pushing_snd_timer:stop(); pushing_snd_timer = nil end
+  if pulling_snd_timer ~= nil then pulling_snd_timer:stop(); pulling_snd_timer = nil end
+end
+
 function hero_meta:on_state_changed(state)
 	local random_sword_snd = math.random(4)
 	local random_sword_spin_snd = math.random(2)
@@ -400,6 +407,7 @@ function hero_meta:on_state_changed(state)
 	  
 	elseif state == "sword loading" then
 	    local game = self:get_game()
+		stop_pushing_pulling()
 		if not game:get_value("skill_1_learned") then
 		   game:simulate_command_released("attack")
 		else
@@ -419,17 +427,11 @@ function hero_meta:on_state_changed(state)
 		sol.audio.play_sound("characters/link/voice/hurt"..random_sword_spin_snd)
 
 	elseif state == "free" then	
-		if pushing_timer ~= nil then pushing_timer:stop(); pushing_timer = nil end
-		if pulling_timer ~= nil then pulling_timer:stop(); pulling_timer = nil end
-		if pushing_snd_timer ~= nil then pushing_snd_timer:stop(); pushing_snd_timer = nil end
-		if pulling_snd_timer ~= nil then pulling_snd_timer:stop(); pulling_snd_timer = nil end
+		stop_pushing_pulling()
 		if was_loading then self:set_walking_speed(88); was_loading = false end
 		
     elseif state == "grabbing" then
-		if pushing_timer ~= nil then pushing_timer:stop(); pushing_timer = nil end
-		if pulling_timer ~= nil then pulling_timer:stop(); pulling_timer = nil end
-		if pushing_snd_timer ~= nil then pushing_snd_timer:stop(); pushing_snd_timer = nil end
-		if pulling_snd_timer ~= nil then pulling_snd_timer:stop(); pulling_snd_timer = nil end
+		stop_pushing_pulling()
 			
 	elseif state == "pushing" then
 	  if pulling_timer ~= nil then pulling_timer:stop(); pulling_timer = nil end
@@ -476,26 +478,26 @@ local sprite_meta = sol.main.get_metatable("sprite")
 -- This part is reserved for later. Implementing rolling function depending on the animation.
 
 -- the rolling animation should be enabled, no matter the frame of the animation, on animation changed is only called when the new animation start at frame 0
--- function sprite_meta:on_frame_changed(animation, frame)
--- local is_rolling = false
-  -- if is_walking then
-   -- local game = sol.main.game
-   -- for frame = 0, 7 do -- lengh of these animation frame
+	-- function sprite_meta:on_frame_changed(animation, frame)
 	   -- local game = sol.main.game
-	   -- local hero = game:get_hero()
-	   -- local x, y, layer = hero:get_position() --these are not necessary but custom entity need layer, x and y
-		 -- if game:is_command_pressed("action") and not is_rolling then
-			-- local roll = game:get_map():create_custom_entity({
-			-- x = x, 
-			-- y = y,
-			-- layer = layer,
-			-- model = "/hero/roll", --TODO MAKE THE ROLLL USING PBEAM MOVEMENT
-			-- })
-			-- roll:start()
-		 -- end
-    -- end
--- end
--- end
+	   -- for frame = 0, 7 do
+		   -- local game = sol.main.game
+		   -- local hero = game:get_hero()
+		   -- local x, y, layer = hero:get_position() --these are not necessary but custom entity need layer, x and y
+			 -- if self:get_animation_set() == "hero/tunic1" or self:get_animation_set() == "hero/tunic2" or self:get_animation_set() == "hero/tunic3"  
+			   -- and self:get_animation() == "walking" or self:get_animation() == "walking_with_shield"
+			     -- and game:is_command_pressed("action") then
+			   -- print("roll")
+				-- local roll = game:get_map():create_custom_entity({
+				-- x = x, 
+				-- y = y,
+				-- layer = layer,
+				-- model = "/hero/roll", --TODO MAKE THE ROLLL USING PBEAM MOVEMENT
+				-- })
+				-- roll:start()
+			 -- end
+		-- end
+	-- end
 end
  
 local function initialize_game()

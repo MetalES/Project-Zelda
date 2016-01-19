@@ -22,6 +22,9 @@ function game:start_pause_menu()
 	mail_quest_builder:new(self),
 	bomber_notebook_builder:new(self)
   }
+  
+  self:clear_map_name()  
+  self:set_clock_enabled(false)
 
   local submenu_index = self:get_value("pause_last_submenu") or 1
   if submenu_index <= 0
@@ -40,6 +43,9 @@ function game:stop_pause_menu()
   local submenu_index = self:get_value("pause_last_submenu")
   sol.menu.stop(self.pause_submenus[submenu_index])
   self.pause_submenus = {}
+  
+  self:set_clock_enabled(true)
+	
   self:set_custom_command_effect("action", nil)
   self:set_custom_command_effect("attack", nil)
 end

@@ -9,6 +9,16 @@ animation{
   },
 }
 animation{
+  name = "brandish",
+  src_image = "hero/miscellaneous.png",
+  directions = {
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 20 },
+  },
+}
+animation{
   name = "stopped_with_shield",
   src_image = "hero/item/bow/bow_tunic.png",
   directions = {
@@ -16,6 +26,16 @@ animation{
     { x = 298, y = 25, frame_width = 25, frame_height = 25, origin_x = 14, origin_y = 20 },
     { x = 225, y = 49, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 21 },
     { x = 0, y = 25, frame_width = 25, frame_height = 25, origin_x = 15, origin_y = 18 },
+  },
+}
+animation{
+  name = "swimming_stopped",
+  src_image = "effects/hero/beam_explosion.png",
+  directions = {
+    { x = 24, y = 8, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+    { x = 24, y = 8, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+    { x = 24, y = 8, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
+    { x = 24, y = 8, frame_width = 8, frame_height = 8, origin_x = 4, origin_y = 4 },
   },
 }
 animation{

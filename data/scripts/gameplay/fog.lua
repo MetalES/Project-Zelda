@@ -5,15 +5,19 @@ function game:display_fog(fog, speed, angle, opacity)
 --The fog are map related so it is logical that object pointer are map related.
 
     local fog = fog or nil
-	self:get_map().fog_speed = speed or 1
-	self:get_map().fog_angle = angle or 0
-	self:get_map().fog_opacity = opacity or 16
-	self:get_map().fog_opacity_variation = opacity_variation or nil
-	self:get_map().fog_opacity_min = opacity_min or nil
-	self:get_map().fog_opacity_max = opacity_max or nil
-	self:get_map().fog_time_between_transition = time_between_transition or nil
+	local speed = speed or 1
+	local angle = angle or 0
+	local opacity = opacity or 16
+	-- self:get_map().fog_opacity_variation = opacity_variation or nil
+	-- self:get_map().fog_opacity_min = opacity_min or nil
+	-- self:get_map().fog_opacity_max = opacity_max or nil
+	-- self:get_map().fog_time_between_transition = time_between_transition or nil
+	self:clear_fog()
 	
 	self:set_value("current_fog", fog)
+	self:set_value("current_fog_speed", speed)
+	self:set_value("current_fog_angle", angle)
+	self:set_value("current_fog_opacity", opacity)
 	
 	sol.menu.start(self:get_map(), fog_menu, true) -- the menu is displayed above the map.
 end
@@ -23,10 +27,17 @@ function game:clear_fog()
 self.clear_all_fog = true
 self:set_value("fog_is_drawn", false)
 self:set_value("current_fog", nil)
+self:set_value("current_fog_speed", 0)
+self:set_value("current_fog_angle", 0)
+self:set_value("current_fog_opacity", 0)
 end
 
 function fog_menu:on_started()
   self:check()
+end
+
+function fog_menu:on_finished()
+  self.game:clear_fog()
 end
 
 -- Checks whether the view displays the correct fog
@@ -45,14 +56,14 @@ end
 function fog_menu:display_fog()	
 	if type(game:get_value("current_fog")) == "string" then
 	  self.fog = sol.surface.create("fogs/"..game:get_value("current_fog")..".png")
-      self.fog:set_opacity(game:get_map().fog_opacity)
+      self.fog:set_opacity(game:get_value("current_fog_opacity"))
 	  self.fog_size_x, self.fog_size_y = self.fog:get_size()
       self.fog_m = sol.movement.create("straight")
 	  
 	  function restart_overlay_movement()
-		self.fog_m:set_speed(game:get_map().fog_speed) 
+		self.fog_m:set_speed(game:get_value("current_fog_speed")) 
 		self.fog_m:set_max_distance(self.fog_size_x)
-		self.fog_m:set_angle(game:get_map().fog_angle * math.pi / 4)
+		self.fog_m:set_angle(game:get_value("current_fog_angle") * math.pi / 4)
 		self.fog_m:start(self.fog, function()
 			restart_overlay_movement()
 			self.fog:set_xy(self.fog_size_x, self.fog_size_y)

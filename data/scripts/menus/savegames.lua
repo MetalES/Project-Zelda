@@ -2,16 +2,81 @@
 
 local savegame_menu = {}
 local cloud_width, cloud_height = 111, 88
+local time_of_day
+local cloud0_x, cloud1_x, cloud2_x, cloud3_x, cloud4_x, cloud5_x, cloud6_x = 211, 0, 16, 160, 296, 200, -23
+local move_element
 
-function savegame_menu:on_started()
+function savegame_menu:on_started()  
+  local hours = tonumber(os.date("%H"))
+  if hours >= 8 and hours < 18 then
+    time_of_day = "day"
+  elseif hours >= 18 and hours < 20 or hours >= 4 and hours < 8  then
+    time_of_day = "sunset"
+  elseif hours >= 20 or hours < 4 then
+    time_of_day = "night"
+  end
+  
+    if hours == 20 then
+	self.time_of_day_x = 31
+	self.time_of_day_y = 105
+	move_element = true
+	elseif hours == 21 then
+	self.time_of_day_x = 31
+	self.time_of_day_y = 65
+	move_element = true
+	elseif hours == 22 then
+	self.time_of_day_x = 31
+	self.time_of_day_y = 17
+	move_element = true
+	elseif hours == 0 and hours < 1 then
+	self.time_of_day_x = 31
+	self.time_of_day_y = -50
+	move_element = false
+	elseif hours == 1 then
+	self.time_of_day_x = 31
+	self.time_of_day_y = 17
+	move_element = true
+	elseif hours == 2 then
+	self.time_of_day_x = 31
+	self.time_of_day_y = 65
+	move_element = true
+	elseif hours == 3 then
+	self.time_of_day_x = 31
+	self.time_of_day_y = 105
+	move_element = true
+	else
+	self.time_of_day_x = 31
+	self.time_of_day_y = 10
+	move_element = true
+	end
 
   -- Create all graphic objects.
   self.surface = sol.surface.create(320, 240)
-  self.background_color = { 104, 144, 240 }
+  self.background = sol.surface.create("menus/selection/background/"..time_of_day.."/background.png")
   self.background_img = sol.surface.create("menus/selection_menu_background.png")
   self.cloud_img = sol.surface.create("menus/selection_menu_cloud.png")
   self.save_container_img = sol.surface.create("menus/selection_menu_save_container.png")
   self.option_container_img = sol.surface.create("menus/selection_menu_option_container.png")
+  
+  self.bird_sprite = sol.sprite.create("menus/selection/background/"..time_of_day.."/bird")
+  self.bird_sprite1 = sol.sprite.create("menus/selection/background/"..time_of_day.."/bird")
+  
+  self.bird_x, self.bird_y =  math.random(-60, -22), math.random(150, 0)
+  self.bird1_x, self.bird1_y = math.random(-200, -22), math.random(70, 0)
+  
+  self.time_of_day = sol.surface.create("menus/selection/background/"..time_of_day.."/element.png")
+  self.cloud0 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud0.png")
+  self.cloud1 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud1.png")
+  self.cloud2 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud2.png")
+  self.cloud3 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud3.png")
+  self.cloud4 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud4.png")
+  self.cloud5 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud5.png")
+  self.cloud6 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud6.png")
+  self.hill_right = sol.surface.create("menus/selection/background/"..time_of_day.."/hill_right.png")
+  self.hill_left = sol.surface.create("menus/selection/background/"..time_of_day.."/hill_left.png")
+  self.night_fog = sol.surface.create("menus/selection/background/night/mountain_fog.png")
+  self.mountain_top = sol.surface.create("menus/selection/background/"..time_of_day.."/mountain_top.png")
+  
   local menu_font, menu_font_size = sol.language.get_menu_font()
   self.option1_text = sol.text_surface.create{
     font = menu_font,
@@ -32,26 +97,10 @@ function savegame_menu:on_started()
   self.finished = false
   self.phase = nil
 
-  -- Start the clouds.
-  self.cloud_positions = {
-    { x =  20, y =  40 },
-    { x =  50, y = 160 },
-    { x = 160, y =  30 },
-    { x = 270, y = 200 },
-    { x = 200, y = 120 },
-    { x =  90, y = 120 },
-    { x = 300, y = 100 },
-    { x = 240, y =  10 },
-    { x =  60, y = 190 },
-    { x = 150, y = 120 },
-    { x = 310, y = 220 },
-    { x =  70, y =  20 },
-    { x = 130, y = 180 },
-    { x = 200, y = 700 },
-    { x =  20, y = 120 },
-    { x = 170, y = 220 }
-  }
   self:repeat_move_clouds()
+  self:repeat_move_clouds_slow()
+  self:repeat_move_bird()
+  self:move_element()
 
   -- Run the menu.
   self:read_savegames()
@@ -145,35 +194,27 @@ function savegame_menu:direction_pressed(direction8)
 end
 
 function savegame_menu:on_draw(dst_surface)
-
-  -- Background color.
-  self.surface:fill_color(self.background_color)
+  local width, height = self.surface:get_size()
+  self.background:draw(self.surface, 0, 0)
+  if time_of_day == "night" then
+    self.night_fog:draw(self.surface, -430, 180)
+  end
+  self.hill_left:draw(self.surface, 0, 198)
+  self.hill_right:draw(self.surface, 248, 198)
 
   -- Clouds.
-  local width, height = self.surface:get_size()
-  for _, position in ipairs(self.cloud_positions) do
-    local x, y = position.x, position.y
-    self.cloud_img:draw(self.surface, x, y)
-
-    if position.x >= width - cloud_width then
-      x = position.x - width
-      y = position.y
-      self.cloud_img:draw(self.surface, x, y)
-
-      if position.y <= 0 then
-        x = position.x - width
-        y = position.y + height
-        self.cloud_img:draw(self.surface, x, y)
-      end
-    end
-
-    if position.y <= 0 then
-      x = position.x
-      y = position.y + height
-      self.cloud_img:draw(self.surface, x, y)
-    end
-  end
-
+  self.time_of_day:draw(self.surface, self.time_of_day_x, self.time_of_day_y)
+  self.cloud0:draw(self.surface, 211, 180)-- V
+  self.cloud1:draw(self.surface, 0, 179)-- V
+  self.cloud2:draw(self.surface, 16, 166) -- V
+  self.cloud3:draw(self.surface, 160, 167)
+  self.cloud4:draw(self.surface, 296, 168)  -- V
+  self.cloud5:draw(self.surface, 200, 142)  -- V
+  self.cloud6:draw(self.surface, -23, 145) -- V
+  self.mountain_top:draw(self.surface, 0, 179)
+  self.bird_sprite:draw(self.surface, self.bird_x, self.bird_y)
+  self.bird_sprite1:draw(self.surface, self.bird1_x, self.bird1_y)
+  
   -- Savegames container.
   self.background_img:draw(self.surface, 37, 38)
   self.title_text:draw(self.surface, 160, 54)
@@ -322,25 +363,108 @@ function savegame_menu:set_cursor_position(cursor_position)
 end
 
 function savegame_menu:repeat_move_clouds()
-
   local width, height = self.surface:get_size()
-  for _, position in ipairs(self.cloud_positions) do
 
-    position.x = position.x + 1
-    if position.x >= width then
-      position.x = 0
-    end
-
-    position.y = position.y -- 1
-    if position.y <= -cloud_height then
-      position.y = height - cloud_height
-    end
-  end
+  local c0 = self.cloud0:get_xy()
+  local c1 = self.cloud1:get_xy()  
+  local c2 = self.cloud2:get_xy()
+  local c3 = self.cloud3:get_xy()
+  local c4 = self.cloud4:get_xy()
+  local c5 = self.cloud5:get_xy()
+  local c6 = self.cloud6:get_xy()
+  
+  	self.cloud0:set_xy(self.cloud0:get_xy() + 1, 0)
+    self.cloud1:set_xy(self.cloud1:get_xy() + 1, 0)
+    self.cloud2:set_xy(self.cloud2:get_xy() + 1, 0)
+    self.cloud3:set_xy(self.cloud3:get_xy() + 1, 0)
+    self.cloud4:set_xy(self.cloud4:get_xy() + 1, 0)
+    self.cloud5:set_xy(self.cloud5:get_xy() + 1, 0)
+    self.cloud6:set_xy(self.cloud6:get_xy() + 1, 0)
+	
+  	if c0 >= 113 + math.random(10, 20) then
+	  self.cloud0:set_xy(-260, 0)
+	end
+	if c1 >= 324 +  math.random(10, 30) then
+	  self.cloud1:set_xy(-32, 0)
+	end
+	if c2 >= 314 then
+	  self.cloud2:set_xy(-50, 0)
+	end
+	if c3 >= 160 + math.random(10, 20) then
+	  self.cloud3:set_xy(-185, 0)
+	end
+	if c4 >= 30 + math.random(10, 20) then
+	  self.cloud4:set_xy(-320, 0)
+	end
+	if c5 >= 120 then
+	  self.cloud5:set_xy(-298, 0)
+	end
+	if c6 >= 335 + math.random(10, 20) then
+	  self.cloud6:set_xy(-30, 0)
+	end
 
   sol.timer.start(self, 100, function()
     self:repeat_move_clouds()
   end)
 end
+
+function savegame_menu:repeat_move_clouds_slow()
+  local width, height = self.surface:get_size() 
+  	
+  if time_of_day == "night" then 
+    local fog0 = self.night_fog:get_xy()
+	self.night_fog:set_xy(self.night_fog:get_xy() + 1, 0)
+	if fog0 >= 430 then
+	  self.night_fog:set_xy(57, 0)
+	end
+  end
+  sol.timer.start(self, 300, function()
+    self:repeat_move_clouds_slow()
+  end)
+end
+
+function savegame_menu:repeat_move_bird()
+  local width, height = self.surface:get_size()
+
+  local b0 = self.bird_sprite:get_xy()
+  local b1 = self.bird_sprite1:get_xy()
+
+	self.bird_sprite:set_xy(self.bird_sprite:get_xy() + 1, 0)
+	self.bird_sprite1:set_xy(self.bird_sprite:get_xy() + 1, 0)
+
+	 if b0 >= 600 +  math.random(10, 30) then
+	   self.bird_sprite:set_xy(math.random(-150, -100), math.random(-20, 40))
+	   self.bird_x, self.bird_y =  math.random(-150, -100), math.random(-20, 20)
+       
+	 end
+	 if b1 >= 700 +  math.random(10, 30) then
+	   self.bird_sprite1:set_xy(math.random(-150, -100), math.random(-20, 40))
+	   self.bird1_x, self.bird1_y = math.random(-200, -22), math.random(70, 0)
+	 end
+
+  sol.timer.start(self, 50, function()
+    self:repeat_move_bird()
+  end)
+end
+
+function savegame_menu:move_element()
+  local width, height = self.surface:get_size()
+  local m0, m1 = self.time_of_day:get_xy()
+  local hours = tonumber(os.date("%H"))
+
+  if move_element then
+	  if hours >= 20 and hours <=23 or hours >= 4 and hours <= 11 then
+ 	    self.time_of_day:set_xy(0, m1 - 1)
+	  else
+	    self.time_of_day:set_xy(0, m1 + 1)
+	  end
+  end
+  
+  sol.timer.start(self, 50000, function()
+    self:move_element()
+  end)
+end
+
 
 ---------------------------
 -- Phase "select a file" --
@@ -565,7 +689,7 @@ end
 ----------------------
 -- Phase "options" --
 ----------------------
-function savegame_menu:init_phase_options()
+function savegame_menu:init_phase_options(savegame)
 
   self.phase = "options"
   self.title_text:set_text_key("selection_menu.phase.options")
@@ -587,7 +711,7 @@ function savegame_menu:init_phase_options()
     {
       name = "music_volume",
       values = { 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100},
-      initial_value = math.floor((sol.audio.get_music_volume() + 5) / 10) * 10
+      initial_value = savegame:get_value("old_volume") or 100
     },
     {
       name = "sound_volume",

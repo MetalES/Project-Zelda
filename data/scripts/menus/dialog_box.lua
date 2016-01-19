@@ -44,7 +44,7 @@ local char_delays = {
   fast = 20,  -- Default.
   instant = 0
 }
-local letter_sound_delay = 50--100
+local letter_sound_delay = 50
 local box_width = 280
 local box_height = 60
 
@@ -61,7 +61,6 @@ function game:initialize_dialog_box()
   dialog_box.text_properties = { 
     horizontal_alignment = "left",
     vertical_alignment = "top",
-    --rendering_mode = "antialiasing",
     font = font,
     font_size = font_size,
   }
@@ -78,7 +77,6 @@ end
 
 -- Exits the dialog box system.
 function game:quit_dialog_box()
-
   if dialog_box ~= nil then
     if game:is_dialog_enabled() then
       sol.menu.stop(dialog_box)
@@ -89,7 +87,6 @@ end
 
 -- Called by the engine when a dialog starts.
 function game:on_dialog_started(dialog, info)
-
   dialog_box.dialog = dialog
   dialog_box.info = info
   dialog_box:set_color({255,255,255}) -- Reset color text to white.
@@ -98,7 +95,6 @@ end
 
 -- Called by the engine when a dialog finishes.
 function game:on_dialog_finished(dialog)
-
   sol.menu.stop(dialog_box)
   dialog_box.dialog = nil
   dialog_box.info = nil
@@ -197,7 +193,7 @@ function dialog_box:on_started()
 
   -- reset the hero to frame 0, he will still not be able to move.
   local hero = map:get_hero()
-  if hero:get_state() ~= "treasure" and hero:get_state() ~= "grabbing" and hero:get_state() ~= "swimming"  then
+  if hero:get_state() ~= "treasure" and hero:get_state() ~= "grabbing" and hero:get_state() ~= "swimming" and hero:get_animation() ~= "brandish" and hero:get_animation() ~= "playing" then
      hero:unfreeze()
   end
   -- Set the coordinates of graphic objects.
@@ -574,7 +570,7 @@ function dialog_box:on_draw(dst_surface)
     dst_surface:fill_color({0, 0, 0}, x, y, 220, 60)
   else
     -- Draw the dialog box.
-    self.box_img:draw_region(0, 0, box_width, box_height, self.dialog_surface, x, y)--#################################################
+    self.box_img:draw_region(0, 0, box_width, box_height, self.dialog_surface, x, y)
   end
 
   -- Draw the text.

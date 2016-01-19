@@ -1,0 +1,3426 @@
+properties{
+  x = 0,
+  y = 0,
+  width = 320,
+  height = 480,
+  world = "dungeon_3",
+  tileset = "water",
+  music = "dungeons/water_temple_loop",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 216,
+  width = 128,
+  height = 64,
+  pattern = "floor_low.6",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 80,
+  width = 16,
+  height = 336,
+  pattern = "floor_low.6",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 56,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.2",
+}
+
+tile{
+  layer = 0,
+  x = 240,
+  y = 416,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.4",
+}
+
+tile{
+  layer = 0,
+  x = 56,
+  y = 56,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.1",
+}
+
+tile{
+  layer = 0,
+  x = 240,
+  y = 56,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.2",
+}
+
+tile{
+  layer = 0,
+  x = 240,
+  y = 80,
+  width = 24,
+  height = 336,
+  pattern = "wall_low.4",
+}
+
+tile{
+  layer = 0,
+  x = 56,
+  y = 80,
+  width = 24,
+  height = 336,
+  pattern = "wall_low.3",
+}
+
+tile{
+  layer = 0,
+  x = 32,
+  y = 32,
+  width = 24,
+  height = 24,
+  pattern = "wall.corner.1",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 32,
+  width = 24,
+  height = 24,
+  pattern = "wall.corner.2",
+}
+
+tile{
+  layer = 0,
+  x = 56,
+  y = 32,
+  width = 80,
+  height = 24,
+  pattern = "wall.1",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 56,
+  width = 24,
+  height = 384,
+  pattern = "wall.4",
+}
+
+tile{
+  layer = 0,
+  x = 32,
+  y = 56,
+  width = 24,
+  height = 384,
+  pattern = "wall.3",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 96,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3a",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 88,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 104,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3b",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 96,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 112,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 104,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 168,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3a",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 160,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 176,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3b",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 168,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 184,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 176,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 240,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3a",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 232,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 248,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3b",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 240,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 256,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 248,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 312,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3a",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 304,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 320,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3b",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 312,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 328,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 320,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 56,
+  y = 416,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.3",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 416,
+  width = 16,
+  height = 24,
+  pattern = "wall_low.2",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 384,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3a",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 376,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 48,
+  y = 392,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.3b",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 384,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 400,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.3.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 392,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.3.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 64,
+  y = 88,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.3.middle",
+}
+
+tile{
+  layer = 0,
+  x = 56,
+  y = 440,
+  width = 208,
+  height = 24,
+  pattern = "wall.2",
+}
+
+tile{
+  layer = 0,
+  x = 32,
+  y = 440,
+  width = 24,
+  height = 24,
+  pattern = "wall.corner.3",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 440,
+  width = 24,
+  height = 24,
+  pattern = "wall.corner.4",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 56,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.1",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 56,
+  width = 16,
+  height = 24,
+  pattern = "wall_low.1",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 56,
+  width = 16,
+  height = 24,
+  pattern = "wall_low.1",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 80,
+  width = 24,
+  height = 112,
+  pattern = "wall_low.4",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 416,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.4",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 416,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.3",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 416,
+  width = 16,
+  height = 24,
+  pattern = "wall_low.2",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 80,
+  width = 24,
+  height = 112,
+  pattern = "wall_low.3",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 304,
+  width = 24,
+  height = 112,
+  pattern = "wall_low.3",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 304,
+  width = 24,
+  height = 112,
+  pattern = "wall_low.4",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 280,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.1",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 280,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.2",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 192,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.3",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 192,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner.4",
+}
+
+tile{
+  layer = 0,
+  x = 72,
+  y = 440,
+  width = 32,
+  height = 16,
+  pattern = "wall_torch.2",
+}
+
+tile{
+  layer = 0,
+  x = 216,
+  y = 440,
+  width = 32,
+  height = 16,
+  pattern = "wall_torch.2",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 392,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4b",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 384,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 400,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 392,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 384,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4a",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 376,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 320,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4b",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 312,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 328,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 320,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 312,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4a",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 304,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 248,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4b",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 240,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 256,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 248,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 240,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4a",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 232,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 176,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4b",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 168,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 184,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 176,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 168,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4a",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 160,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 104,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4b",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 96,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.1",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 112,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.4",
+}
+
+tile{
+  layer = 0,
+  x = 272,
+  y = 104,
+  width = 8,
+  height = 8,
+  pattern = "wall_tunnel.4.support.2",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 96,
+  width = 16,
+  height = 8,
+  pattern = "wall_tunnel.4a",
+}
+
+tile{
+  layer = 0,
+  x = 256,
+  y = 88,
+  width = 24,
+  height = 8,
+  pattern = "wall_tunnel.4.support.3",
+}
+
+tile{
+  layer = 0,
+  x = 248,
+  y = 304,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.4.middle",
+}
+
+tile{
+  layer = 0,
+  x = 248,
+  y = 376,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.4.middle",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 88,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.3",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 160,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.3",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 232,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.3",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 304,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.3",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 304,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.4",
+}
+
+tile{
+  layer = 0,
+  x = 40,
+  y = 376,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.3",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 376,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.4",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 232,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.4",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 160,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.4",
+}
+
+tile{
+  layer = 0,
+  x = 264,
+  y = 88,
+  width = 16,
+  height = 32,
+  pattern = "water_wall.drain_gate.4",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 280,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner_reverse.3",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 280,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner_reverse.4",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 192,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner_reverse.2",
+}
+
+tile{
+  layer = 0,
+  x = 200,
+  y = 192,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.corner_reverse.1",
+}
+
+tile{
+  layer = 0,
+  x = 120,
+  y = 192,
+  width = 80,
+  height = 24,
+  pattern = "wall_low.1",
+}
+
+tile{
+  layer = 0,
+  x = 120,
+  y = 280,
+  width = 32,
+  height = 24,
+  pattern = "wall_low.2",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 80,
+  width = 16,
+  height = 336,
+  pattern = "floor_low.6",
+}
+
+tile{
+  layer = 0,
+  x = 232,
+  y = 80,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.2",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 80,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.1",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 88,
+  width = 8,
+  height = 128,
+  pattern = "wall_low_border.3",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 88,
+  width = 8,
+  height = 320,
+  pattern = "wall_low_border.3",
+}
+
+tile{
+  layer = 0,
+  x = 88,
+  y = 80,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.2",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 80,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.1",
+}
+
+tile{
+  layer = 0,
+  x = 88,
+  y = 88,
+  width = 8,
+  height = 128,
+  pattern = "wall_low_border.4",
+}
+
+tile{
+  layer = 0,
+  x = 232,
+  y = 88,
+  width = 8,
+  height = 320,
+  pattern = "wall_low_border.4",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 408,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.3",
+}
+
+tile{
+  layer = 0,
+  x = 88,
+  y = 408,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.4",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 408,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.3",
+}
+
+tile{
+  layer = 0,
+  x = 232,
+  y = 408,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.4",
+}
+
+tile{
+  layer = 0,
+  x = 88,
+  y = 216,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner_reverse.2",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 216,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner_reverse.1",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 272,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.2",
+}
+
+tile{
+  layer = 0,
+  x = 88,
+  y = 272,
+  width = 8,
+  height = 8,
+  pattern = "wall_low_border.corner.1",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 280,
+  width = 8,
+  height = 128,
+  pattern = "wall_low_border.3",
+}
+
+tile{
+  layer = 0,
+  x = 88,
+  y = 280,
+  width = 8,
+  height = 128,
+  pattern = "wall_low_border.4",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 216,
+  width = 128,
+  height = 8,
+  pattern = "wall_low_border.2",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 272,
+  width = 128,
+  height = 8,
+  pattern = "wall_low_border.1",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 400,
+  width = 16,
+  height = 16,
+  pattern = "floor_water_drain",
+}
+
+tile{
+  layer = 0,
+  x = 248,
+  y = 88,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.4.middle",
+}
+
+tile{
+  layer = 0,
+  x = 248,
+  y = 160,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.4.middle",
+}
+
+tile{
+  layer = 0,
+  x = 248,
+  y = 232,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.4.middle",
+}
+
+tile{
+  layer = 0,
+  x = 64,
+  y = 160,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.3.middle",
+}
+
+tile{
+  layer = 0,
+  x = 64,
+  y = 232,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.3.middle",
+}
+
+tile{
+  layer = 0,
+  x = 64,
+  y = 304,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.3.middle",
+}
+
+tile{
+  layer = 0,
+  x = 64,
+  y = 376,
+  width = 8,
+  height = 32,
+  pattern = "waterfall.3.middle",
+}
+
+tile{
+  layer = 0,
+  x = 88,
+  y = 240,
+  width = 16,
+  height = 16,
+  pattern = "floor_water_drain",
+}
+
+tile{
+  layer = 0,
+  x = 216,
+  y = 240,
+  width = 16,
+  height = 16,
+  pattern = "floor_water_drain",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 80,
+  width = 16,
+  height = 16,
+  pattern = "floor_water_drain",
+}
+
+tile{
+  layer = 0,
+  x = 224,
+  y = 80,
+  width = 16,
+  height = 16,
+  pattern = "floor_water_drain",
+}
+
+tile{
+  layer = 0,
+  x = 80,
+  y = 400,
+  width = 16,
+  height = 16,
+  pattern = "floor_water_drain",
+}
+
+tile{
+  layer = 0,
+  x = 176,
+  y = 280,
+  width = 24,
+  height = 24,
+  pattern = "wall_low.2",
+}
+
+tile{
+  layer = 0,
+  x = 184,
+  y = 32,
+  width = 80,
+  height = 24,
+  pattern = "wall.1",
+}
+
+tile{
+  layer = 0,
+  x = 176,
+  y = 32,
+  width = 24,
+  height = 8,
+  pattern = "34",
+}
+
+wall{
+  layer = 0,
+  x = 144,
+  y = 288,
+  width = 8,
+  height = 160,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 0,
+  x = 168,
+  y = 288,
+  width = 8,
+  height = 160,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 0,
+  x = 152,
+  y = 352,
+  width = 16,
+  height = 16,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+dynamic_tile{
+  name = "water_1_almost_gone_1",
+  layer = 0,
+  x = 80,
+  y = 96,
+  pattern = "water.transparent",
+  width = 16,
+  height = 80,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_1_almost_gone_2",
+  layer = 0,
+  x = 224,
+  y = 96,
+  pattern = "water.transparent",
+  width = 16,
+  height = 80,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_1_almost_gone_3",
+  layer = 0,
+  x = 224,
+  y = 320,
+  pattern = "water.transparent",
+  width = 16,
+  height = 80,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_1_almost_gone_4",
+  layer = 0,
+  x = 80,
+  y = 320,
+  pattern = "water.transparent",
+  width = 16,
+  height = 80,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_1_level_1",
+  layer = 0,
+  x = 80,
+  y = 80,
+  pattern = "water.transparent",
+  width = 16,
+  height = 336,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_1_level_2",
+  layer = 0,
+  x = 224,
+  y = 80,
+  pattern = "water.transparent",
+  width = 16,
+  height = 336,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_1_level_3",
+  layer = 0,
+  x = 96,
+  y = 216,
+  pattern = "water.transparent",
+  width = 128,
+  height = 64,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_2_level_1",
+  layer = 0,
+  x = 72,
+  y = 72,
+  pattern = "water.transparent",
+  width = 32,
+  height = 352,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_2_level_2",
+  layer = 0,
+  x = 216,
+  y = 72,
+  pattern = "water.transparent",
+  width = 32,
+  height = 352,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_2_level_3",
+  layer = 0,
+  x = 104,
+  y = 208,
+  pattern = "water.transparent",
+  width = 112,
+  height = 80,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_3_level_4",
+  layer = 0,
+  x = 64,
+  y = 64,
+  pattern = "water.transparent",
+  width = 48,
+  height = 368,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_3_level_5",
+  layer = 0,
+  x = 208,
+  y = 64,
+  pattern = "water.transparent",
+  width = 48,
+  height = 368,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_3_level_6",
+  layer = 0,
+  x = 112,
+  y = 200,
+  pattern = "water.transparent",
+  width = 96,
+  height = 96,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_door_check",
+  layer = 0,
+  x = 152,
+  y = 280,
+  pattern = "water.transparent",
+  width = 16,
+  height = 80,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_8",
+  layer = 0,
+  x = 56,
+  y = 312,
+  pattern = "waterfall.3.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_3",
+  layer = 0,
+  x = 256,
+  y = 96,
+  pattern = "waterfall.4.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_4",
+  layer = 0,
+  x = 256,
+  y = 168,
+  pattern = "waterfall.4.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_5",
+  layer = 0,
+  x = 256,
+  y = 240,
+  pattern = "waterfall.4.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_6",
+  layer = 0,
+  x = 256,
+  y = 312,
+  pattern = "waterfall.4.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_7",
+  layer = 0,
+  x = 256,
+  y = 384,
+  pattern = "waterfall.4.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_9",
+  layer = 0,
+  x = 56,
+  y = 96,
+  pattern = "waterfall.3.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_10",
+  layer = 0,
+  x = 56,
+  y = 168,
+  pattern = "waterfall.3.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_11",
+  layer = 0,
+  x = 56,
+  y = 240,
+  pattern = "waterfall.3.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_12",
+  layer = 0,
+  x = 56,
+  y = 384,
+  pattern = "waterfall.3.top",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+teletransporter{
+  layer = 0,
+  x = 152,
+  y = 336,
+  width = 16,
+  height = 16,
+  destination_map = "dungeons/d_water_ice/2/main",
+  destination = "from_preboss_0",
+}
+
+destination{
+  name = "from_main_up_0",
+  layer = 0,
+  x = 88,
+  y = 325,
+  direction = 1,
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 48,
+  width = 48,
+  height = 32,
+  pattern = "floor.1",
+}
+
+tile{
+  layer = 1,
+  x = 72,
+  y = 32,
+  width = 32,
+  height = 24,
+  pattern = "wall_statue.6.1",
+}
+
+tile{
+  layer = 1,
+  x = 216,
+  y = 32,
+  width = 32,
+  height = 24,
+  pattern = "wall_statue.6.1",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 64,
+  width = 64,
+  height = 368,
+  pattern = "floor.15",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 72,
+  width = 8,
+  height = 128,
+  pattern = "barrier.3.2",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 72,
+  width = 8,
+  height = 128,
+  pattern = "barrier.3.2",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 64,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 64,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 56,
+  width = 16,
+  height = 8,
+  pattern = "wall_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 424,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 424,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 432,
+  width = 80,
+  height = 8,
+  pattern = "wall_border.2",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 432,
+  width = 16,
+  height = 32,
+  pattern = "wall_pillar.5.2",
+}
+
+tile{
+  layer = 1,
+  x = 184,
+  y = 432,
+  width = 16,
+  height = 32,
+  pattern = "wall_pillar.5.2",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 72,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 136,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 176,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 160,
+  y = 88,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 168,
+  y = 176,
+  width = 16,
+  height = 32,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 88,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 128,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 240,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 200,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 288,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 264,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 296,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 160,
+  y = 320,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 376,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 160,
+  y = 408,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 224,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 352,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 168,
+  y = 384,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 416,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 336,
+  width = 16,
+  height = 16,
+  pattern = "floor.35",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 328,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 264,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 408,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 392,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 200,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 152,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 104,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 168,
+  y = 64,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 416,
+  width = 16,
+  height = 16,
+  pattern = "floor.29",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 400,
+  width = 16,
+  height = 16,
+  pattern = "floor.31",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 400,
+  width = 16,
+  height = 16,
+  pattern = "floor.13",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 384,
+  width = 16,
+  height = 16,
+  pattern = "floor.13",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 360,
+  width = 16,
+  height = 16,
+  pattern = "floor.13",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 360,
+  width = 16,
+  height = 16,
+  pattern = "pillar.bottom",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 360,
+  width = 16,
+  height = 16,
+  pattern = "pillar.bottom",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 64,
+  width = 64,
+  height = 8,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 424,
+  width = 64,
+  height = 8,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 376,
+  width = 8,
+  height = 48,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 184,
+  y = 376,
+  width = 8,
+  height = 48,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 184,
+  y = 72,
+  width = 8,
+  height = 144,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 72,
+  width = 8,
+  height = 144,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 440,
+  width = 8,
+  height = 16,
+  pattern = "door.2.support.1",
+}
+
+tile{
+  layer = 1,
+  x = 168,
+  y = 440,
+  width = 8,
+  height = 16,
+  pattern = "door.2.support.2",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 440,
+  width = 16,
+  height = 16,
+  pattern = "door.2",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 200,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 200,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 272,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 272,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 280,
+  width = 8,
+  height = 144,
+  pattern = "barrier.3.2",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 280,
+  width = 8,
+  height = 144,
+  pattern = "barrier.3.2",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 264,
+  width = 8,
+  height = 96,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 184,
+  y = 264,
+  width = 8,
+  height = 96,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 232,
+  width = 16,
+  height = 16,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 232,
+  width = 16,
+  height = 16,
+  pattern = "floor.15",
+}
+
+tile{
+  layer = 1,
+  x = 200,
+  y = 216,
+  width = 16,
+  height = 16,
+  pattern = "floor.19",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 240,
+  width = 16,
+  height = 16,
+  pattern = "floor.19",
+}
+
+tile{
+  layer = 1,
+  x = 200,
+  y = 248,
+  width = 16,
+  height = 16,
+  pattern = "floor.19",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 216,
+  width = 16,
+  height = 16,
+  pattern = "floor.12",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 216,
+  width = 16,
+  height = 16,
+  pattern = "floor.12",
+}
+
+tile{
+  layer = 1,
+  x = 200,
+  y = 232,
+  width = 16,
+  height = 16,
+  pattern = "floor.12",
+}
+
+tile{
+  layer = 1,
+  x = 184,
+  y = 248,
+  width = 16,
+  height = 16,
+  pattern = "floor.12",
+}
+
+tile{
+  layer = 1,
+  x = 200,
+  y = 216,
+  width = 16,
+  height = 48,
+  pattern = "floor_pot",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 152,
+  width = 16,
+  height = 16,
+  pattern = "pillar.bottom",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 152,
+  width = 16,
+  height = 16,
+  pattern = "pillar.bottom",
+}
+
+tile{
+  layer = 1,
+  x = 128,
+  y = 96,
+  width = 16,
+  height = 16,
+  pattern = "torch_big.bottom",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 96,
+  width = 16,
+  height = 16,
+  pattern = "torch_big.bottom",
+}
+
+tile{
+  layer = 1,
+  x = 224,
+  y = 200,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 224,
+  y = 272,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 88,
+  y = 272,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 88,
+  y = 200,
+  width = 8,
+  height = 8,
+  pattern = "barrier.2.border",
+}
+
+tile{
+  layer = 1,
+  x = 96,
+  y = 208,
+  width = 32,
+  height = 8,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 208,
+  width = 32,
+  height = 8,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 264,
+  width = 32,
+  height = 8,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 96,
+  y = 264,
+  width = 32,
+  height = 8,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 96,
+  y = 216,
+  width = 8,
+  height = 48,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 216,
+  y = 216,
+  width = 8,
+  height = 48,
+  pattern = "floor_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 224,
+  y = 208,
+  width = 8,
+  height = 64,
+  pattern = "barrier.3.2",
+}
+
+tile{
+  layer = 1,
+  x = 88,
+  y = 208,
+  width = 8,
+  height = 64,
+  pattern = "barrier.3.2",
+}
+
+tile{
+  layer = 1,
+  x = 96,
+  y = 200,
+  width = 24,
+  height = 8,
+  pattern = "barrier.3.1",
+}
+
+tile{
+  layer = 1,
+  x = 200,
+  y = 200,
+  width = 24,
+  height = 8,
+  pattern = "barrier.3.1",
+}
+
+tile{
+  layer = 1,
+  x = 200,
+  y = 272,
+  width = 24,
+  height = 8,
+  pattern = "barrier.3.1",
+}
+
+tile{
+  layer = 1,
+  x = 96,
+  y = 272,
+  width = 24,
+  height = 8,
+  pattern = "barrier.3.1",
+}
+
+tile{
+  layer = 1,
+  x = 112,
+  y = 240,
+  width = 16,
+  height = 16,
+  pattern = "floor.19",
+}
+
+tile{
+  layer = 1,
+  x = 112,
+  y = 224,
+  width = 16,
+  height = 16,
+  pattern = "floor.12",
+}
+
+tile{
+  layer = 1,
+  x = 112,
+  y = 248,
+  width = 16,
+  height = 16,
+  pattern = "floor.19",
+}
+
+tile{
+  layer = 1,
+  x = 104,
+  y = 216,
+  width = 16,
+  height = 48,
+  pattern = "floor_pot",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 456,
+  width = 16,
+  height = 32,
+  pattern = "floor.34",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 32,
+  width = 32,
+  height = 16,
+  pattern = "33",
+}
+
+tile{
+  layer = 1,
+  x = 184,
+  y = 56,
+  width = 16,
+  height = 8,
+  pattern = "wall_border.1",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 56,
+  width = 8,
+  height = 8,
+  pattern = "wall_border.corner.1",
+}
+
+tile{
+  layer = 1,
+  x = 192,
+  y = 56,
+  width = 8,
+  height = 8,
+  pattern = "wall_border.corner.2",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 40,
+  width = 24,
+  height = 24,
+  pattern = "37",
+}
+
+tile{
+  layer = 1,
+  x = 120,
+  y = 32,
+  width = 24,
+  height = 8,
+  pattern = "36",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 40,
+  width = 24,
+  height = 24,
+  pattern = "35",
+}
+
+tile{
+  layer = 1,
+  x = 152,
+  y = 232,
+  width = 16,
+  height = 16,
+  pattern = "floor.8",
+}
+
+tile{
+  layer = 1,
+  x = 144,
+  y = 0,
+  width = 32,
+  height = 32,
+  pattern = "floor.1",
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 0,
+  width = 8,
+  height = 8,
+  pattern = "barrier.1.border",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 0,
+  width = 8,
+  height = 8,
+  pattern = "barrier.1.border",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 24,
+  width = 8,
+  height = 8,
+  pattern = "barrier.1.border",
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 24,
+  width = 8,
+  height = 8,
+  pattern = "barrier.1.border",
+}
+
+tile{
+  layer = 1,
+  x = 136,
+  y = 8,
+  width = 8,
+  height = 16,
+  pattern = "barrier.1.2",
+}
+
+tile{
+  layer = 1,
+  x = 176,
+  y = 8,
+  width = 8,
+  height = 16,
+  pattern = "barrier.1.2",
+}
+
+destination{
+  name = "from_main_up_1",
+  layer = 1,
+  x = 160,
+  y = 453,
+  direction = 1,
+}
+
+enemy{
+  layer = 1,
+  x = 136,
+  y = 285,
+  direction = 0,
+  breed = "pike_auto",
+}
+
+enemy{
+  layer = 1,
+  x = 184,
+  y = 333,
+  direction = 0,
+  breed = "pike_auto",
+}
+
+destructible{
+  layer = 1,
+  x = 208,
+  y = 245,
+  treasure_name = "heart",
+  sprite = "entities/pot",
+  destruction_sound = "Pot_Shatter",
+  weight = 1,
+  can_be_cut = true,
+}
+
+destructible{
+  layer = 1,
+  x = 208,
+  y = 229,
+  treasure_name = "heart",
+  sprite = "entities/pot",
+  destruction_sound = "Pot_Shatter",
+  weight = 1,
+  can_be_cut = true,
+}
+
+destructible{
+  layer = 1,
+  x = 208,
+  y = 261,
+  treasure_name = "heart",
+  sprite = "entities/pot",
+  destruction_sound = "Pot_Shatter",
+  weight = 1,
+  can_be_cut = true,
+}
+
+destructible{
+  layer = 1,
+  x = 112,
+  y = 229,
+  treasure_name = "heart",
+  sprite = "entities/pot",
+  destruction_sound = "Pot_Shatter",
+  weight = 1,
+  can_be_cut = true,
+}
+
+destructible{
+  layer = 1,
+  x = 112,
+  y = 245,
+  treasure_name = "heart",
+  sprite = "entities/pot",
+  destruction_sound = "Pot_Shatter",
+  weight = 1,
+  can_be_cut = true,
+}
+
+destructible{
+  layer = 1,
+  x = 112,
+  y = 261,
+  treasure_name = "heart",
+  sprite = "entities/pot",
+  destruction_sound = "Pot_Shatter",
+  weight = 1,
+  can_be_cut = true,
+}
+
+teletransporter{
+  layer = 1,
+  x = 144,
+  y = 0,
+  width = 32,
+  height = 16,
+  destination_map = "dungeons/d_water_ice/boss",
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_11",
+  layer = 1,
+  x = 72,
+  y = 64,
+  pattern = "waterfall.1.bottom",
+  width = 32,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_mid_full",
+  layer = 1,
+  x = 72,
+  y = 56,
+  pattern = "waterfall.1.middle",
+  width = 32,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top",
+  layer = 1,
+  x = 80,
+  y = 48,
+  pattern = "waterfall.1.top",
+  width = 16,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_6",
+  layer = 1,
+  x = 248,
+  y = 376,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full",
+  layer = 1,
+  x = 64,
+  y = 376,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_flow_top_2",
+  layer = 1,
+  x = 224,
+  y = 48,
+  pattern = "waterfall.1.top",
+  width = 16,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_2",
+  layer = 1,
+  x = 64,
+  y = 304,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_3",
+  layer = 1,
+  x = 64,
+  y = 232,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_4",
+  layer = 1,
+  x = 64,
+  y = 160,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_5",
+  layer = 1,
+  x = 64,
+  y = 88,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_7",
+  layer = 1,
+  x = 248,
+  y = 304,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_8",
+  layer = 1,
+  x = 248,
+  y = 232,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_9",
+  layer = 1,
+  x = 248,
+  y = 160,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_10",
+  layer = 1,
+  x = 248,
+  y = 88,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 32,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_11",
+  layer = 1,
+  x = 248,
+  y = 96,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_12",
+  layer = 1,
+  x = 248,
+  y = 168,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_13",
+  layer = 1,
+  x = 248,
+  y = 240,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_14",
+  layer = 1,
+  x = 248,
+  y = 312,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_15",
+  layer = 1,
+  x = 248,
+  y = 384,
+  pattern = "waterfall.4.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_16",
+  layer = 1,
+  x = 64,
+  y = 384,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_17",
+  layer = 1,
+  x = 64,
+  y = 312,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_18",
+  layer = 1,
+  x = 64,
+  y = 240,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_19",
+  layer = 1,
+  x = 64,
+  y = 168,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_20",
+  layer = 1,
+  x = 64,
+  y = 96,
+  pattern = "waterfall.3.bottom",
+  width = 8,
+  height = 16,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_mid_full_2",
+  layer = 1,
+  x = 216,
+  y = 56,
+  pattern = "waterfall.1.middle",
+  width = 32,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_mid_mid_1",
+  layer = 1,
+  x = 80,
+  y = 56,
+  pattern = "waterfall.1.middle",
+  width = 16,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_mid_mid_0",
+  layer = 1,
+  x = 224,
+  y = 56,
+  pattern = "waterfall.1.middle",
+  width = 16,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid",
+  layer = 1,
+  x = 224,
+  y = 64,
+  pattern = "waterfall.1.bottom",
+  width = 16,
+  height = 8,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_mid_2",
+  layer = 1,
+  x = 80,
+  y = 64,
+  pattern = "waterfall.1.bottom",
+  width = 16,
+  height = 8,
+  enabled_at_start = true,
+}
+
+switch{
+  name = "water_test",
+  layer = 1,
+  x = 0,
+  y = 0,
+  subtype = "solid",
+  sprite = "entities/switch",
+  sound = "common/switch_crystal_hit",
+  needs_block = false,
+  inactivate_when_leaving = false,
+}
+
+dynamic_tile{
+  name = "water_stream_bot_full_12",
+  layer = 1,
+  x = 216,
+  y = 64,
+  pattern = "waterfall.1.bottom",
+  width = 32,
+  height = 8,
+  enabled_at_start = true,
+}
+
+teletransporter{
+  layer = 1,
+  x = 152,
+  y = 464,
+  width = 16,
+  height = 16,
+  destination_map = "dungeons/d_water_ice/2/main",
+  destination = "from_preboss_1",
+}
+
+wall{
+  layer = 1,
+  x = 168,
+  y = 448,
+  width = 8,
+  height = 32,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 1,
+  x = 144,
+  y = 448,
+  width = 8,
+  height = 32,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+custom_entity{
+  name = "boss_door",
+  layer = 1,
+  x = 160,
+  y = 61,
+  direction = 1,
+  sprite = "entities/dungeon/boss_door",
+  model = "dungeon/boss_door",
+}
+
+npc{
+  name = "boss_door_chain",
+  layer = 1,
+  x = 160,
+  y = 45,
+  direction = 3,
+  subtype = 1,
+  sprite = "entities/dungeon/boss_door_chain",
+}
+
+custom_entity{
+  name = "dungeons/d_water_ice/2/entrance",
+  layer = 1,
+  x = 160,
+  y = 245,
+  direction = 0,
+  sprite = "entities/dungeon/warp_boss",
+  model = "dungeon/warp",
+}
+
+destination{
+  name = "teleporter_dungeons/d_water_ice/2/boss_preroom",
+  layer = 1,
+  x = 160,
+  y = 253,
+  direction = 3,
+}
+
+custom_entity{
+  layer = 1,
+  x = 160,
+  y = 125,
+  direction = 0,
+  model = "object/shop/shop",
+}
+
+tile{
+  layer = 2,
+  x = 144,
+  y = 0,
+  width = 32,
+  height = 24,
+  pattern = "ceiling",
+}
+
+tile{
+  layer = 2,
+  x = 176,
+  y = 0,
+  width = 144,
+  height = 32,
+  pattern = "ceiling",
+}
+
+tile{
+  layer = 2,
+  x = 0,
+  y = 0,
+  width = 144,
+  height = 32,
+  pattern = "ceiling",
+}
+
+tile{
+  layer = 2,
+  x = 0,
+  y = 32,
+  width = 32,
+  height = 448,
+  pattern = "ceiling",
+}
+
+tile{
+  layer = 2,
+  x = 288,
+  y = 32,
+  width = 32,
+  height = 448,
+  pattern = "ceiling",
+}
+
+tile{
+  layer = 2,
+  x = 32,
+  y = 464,
+  width = 256,
+  height = 16,
+  pattern = "ceiling",
+}
+
+tile{
+  layer = 2,
+  x = 128,
+  y = 344,
+  width = 16,
+  height = 16,
+  pattern = "pillar.top",
+}
+
+tile{
+  layer = 2,
+  x = 176,
+  y = 344,
+  width = 16,
+  height = 16,
+  pattern = "pillar.top",
+}
+
+tile{
+  layer = 2,
+  x = 128,
+  y = 136,
+  width = 16,
+  height = 16,
+  pattern = "pillar.top",
+}
+
+tile{
+  layer = 2,
+  x = 176,
+  y = 136,
+  width = 16,
+  height = 16,
+  pattern = "pillar.top",
+}
+
+tile{
+  layer = 2,
+  x = 128,
+  y = 80,
+  width = 16,
+  height = 16,
+  pattern = "torch_big.top",
+}
+
+tile{
+  layer = 2,
+  x = 176,
+  y = 80,
+  width = 16,
+  height = 16,
+  pattern = "torch_big.top",
+}
+
+tile{
+  layer = 2,
+  x = 144,
+  y = 456,
+  width = 32,
+  height = 8,
+  pattern = "door_top.2",
+}
+
+tile{
+  layer = 2,
+  x = 176,
+  y = 16,
+  width = 24,
+  height = 16,
+  pattern = "29",
+}
+
+tile{
+  layer = 2,
+  x = 120,
+  y = 16,
+  width = 24,
+  height = 16,
+  pattern = "28",
+}
+
+tile{
+  layer = 2,
+  x = 144,
+  y = 16,
+  width = 32,
+  height = 16,
+  pattern = "32",
+}
+
+tile{
+  layer = 2,
+  x = 104,
+  y = 32,
+  width = 16,
+  height = 32,
+  pattern = "drapes.1.1",
+}
+
+tile{
+  layer = 2,
+  x = 200,
+  y = 32,
+  width = 16,
+  height = 32,
+  pattern = "drapes.1.1",
+}
+
+enemy{
+  layer = 2,
+  x = 184,
+  y = 141,
+  direction = 0,
+  breed = "keese",
+}
+
+enemy{
+  layer = 2,
+  x = 136,
+  y = 141,
+  direction = 0,
+  breed = "keese",
+}
+

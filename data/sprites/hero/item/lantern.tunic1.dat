@@ -171,12 +171,12 @@ animation{
 }
 animation{
   name = "lantern_swing",
-  src_image = "hero/item/lantern.swing.tunic1.png",
+  src_image = "hero/item/lantern.swing.tunic.png",
   frame_delay = 45,
   directions = {
     { x = 0, y = 64, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 27, num_frames = 12 },
     { x = 0, y = 32, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 29, num_frames = 12 },
-    { x = 0, y = 64, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 25, num_frames = 12 },
+    { x = 0, y = 0, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 25, num_frames = 12 },
     { x = 0, y = 96, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 29, num_frames = 12 },
   },
 }
@@ -189,18 +189,6 @@ animation{
     { x = 0, y = 24, frame_width = 48, frame_height = 24, origin_x = 24, origin_y = 21, num_frames = 5 },
     { x = 0, y = 48, frame_width = 48, frame_height = 24, origin_x = 24, origin_y = 21, num_frames = 5 },
     { x = 0, y = 72, frame_width = 48, frame_height = 24, origin_x = 24, origin_y = 21, num_frames = 5 },
-  },
-}
-animation{
-  name = "playing",
-  src_image = "hero/ocarina.tunic.png",
-  frame_delay = 150,
-  frame_to_loop_on = 4,
-  directions = {
-    { x = 0, y = 0, frame_width = 24, frame_height = 24, origin_x = 12, origin_y = 21, num_frames = 8 },
-    { x = 0, y = 0, frame_width = 24, frame_height = 24, origin_x = 12, origin_y = 21, num_frames = 8 },
-    { x = 0, y = 0, frame_width = 24, frame_height = 24, origin_x = 12, origin_y = 21, num_frames = 8 },
-    { x = 0, y = 0, frame_width = 24, frame_height = 24, origin_x = 12, origin_y = 21, num_frames = 8 },
   },
 }
 animation{
@@ -261,15 +249,6 @@ animation{
   },
 }
 animation{
-  name = "rolling",
-  src_image = "hero/rolling.tunic.png",
-  frame_delay = 200,
-  frame_to_loop_on = 0,
-  directions = {
-    { x = 0, y = 0, frame_width = 16, frame_height = 24, origin_x = 8, origin_y = 12, num_frames = 5 },
-  },
-}
-animation{
   name = "shovel",
   src_image = "hero/shovel.tunic.png",
   frame_delay = 50,
@@ -278,15 +257,6 @@ animation{
     { x = 0, y = 40, frame_width = 64, frame_height = 40, origin_x = 32, origin_y = 29 },
     { x = 0, y = 80, frame_width = 64, frame_height = 40, origin_x = 32, origin_y = 29 },
     { x = 0, y = 120, frame_width = 64, frame_height = 40, origin_x = 32, origin_y = 29 },
-  },
-}
-animation{
-  name = "sleep",
-  src_image = "hero/tunic.sleep.png",
-  frame_delay = 300,
-  frame_to_loop_on = 0,
-  directions = {
-    { x = 0, y = 0, frame_width = 22, frame_height = 21, origin_x = 12, origin_y = 8, num_frames = 4 },
   },
 }
 animation{
@@ -347,7 +317,7 @@ animation{
 }
 animation{
   name = "sword",
-  src_image = "hero/item/lantern.sword.tunic1.png",
+  src_image = "hero/item/lantern.sword.tunic.png",
   frame_delay = 22,
   directions = {
     { x = 0, y = 0, frame_width = 32, frame_height = 32, origin_x = 16, origin_y = 29, num_frames = 12 },

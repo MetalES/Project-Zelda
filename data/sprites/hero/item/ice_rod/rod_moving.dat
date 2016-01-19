@@ -1,0 +1,10 @@
+animation{
+  name = "stopped",
+  src_image = "hero/item/fire_rod/rod.moving.entity.png",
+  directions = {
+    { x = 24, y = 0, frame_width = 24, frame_height = 24, origin_x = 9, origin_y = 21 },
+    { x = 24, y = 24, frame_width = 24, frame_height = 24, origin_x = 12, origin_y = 21 },
+    { x = 24, y = 48, frame_width = 24, frame_height = 24, origin_x = 15, origin_y = 21 },
+    { x = 24, y = 72, frame_width = 24, frame_height = 24, origin_x = 12, origin_y = 16 },
+  },
+}

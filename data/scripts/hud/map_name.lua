@@ -63,8 +63,8 @@ local remaining_time = 500
    	self.map_name:set_text_key("map.gameplay.map_name."..self.game.map_name_string)
 	self.mx, self.my = self.map_name:get_size()
     self.map_name_surface = sol.surface.create(self.mx * 2, self.my)
+	self.map_name_surface:set_opacity(0)
     self.map_name:draw(self.map_name_surface, self.mx, self.my * 0.5)	  
-    self.map_name_surface:set_opacity(0) 
 	self.display_boss_name = false			
   else
     self.display_boss_name = true		
@@ -76,8 +76,8 @@ local remaining_time = 500
 		   self.map_name:set_text(text_lines)
 		   self.mx, self.my = self.map_name:get_size()
 		   self.map_name_surface = sol.surface.create(self.mx * 2 , self.my * 4)
-		   self.map_name:draw(self.map_name_surface, self.mx, self.my * 0.5)
 		   self.map_name_surface:set_opacity(0) 
+		   self.map_name:draw(self.map_name_surface, self.mx, self.my * 0.5)
 	   else
 		   self.boss_presentation_text:set_text(text_lines)
 		   local tw, th = self.boss_presentation_text:get_size()
@@ -90,13 +90,16 @@ local remaining_time = 500
 		
 		self.game:get_map().map_name_timer = sol.timer.start(self.game:get_map(), 500, function()
 			self.map_name_surface:fade_in(40)
-			self.game:get_map().map_name_timer2 = sol.timer.start(self.game:get_map(), 3500, function()
-				self.map_name_surface:fade_out(40, function()
-				  self.map_name_surface:clear()
-				  self.game:set_value("map_name_displaying", false)
-				  self.game:set_value("previous_map_name_displayed", nil)
-				end)
+			self.game:get_map().map_name_timer:stop()
+		end)
+		
+		self.game:get_map().map_name_timer2 = sol.timer.start(self.game:get_map(), 4000, function()
+			self.map_name_surface:fade_out(40, function()
+			  self.map_name_surface:clear()
+			  self.game:set_value("map_name_displaying", false)
+			  self.game:set_value("previous_map_name_displayed", nil)
 			end)
+			self.game:get_map().map_name_timer2:stop()
 		end)
       end
 end
@@ -117,10 +120,11 @@ local scr_x, scr_y = dst_surface:get_size()
 	  elseif self.game.clear_all_map_name then
 	     self.map_name_surface:set_opacity(0)
 	     self.map_name_surface:clear()
+		 self.game:set_value("map_name_displaying", false)
+		 self.game:set_value("previous_map_name_displayed", nil)
 	     self.game.clear_all_map_name = false
 	  end
 	end
-
 end
 
 return map_name

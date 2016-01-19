@@ -7,8 +7,13 @@ local sound_played_on_brandish = "/common/big_item"
 local sound_played_when_picked = nil
 local is_assignable = true
 local sound_dir = "/items/"..item_name.."/"
-
 local volume_bgm = game:get_value("old_volume")
+
+local magic_need = 1
+local ghost_trail
+local magic_timer
+local cloak_logic
+local hero_dead_sprite
 
 -- Cloak of Darkness
 
@@ -17,18 +22,25 @@ function item:on_created()
   self:set_assignable(is_assignable)
   self:set_sound_when_picked(sound_played_when_picked)
   self:set_sound_when_brandished(sound_played_on_brandish)
-  game:set_value("item_"..item_name.."_state", 0)
 end
 
 
 function item:on_map_changed()
--- if link_dead_sprite ~= nil then link_dead_sprite:remove() end
--- if cloak_process ~= nil then cloak_process:stop(); cloak_process = nil end 
+  game:get_hero():set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
+  if game:get_value("item_"..item_name.."_state") > 0 then 
+	game:get_hero():freeze()
+	game:get_hero():set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
+	game:set_ability("sword", game:get_value("item_saved_sword"))
+	game:get_hero():set_walking_speed(88)
+	if game:get_value("starting_cutscene") ~= true then game:set_pause_allowed(true) game:get_hero():set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield")); game:set_ability("shield", game:get_value("item_saved_shield")) end
+	game:get_hero():unfreeze()
+	self:set_finished()
+  end
 self:set_finished()
 end
 
 
-function item:transit_to_finish() --TODO
+function item:transit_to_finish()
 local hero = game:get_hero()
 hero:freeze()
 
@@ -40,11 +52,10 @@ hero:set_tunic_sprite_id("hero/tunic"..game:get_value("item_saved_tunic"))
 hero:set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield"))
 
 game:set_ability("shield", game:get_value("item_saved_shield"))
-game:set_value("item_"..item_name.."_state", 0)
 
 self:set_finished()
 hero:unfreeze()
-game:set_pause_allowed(true)
+if game:get_value("starting_cutscene") ~= true then game:set_pause_allowed(true) end
 end
 
 function item:store_equipment()
@@ -71,11 +82,11 @@ function item:on_using()
 local hero = game:get_hero()
 local tunic = game:get_value("item_saved_tunic")
 local x, y, layer = hero:get_position()
-local magic_need = 1
 
 local function cancel_item() game:get_map():move_camera(hero_dead_sprite.x, hero_dead_sprite.y, 300, function() hero:set_position(hero_dead_sprite.x, hero_dead_sprite.y, hero_dead_sprite.layer); hero_dead_sprite:remove(); hero:set_visible(true); sol.audio.play_sound("stairs_indicator"); self:transit_to_finish() end, 10, 0) end
 local function end_by_collision() game:set_ability("shield", game:get_value("item_saved_shield")); cancel_item(); sol.audio.play_sound(sound_dir.."ending"); game:set_pause_allowed(true) end
 
+game:using_item()
 
 if game:get_value("item_"..item_name.."_state") == 0 then
 	hero:unfreeze()
@@ -104,7 +115,6 @@ if game:get_value("item_"..item_name.."_state") == 0 then
 	-- entity:set_enabled(true)
 	-- end
 		
-		
 		cloak_logic = sol.timer.start(10, function()
 			if hero:get_direction() == 0 then new_x = -1; new_y = 0 
 			elseif hero:get_direction() == 1 then new_x = 0; new_y = 1 
@@ -114,7 +124,6 @@ if game:get_value("item_"..item_name.."_state") == 0 then
 			
 			if hero:get_state() == "hurt" then hero:set_tunic_sprite_id("hero/tunic"..tunic); hero:start_hurt(0,0,0); end_by_collision() end
 			if hero:get_state() == "falling" then hero:set_tunic_sprite_id("hero/tunic"..tunic); end_by_collision() end
-			-- if hero:overlaps(hero_dead_sprite) then item:transit_to_finish() end
 		   return true
 		end)
 	     
@@ -167,15 +176,14 @@ function item:set_finished()
 	if magic_timer ~= nil then magic_timer:stop(); magic_timer = nil end
 	if cloak_logic ~= nil then cloak_logic:stop(); cloak_logic = nil end
 		
-	game:set_value("item_"..item_name.."_can_shoot", false)
 	game:set_value("item_"..item_name.."_state", 0)
-	game:set_value("item_"..item_name.."_avoid_return", false)
+	game:item_finished()
+	
+game:set_command_keyboard_binding("action", game:get_value("item_saved_kb_action"))
+game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
+game:set_command_keyboard_binding("item_2", game:get_value("item_2_kb_slot"))
 
-	game:set_custom_command_effect("attack", nil)
-	game:set_command_keyboard_binding("action", game:get_value("item_saved_kb_action"))
-	game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
-	game:set_command_keyboard_binding("item_2", game:get_value("item_2_kb_slot"))
-	game:set_command_joypad_binding("action", game:get_value("item_saved_jp_action"))
-	game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
-	game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
+game:set_command_joypad_binding("action", game:get_value("item_saved_jp_action"))
+game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
+game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
 end
