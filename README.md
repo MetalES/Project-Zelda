@@ -24,7 +24,6 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 - Day/Night + clock added
 - WIP : Shop, Epona, Horse system
 - Restarted PSP port
-- 
 
 #Planned
 - Shaders (Heat effect, clouds, etc)
