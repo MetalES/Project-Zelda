@@ -1,6 +1,7 @@
 # Solarus : Project Zelda
 
-Current build : Unplayable, scripts missing
+*Current build : Unplayable, scripts missing
+Don't ask me to fix the git if the file you downloaded provide errors in your quest, they'll be automatically fixed, patience is the key.
 
 Repo Update rate : Each Week.
 Advancement tracking : each major version.
