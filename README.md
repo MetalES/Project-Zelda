@@ -20,12 +20,12 @@ Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Sol
 
 #Version updates (advancement tracking) :
 
-#0.2 - January 20th 2016
+#0.21 - January 23th 2016
 - Ocarina added, song effect remains.
 - Avoidable guards added
 - Day/Night + clock added
 - WIP : Shop, Epona, Horse system
-- Restarted PSP port
+- Hero Mode implemented
 
 #Planned
 - Shaders (Heat effect, clouds, etc)
