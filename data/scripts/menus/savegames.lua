@@ -208,6 +208,7 @@ function savegame_menu:draw_savegame(slot_index)
   for i = 1, 3 do
     if self.slots[i].savegame:get_value("hero_mode") then
 	self.file_box_graphic:draw_region(64, 0, 64, 16, self.surface, 63, 58 + 17 * (i))
+	self.file_box_graphic:draw_region(128, 0, 11, 11, self.surface, 58, 60 + 17 * (i))
     else
 	self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 58 + 17 * (i))
 	end
@@ -483,6 +484,7 @@ function savegame_menu:key_pressed_phase_select_file(key)
         self:init_phase_display_quest()
       else
         -- It's a new savegame: choose the player's name.
+		self.selected_quest = self.cursor_position
         self:init_phase_choose_name()
       end
     end
@@ -1046,15 +1048,18 @@ end
 
 function savegame_menu:draw_phase_display_quest()
   local y = 115
-  -- Current savegame slot.
-  self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 75)
+  -- Current savegame slot
+  
   self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 133)
   self.file_box_erase:draw_region(0, 0, 64, 16, self.surface, 63, 150)
   
   if self.savegame:get_value("hero_mode") then
   self.file_box_graphic:draw_region(0, 124, 177, 56, self.surface, 62, 75)
+  self.file_box_graphic:draw_region(64, 0, 64, 16, self.surface, 63, 75)
+  self.file_box_graphic:draw_region(128, 0, 11, 11, self.surface, 58, 77)
   else
   self.file_box_graphic:draw_region(0, 32, 177, 56, self.surface, 62, 75)
+  self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 75)
   end
   self.hero_name:draw(self.surface, 136, 82)
   self.hero_sprite:draw(self.surface, 81, 116)
@@ -1523,9 +1528,9 @@ function savegame_menu:add_letter_player_name()
 		  self.cursor_sprite:set_animation("blink")
 		  finished = true
 		else
-		  sol.audio.play_sound("menu/letter_back")
 		  finished = false
 		end
+	  sol.audio.play_sound("menu/letter_back")
       end
     end
   end
@@ -1567,7 +1572,6 @@ function savegame_menu:validate_player_name()
 	  sol.timer.start(self, 200, function()
 		sol.audio.play_sound("menu/fileselect_created")
 		self.title_text:set_text_key("selection_menu.phase.created_file")
-		
 		local savegame = self.slots[self.selected_quest].savegame	
 		self:set_initial_values(savegame)
 		savegame:save()
