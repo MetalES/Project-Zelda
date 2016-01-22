@@ -470,6 +470,20 @@ function hero_meta:on_state_changed(state)
 
 	end	
   end  
+  
+  function hero_meta:teleport_to(map_id, destination, transition)
+    local map_id = map_id
+	local destination = destination
+	local transition = transition or "fade"
+
+  --define the destination_mode, depending on the game mode
+  	if sol.main.game:get_value("hero_mode") then
+     dest_map = "mirror"
+	else 
+	 dest_map = "normal"
+    end
+  self:teleport(dest_map.."/"..map_id, destination, transition)
+  end
 end
 
 local function initialize_sprite()

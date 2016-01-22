@@ -1,0 +1,10 @@
+This is going to be the next thing after Epona.
+
+So, as stated by other, Titlescreen must be a surface-only drawables.
+But, I have some idea to counter this and make the titlescreen a map thing.
+
+- in main.lua, check if a file "save0" exist, if not, create it with as starting location the desired map
+- when the titlescreen start, game:start(save0)
+- handle the titlescreen from the map script
+- when start is pressed, go to file selection
+

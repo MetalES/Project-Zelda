@@ -25,18 +25,17 @@ self.can_control = true
   self.bird_x, self.bird_y =  math.random(-60, -22), math.random(150, 0)
   self.bird1_x, self.bird1_y = math.random(-200, -22), math.random(70, 0)
   
-  self.time_of_day = sol.surface.create("menus/selection/background/"..time_of_day.."/element.png")
-  self.cloud0 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud0.png")
-  self.cloud1 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud1.png")
-  self.cloud2 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud2.png")
-  self.cloud3 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud3.png")
-  self.cloud4 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud4.png")
-  self.cloud5 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud5.png")
-  self.cloud6 = sol.surface.create("menus/selection/background/"..time_of_day.."/cloud6.png")
-  self.hill_right = sol.surface.create("menus/selection/background/"..time_of_day.."/hill_right.png")
-  self.hill_left = sol.surface.create("menus/selection/background/"..time_of_day.."/hill_left.png")
+  self.cloud0 = sol.surface.create("menus/selection/background/night/cloud0.png")
+  self.cloud1 = sol.surface.create("menus/selection/background/night/cloud1.png")
+  self.cloud2 = sol.surface.create("menus/selection/background/night/cloud2.png")
+  self.cloud3 = sol.surface.create("menus/selection/background/night/cloud3.png")
+  self.cloud4 = sol.surface.create("menus/selection/background/night/cloud4.png")
+  self.cloud5 = sol.surface.create("menus/selection/background/night/cloud5.png")
+  self.cloud6 = sol.surface.create("menus/selection/background/night/cloud6.png")
+  self.hill_right = sol.surface.create("menus/selection/background/night/hill_right.png")
+  self.hill_left = sol.surface.create("menus/selection/background/night/hill_left.png")
   self.night_fog = sol.surface.create("menus/selection/background/night/mountain_fog.png")
-  self.mountain_top = sol.surface.create("menus/selection/background/"..time_of_day.."/mountain_top.png")
+  self.mountain_top = sol.surface.create("menus/selection/background/night/mountain_top.png")
   self.curent_menu_container_box = sol.surface.create("menus/selection/background/common/fileselect.png")
   self.player_name_graphic = sol.surface.create("menus/selection/background/common/fileselect.png")
   self.file_box_graphic = sol.surface.create("menus/selection/background/common/fileselect.png")
@@ -172,7 +171,6 @@ function savegame_menu:on_draw(dst_surface)
   self.background:draw(self.surface, 0, 0)
 
   -- Clouds.
-  self.time_of_day:draw(self.surface, self.time_of_day_x, self.time_of_day_y)
   self.cloud0:draw(self.surface, 211, 180)-- V
   self.cloud1:draw(self.surface, 0, 179)-- V
   self.cloud2:draw(self.surface, 16, 166) -- V
@@ -207,9 +205,14 @@ function savegame_menu:draw_savegame(slot_index)
   local slot = self.slots[slot_index]
   slot.file:draw(self.surface, 73, 65 + slot_index * 17)
    
-  self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 75)
-  self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 92)
-  self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 109)
+  for i = 1, 3 do
+    if self.slots[i].savegame:get_value("hero_mode") then
+	self.file_box_graphic:draw_region(64, 0, 64, 16, self.surface, 63, 58 + 17 * (i))
+    else
+	self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 58 + 17 * (i))
+	end
+  end
+  
   self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 133)
   if not self.is_copy_erase then
     self.file_box_erase:draw_region(0, 0, 64, 16, self.surface, 63, 150)
@@ -250,10 +253,7 @@ end
 
 function savegame_menu:draw_bottom_buttons()
 
-  local x
-  local y = 158
   if self.option1_text:get_text():len() > 0 then
-    x = 57
 	if self.is_option_menu then
 	  self.option1_text:draw(self.surface, 71, 160)
 	else
@@ -261,12 +261,14 @@ function savegame_menu:draw_bottom_buttons()
 	end
   end
   if self.option2_text:get_text():len() > 0 then
-    x = 165
     self.option2_text:draw(self.surface, 77, 157)
   end
   if self.option3_text:get_text():len() > 0 then
-    x = 165
-    self.option3_text:draw(self.surface, 77, 181)
+    if self.can_hero_mode then
+	  self.option3_text:draw(self.surface, 67, 181)
+	else
+      self.option3_text:draw(self.surface, 77, 181)
+	end
   end
 end
 
@@ -331,9 +333,9 @@ end
 function savegame_menu:move_cursor_up()
   sol.audio.play_sound("menu/cursor_1")
   local cursor_position = self.cursor_position - 1
-  if cursor_position == 0 and not self.is_copy_erase and self.draw_option_container then
+  if (cursor_position == 0 and not self.is_copy_erase and self.draw_option_container) or (cursor_position == 3 and self.phase == "display_quest" and self.can_hero_mode) then 
     cursor_position = 6
-  elseif cursor_position == 3 and ((self.phase == "confirm_copy" or self.phase == "confirm_erase" or self.phase == "display_quest") or not self.is_copy_erase and not self.draw_option_container) then
+  elseif cursor_position == 3 and ((self.phase == "confirm_copy" or self.phase == "confirm_erase" and not self.can_hero_mode) or not self.is_copy_erase and not self.draw_option_container) then
     cursor_position = 5 
   elseif cursor_position == 0 and (self.phase == "copy_file" or self.phase == "copy_which_file" or self.phase == "erase_file") then
     cursor_position = 4
@@ -346,9 +348,11 @@ function savegame_menu:move_cursor_down()
   sol.audio.play_sound("menu/cursor_1")
   local cursor_position = self.cursor_position + 1
   
-  if cursor_position == 7 then
+  if cursor_position == 7 and not self.can_hero_mode then 
     cursor_position = 1
-  elseif cursor_position == 6 and ((self.phase == "confirm_copy" or self.phase == "confirm_erase" or self.phase == "display_quest") or not self.is_copy_erase and not self.draw_option_container) then
+  elseif cursor_position == 7 and self.can_hero_mode then
+    cursor_position = 4
+  elseif (cursor_position == 6 and ((self.phase == "confirm_copy" or self.phase == "confirm_erase") or not self.is_copy_erase and not self.draw_option_container and not self.can_hero_mode))then
     cursor_position = 4
   elseif cursor_position == 5 and (self.phase == "copy_file" or self.phase == "copy_which_file" or self.phase == "erase_file") then
     cursor_position = 1
@@ -627,14 +631,13 @@ function savegame_menu:key_pressed_phase_copy_which_file(key)
     elseif self.cursor_position > 0 and self.cursor_position <= 3 then
       -- The user chooses a savegame to delete.
       local slot = self.slots[self.cursor_position]
-      if not sol.game.exists(slot.file_name) then
-        -- The savegame doesn't exist: error sound.
-		self.is_copy_erase = false
-		sol.audio.play_sound("menu/menu_open")
-		self.target_file = self.cursor_position
-        self:init_phase_confirm_copy()
-      else
-	    sol.audio.play_sound("error")
+      if sol.game.exists(slot.file_name) then
+  	  sol.audio.play_sound("error")
+	  else
+	  self.is_copy_erase = false
+	  sol.audio.play_sound("menu/menu_open")
+	  self.target_file = self.cursor_position
+      self:init_phase_confirm_copy()
       end
     end
   else
@@ -751,9 +754,9 @@ end
 function savegame_menu:direction_pressed_phase_confirm_copy(direction8)
 
   local handled = false
-  if direction8 == 2 then
+  if direction8 == 2 and self.can_control then
     self:move_cursor_up()
-  elseif direction8 == 6 then
+  elseif direction8 == 6 and self.can_control then
     self:move_cursor_down()
     handled = true
   end
@@ -963,6 +966,13 @@ function savegame_menu:init_phase_display_quest()
 	  vertical_aligmenent = "center",
 	  text_key = "selection_menu.file"
   }
+  
+  if self.savegame:get_value("finished_game") and not self.savegame:get_value("hero_mode") then
+    self.can_hero_mode = true
+    self:set_bottom_buttons("selection_menu.no", "selection_menu.yes", "selection_menu.hero_mode")
+  elseif not self.savegame:get_value("finished_game") then
+    self:set_bottom_buttons("selection_menu.no", "selection_menu.yes", nil)
+  end
     
   local hearts_class = require("scripts/hud/hearts")
   self.hearts_view = hearts_class:new(self.savegame)
@@ -1004,7 +1014,12 @@ function savegame_menu:key_pressed_phase_display_quest(key)
       -- The user chooses "no".
       sol.audio.play_sound("menu/letter_back")
 	  self:set_cursor_position(self.selected_quest)
+	  self.can_hero_mode = false
       self:init_phase_select_file()
+	elseif self.cursor_position == 6 then
+	  sol.audio.play_sound("menu/menu_open")
+	    self.is_entering_hero_mode_new_name = true
+	  self:init_phase_choose_name()
     end
   else
     handled = false
@@ -1036,9 +1051,17 @@ function savegame_menu:draw_phase_display_quest()
   self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 133)
   self.file_box_erase:draw_region(0, 0, 64, 16, self.surface, 63, 150)
   
+  if self.savegame:get_value("hero_mode") then
+  self.file_box_graphic:draw_region(0, 124, 177, 56, self.surface, 62, 75)
+  else
   self.file_box_graphic:draw_region(0, 32, 177, 56, self.surface, 62, 75)
+  end
   self.hero_name:draw(self.surface, 136, 82)
   self.hero_sprite:draw(self.surface, 81, 116)
+  
+  if self.savegame:get_value("finished_game") and not self.savegame:get_value("hero_mode") then
+    self.file_box_option:draw_region(64, 0, 64, 16, self.surface, 63, 174)
+  end
   
   local dst_position = {
   {67, 13, 121},
@@ -1491,14 +1514,18 @@ function savegame_menu:add_letter_player_name()
           self.player_name = self.player_name:sub(1, size - 1)
         end
 
-      elseif letter_cursor.x == 11 then  -- Validate the choice.
+      elseif letter_cursor.x == 11 then  -- Validate the choice. 
 	    self.can_control = false
         finished = self:validate_player_name()
 
       elseif letter_cursor.x == 12 then  -- Cancel.
-        sol.audio.play_sound("menu/letter_back")
-		self.cursor_sprite:set_animation("blink")
-        finished = true
+		if not self.is_entering_hero_mode_new_name then
+		  self.cursor_sprite:set_animation("blink")
+		  finished = true
+		else
+		  sol.audio.play_sound("menu/letter_back")
+		  finished = false
+		end
       end
     end
   end
@@ -1522,32 +1549,50 @@ function savegame_menu:validate_player_name()
     sol.audio.play_sound("menu/letter_back")
 	self.can_control = true
     return false
-  else
+  else 
     self.can_control = false
   end
-  
+    
   sol.audio.play_sound("menu/fileselect_startcreating")
   self.title_text:set_text_key("selection_menu.phase.creating_file")
   
-  sol.timer.start(self, 3500, function()
-    sol.audio.play_sound("menu/fileselect_created")
-	self.title_text:set_text_key("selection_menu.phase.created_file")
-	local savegame = self.slots[self.cursor_position].savegame
-	self:set_initial_values(savegame)
-	savegame:save()
-	self:read_savegames()
-	sol.timer.start(self, 2000, function()
-	  self.can_control = true
-	  self.cursor_sprite:set_animation("blink")
-	  self:init_phase_select_file()
-	end)
-  end)
   
+  sol.timer.start(self, 3300, function()
+    if self.can_hero_mode then
+  	 local slot = self.slots[self.selected_quest]
+     sol.game.delete(slot.file_name)
+     self:read_savegames()
+	 sol.file.remove("save"..self.selected_quest..".dat")
+    end
+	  sol.timer.start(self, 200, function()
+		sol.audio.play_sound("menu/fileselect_created")
+		self.title_text:set_text_key("selection_menu.phase.created_file")
+		
+		local savegame = self.slots[self.selected_quest].savegame	
+		self:set_initial_values(savegame)
+		savegame:save()
+		self:read_savegames()
+		sol.timer.start(self, 2000, function()
+		  self.can_control = true
+		  self.is_entering_hero_mode_new_name = false
+		  self.can_hero_mode = false
+	      self.draw_option_container = true
+		  self.is_copy_erase = false
+		  self:set_cursor_position(self.selected_quest)
+		  self.cursor_sprite:set_animation("blink")
+		  self:init_phase_select_file()
+		end)
+	  end)
+  end)
 end
 
 
 function savegame_menu:set_initial_values(savegame)
   savegame:set_value("player_name", self.player_name)
+  
+  	if self.can_hero_mode then
+	  savegame:set_value("hero_mode", true)
+	end
 
   savegame:set_starting_location("cutscene/intro", "default")
   savegame:set_value("old_volume", sol.audio.get_music_volume())
