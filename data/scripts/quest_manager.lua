@@ -68,14 +68,27 @@ local function initialize_enemies()
   function enemy_meta:on_hurt_by_sword(hero, enemy_sprite)
     -- Here, self is the enemy.
     local game = self:get_game()
+	local hero_mode = game:get_value("hero_mode")
     local sword = game:get_ability("sword")
 	local damage_factors = { 1, 2, 4, 8 }  -- Damage factor of each sword.
     local damage_factor = damage_factors[sword]
 	
-    if hero:get_state() == "sword spin attack" then
-      damage_factor = damage_factor * 2  -- The spin attack is twice as powerful, but costs more stamina.
-    end 
-
+	if hero:get_state() == "sword spin attack" then
+	  if hero_mode then
+	    damage_factor = damage_factor
+	  else
+	    damage_factor = damage_factor * 2  -- The spin attack is twice as powerful, but costs more stamina.
+	  end
+	end
+	
+	if hero:get_state() == "sword swinging" then
+	  if hero_mode then
+	    damage_factor =  damage_factor / 2 -- damage are ridiculous
+	  else
+	    damage_factor = damage_factor  -- Dafault damage value
+	  end
+	end
+		
     local reaction = self:get_attack_consequence_sprite(enemy_sprite, "sword")
     self:remove_life(reaction * damage_factor)
   end
@@ -340,8 +353,55 @@ local hero_meta = sol.main.get_metatable("hero")
 local was_loading
 local pushing_timer, pulling_timer
 local pulling_snd_timer, pushing_snd_timer, low_life_snd_timer
-local using_bow, using_hookshot, using_boomerang
 
+
+function hero_meta:on_taking_damage(damage)
+    local damage = damage
+	local game = self:get_game()
+	local hero_mode = game:get_value("hero_mode")
+	
+	print("taking damage")
+
+    if self:is_condition_active('frozen') then
+      damage = damage * 3
+      self:stop_frozen(true)
+    end
+
+    if damage < 1 then
+      damage = 1
+    end
+	
+	local shield = game:get_ability("shield")
+	
+	if hero_mode then
+	  if shield > 1 then
+	    damage = math.floor(damage / (shield / 3))
+		print(damage)
+	  else 
+	    damage = damage * 2
+		print(damage)
+	  end
+	else 
+	  if shield > 1 then
+	    damage = math.floor(damage / shield)
+		print(damage)
+	  else
+	    damage = damage
+	  end
+	end
+	
+	-- if hero_mode then
+	-- damage = damage * 2
+	-- else 
+	  -- damage = damage
+	-- end  
+	-- game:remove_life(damage)
+
+    game:remove_life(damage)
+
+end
+
+  -- Used for Pushing / Pulling state
 local function stop_pushing_pulling()
   if pushing_timer ~= nil then pushing_timer:stop(); pushing_timer = nil end
   if pulling_timer ~= nil then pulling_timer:stop(); pulling_timer = nil end
@@ -349,6 +409,7 @@ local function stop_pushing_pulling()
   if pulling_snd_timer ~= nil then pulling_snd_timer:stop(); pulling_snd_timer = nil end
 end
 
+  -- On state changed : Tell the game what to do if the state changed
 function hero_meta:on_state_changed(state)
 	local random_sword_snd = math.random(4)
 	local random_sword_spin_snd = math.random(2)
@@ -469,20 +530,22 @@ function hero_meta:on_state_changed(state)
 	    sol.audio.play_sound("characters/link/voice/jump")
 
 	end	
-  end  
-  
+  end 
+
+-- Custom Functions  
+-- Teleport_to, nothing more, it's just hero:teleport(), just with a function that check if we are in hero mode
   function hero_meta:teleport_to(map_id, destination, transition)
     local map_id = map_id
 	local destination = destination
 	local transition = transition or "fade"
+	local dest_map
 
-  --define the destination_mode, depending on the game mode
   	if sol.main.game:get_value("hero_mode") then
      dest_map = "mirror"
 	else 
 	 dest_map = "normal"
     end
-  self:teleport(dest_map.."/"..map_id, destination, transition)
+    self:teleport(dest_map.."/"..map_id, destination, transition)
   end
 end
 

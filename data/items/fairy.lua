@@ -10,6 +10,8 @@ end
 
 function item:on_pickable_created(pickable)
 
+  if self:get_game():get_value("hero_mode") then pickable:remove() end
+
    -- Create a movement that goes into random directions,
    -- with a speed of 28 pixels per second.
   local movement = sol.movement.create("random")

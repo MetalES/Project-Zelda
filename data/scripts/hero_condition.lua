@@ -114,34 +114,6 @@ function condition_manager:initialize(game)
     return false
   end
 
-  function hero:on_taking_damage(in_damage)
-    local damage = in_damage
-
-    if hero:is_condition_active('frozen') then
-      damage = damage * 3
-      hero:stop_frozen(true)
-    end
-
-    if damage == 0 then
-      return
-    end
-
-    local shield_level = game:get_ability('shield')
-    local tunic_level = game:get_ability('tunic')
-
-    local protection_divider = tunic_level * math.ceil(shield_level / 2)
-    if protection_divider == 0 then
-      protection_divider = 1
-    end
-    damage = math.floor(damage / protection_divider)
-
-    if damage < 1 then
-      damage = 1
-    end
-
-    game:remove_life(damage)
-  end
-
   function hero:start_confusion(delay)
     local aDirectionPressed = {
       right = false,
@@ -202,7 +174,12 @@ function condition_manager:initialize(game)
     hero:freeze()
     hero:set_animation("electrocuted")
     sol.audio.play_sound("spark")
-    game:remove_life(2)
+	
+	if game:get_value("hero_mode") then
+	  game:remove_life(4)
+	else
+      game:remove_life(2)
+	end
 
     hero:set_condition('electrocution', true)
     condition_manager.timers['electrocution'] = sol.timer.start(hero, delay, function()

@@ -52,6 +52,9 @@ sol.timer.start(250, function() heart_sprite:get_sprite():fade_out(2, function()
 end
 
 function item:on_pickable_created(pickable)
+
+  if self:get_game():get_value("hero_mode") then pickable:remove() end
+
   if pickable:get_falling_height() ~= 0 then
     -- Replace the default falling movement by a special one.
     local trajectory = {
