@@ -1,3 +1,6 @@
+-- Script by Wrightmat, still not worked on it.
+-- Gonna be reworked for the Song of Soaring
+
 local game = ...
 local warp_menu = {}  -- The warp menu.
 local initial_point

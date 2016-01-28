@@ -1,92 +1,81 @@
 local cutscene_bars_builder = {}
 
-local cutscene_bars_size = sol.surface.create(320, 26)
-local cutscene_bars_2_size = sol.surface.create(320, 27)
-
-local initialized_at_start = false
-local movement_type = "straight"
-local speed = 500
-local distance = 26
-local direction_angle_calc_up = math.pi / 2
-local direction_angle_calc_down = 3 * direction_angle_calc_up
-local state = 0
-
 function cutscene_bars_builder:new(game)
+  local object = {}
+  setmetatable(object, self)
+  self.__index = self
 
-  local cutscene_bars = {}
-  local cutscene_bars_enabled = false  
-    
-  function cutscene_bars:set_dst_position(x, y)
-    self.dst_x = x
-    self.dst_y = y
-  end
-  
-  function cutscene_bars:on_draw(dst_surface)
-    if cutscene_bars_enabled then
-	  cutscene_bars_size:draw(dst_surface, 0, -26)
-	  cutscene_bars_size:fill_color({0,0,0})
-	  cutscene_bars_size:set_opacity(255)
+  object:initialize(game)
 
-	  cutscene_bars_2_size:draw(dst_surface, 0 , 239)
-	  cutscene_bars_2_size:fill_color({0,0,0})
-	  cutscene_bars_2_size:set_opacity(255)
-	  bars_draw = true
-	elseif not initialized_at_start then
-	  cutscene_bars_2_size:clear()
-	  cutscene_bars_size:clear()
-	  cutscene_bars_size:set_xy(0,0)
-      cutscene_bars_2_size:set_xy(0,0)
-	  initialized_at_start = true
-	end
-  end
-
-local function check()
- -- define movement here
- local up = sol.movement.create(movement_type)
-	   up:set_speed(speed)
-	   up:set_angle(direction_angle_calc_up)
-       up:set_max_distance(distance)
- local down = sol.movement.create(movement_type)
-	   down:set_speed(speed)
-	   down:set_angle(direction_angle_calc_down)
-       down:set_max_distance(distance)
- function up:on_finished()
-   up:stop()
-   down:on_finished()
- end
- function down:on_finished()
-   down:stop()
-    if state == 1 then
-      cutscene_bars_2_size:clear()
-	  cutscene_bars_size:clear()	
-	  show_bars = false 
-	  cutscene_bars_enabled = false
-	  initialized_at_start = false
-	  state = 0
-    end
- end
-
-  if show_bars ~= true then		
-  cutscene_bars_enabled = false
-  else  
-	  if not cutscene_bars_enabled then
-		up:start(cutscene_bars_2_size)
-		down:start(cutscene_bars_size)
-		cutscene_bars_enabled = true
-	  elseif cutscene_bars_enabled == true and bars_dispose == true then	
-		down:start(cutscene_bars_2_size)
-		up:start(cutscene_bars_size)
-		state = 1
-		bars_dispose = false
-	  end
-   end
-  return true 
+  return object
 end
 
-  check()
-  sol.timer.start(game, 100, check)
+function cutscene_bars_builder:initialize(game)
+  self.game = game
+  self.bar0, self.bar1 = sol.surface.create(320, 26), sol.surface.create(320, 27)
+  self.bar0:fill_color({0,0,0})
+  self.bar1:fill_color({0,0,0})
+  self.state = 0
+  self.initialized = false
+  self.displaying_bars = false
+end
 
-return cutscene_bars
+function cutscene_bars_builder:on_started()
+  self:check()
+end
+
+function cutscene_bars_builder:check()
+    if self.game.display_cutscene_bars and not self.game.dispose_cutscene_bars and not self.initialized then
+      self:display_bars()
+	  self.initialized = true
+    elseif self.game.display_cutscene_bars and  self.game.dispose_cutscene_bars then
+	  self:display_bars()
+	  self.initialized = false
+	end
+	
+  sol.timer.start(self.game, 250, function()
+     self:check()
+  end)
+end
+
+function cutscene_bars_builder:display_bars()
+-- Movements
+ local up = sol.movement.create("straight")
+	   up:set_speed(500)
+	   up:set_angle(math.pi / 2)
+       up:set_max_distance(26)
+ local down = sol.movement.create("straight")
+	   down:set_speed(500)
+	   down:set_angle(3 * math.pi / 2)
+       down:set_max_distance(26)
+	   
+  if self.state == 0 then
+    self.displaying_bars = true
+    up:start(self.bar1)  
+    down:start(self.bar0)  
+	self.state = 1
+  elseif self.state == 1 then
+    up:start(self.bar0)  
+    down:start(self.bar1, function()
+	  self.state = 0
+	  self.game.display_cutscene_bars = false
+	  self.game.dispose_cutscene_bars = false
+	  self.displaying_bars = false
+	  self.initialized = false
+	end)  
+  end
+end
+
+function cutscene_bars_builder:set_dst_position(x, y)
+  self.dst_x = x
+  self.dst_y = y
+end
+
+function cutscene_bars_builder:on_draw(dst_surface)
+  if self.displaying_bars then
+  self.bar0:draw(dst_surface, 0, -26)
+  self.bar1:draw(dst_surface, 0 , 239)
+  end
 end
 
 return cutscene_bars_builder
