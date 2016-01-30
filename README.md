@@ -1,6 +1,8 @@
 # Solarus : Project Zelda
 
 ->Current build<- : Unplayable, scripts missing
+There is a lot of stuffs not uploaded on the GIT, I wanna keep them safely before the release of the demo. (Approx. Summer 2016)
+You will find some basic stuffs here and there though.
 
 Don't ask me to fix the git if the file you downloaded provide errors in your quest, they'll be automatically fixed, patience is the key.
 
@@ -13,7 +15,7 @@ Welcome to Solarus Engine : Project Zelda's Git. Here you can find the files of 
 This game is being made using the Solarus engine*
 
 The game is currently in version 0.15
-Currently working on : Gameplay
+Currently working on : Bosses
 
 To run: Windows: execute "solarus.exe" Linux: download executable or compile source available at http://www.solarus-games.org         Mac: download executable or compile source available at http://www.solarus-games.org
 Solarus is Christopho's A-RPG Engine that was originally made for Mystery of Solarus DX written in C++ that interprete LUA code for running user quest(s) (https://github.com/christopho).
