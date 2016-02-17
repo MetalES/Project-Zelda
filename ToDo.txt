@@ -1,16 +1,1 @@
-Version 0.1 :
-
--Make ALL of Link's needed sprites
-   - [DONE]Climbing
-   - Items
-   - [DONE]Rolling
-   - Cutscene poses
-- Work on some items, they don't need to be fully functionnal
-- import all other ressources from RPG Maker Version, this is secondary.
-- import NPC
-
-Version 0.2 :
-
-- Started making intro
-- [DONE]1st playable floor of Knight Academy (Starting Point after Forsaken Jail (Dungeon 1)
-- [DONE] Link & Uncle House
+Nothing, just map
