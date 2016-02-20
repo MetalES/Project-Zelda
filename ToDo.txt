@@ -1,1 +1,6 @@
-Nothing, just map
+Day and Night cycle need to be reworked.
+  - Add the minute indicator
+  - A graphic "Day" or "Night"
+  - Delete depencies of Day / Night related features of Game_manager and quest_manager
+  - Optionnal : Majora's Mask 3 day example
+  
