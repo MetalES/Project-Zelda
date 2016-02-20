@@ -41,6 +41,7 @@ function game:set_time_flow(int)
   game:start_tone_system()
 end
 
+--Code from Wrightmat
 function game:get_time_of_day()
   if game:get_value("time_of_day") == nil then game:set_value("time_of_day", "day") end
   return game:get_value("time_of_day")
@@ -92,10 +93,10 @@ end
 function tone_manager:check()
 local minute = self.game:get_value("current_minute")
 local hour = self.game:get_value("current_hour")
-local world = self.game:get_map():get_world() or nil
+-- local world = self.game:get_map():get_world() or nil
 local need_rebuild = false
 
-  if world ~= "outside" then
+  if self.game:get_map():get_tileset() ~= "hyrule" then
     self.time_system = false
   else
     self.time_system = true
@@ -152,42 +153,40 @@ local hour = self.game:get_value("current_hour")
    self.game:set_value("time_of_day", "night_ending")
    self:set_new_tone(10, 10, 60, 130)
   elseif hour == 5 and minute == 0 and minute <= 30 then
-   self:set_new_tone(50, 10, 60, 110)
+   self:set_new_tone(30,150, 50, 110)
   elseif hour == 5 and minute >= 30 then
    self.game:set_value("time_of_day", "twilight_sunrise")
-    self:set_new_tone(100, 33, 63, 100)
+    self:set_new_tone(253, 125, 5, 100)
   elseif hour == 6 and minute == 0 and minute <= 30 then
    self.game:set_value("time_of_day", "sunrise")
-   self:set_new_tone(253, 150, 5, 100)
+   self:set_new_tone(253, 125, 5, 80)
   elseif hour == 6 and minute >= 30 then
    self.game:set_value("time_of_day", "daytime")
-   self:set_new_tone(253, 150, 5, 80)
+   self:set_new_tone(253, 125, 5, 60)
   elseif hour >= 7 and hour <= 11 then
    self:set_new_tone(0, 0, 0, 0)
-  elseif hour >= 12 and hour <= 14 then
+  elseif hour >= 12 and hour <= 15 then
    self:set_new_tone(255, 255, 0, 25)
-  elseif hour == 15 then
-   self:set_new_tone(255, 255, 0, 50)
   elseif hour == 16 and minute == 0 and minute <= 30 then
    self.game:set_value("time_of_day", "day_ending")
-   self:set_new_tone(253, 200, 5, 60)
+   self:set_new_tone(253, 125, 5, 60)
   elseif hour == 16 and minute >= 30 then
-   self:set_new_tone(253, 160, 5, 75)
+   self:set_new_tone(253, 125, 5, 75)
   elseif hour == 17 and minute == 0 and minute <= 30 then
-   self:set_new_tone(253, 160, 5, 90)--188
+   self:set_new_tone(253, 125, 5, 90)
   elseif hour == 17 and minute >= 30 then
    self.game:set_value("time_of_day", "sunset")
-   self:set_new_tone(245, 120, 50, 100)
+   self:set_new_tone(200, 100, 50, 100)
   elseif hour == 18 and minute >= 0 and minute <= 30 then
    self.game:set_value("time_of_day", "twilight_sunset")
-   self:set_new_tone(200, 0, 70,60)
+   self:set_new_tone(150, 0, 70,120)
   elseif hour == 18 and minute >= 30 then
-   self:set_new_tone(100, 0, 100,60)
+   self:set_new_tone(25, 0, 70,140) --??? 100 0 70 140
   elseif hour == 19 and minute >= 0 and minute <=30 then
    self.game:set_value("time_of_day", "night")
-   self:set_new_tone(0, 0, 64, 120)
+   self:set_new_tone(0, 0, 64, 160)
   elseif hour == 19 and minute >= 30 then
-   self:set_new_tone(0, 0, 64, 125)
+   self:set_new_tone(0, 0, 64, 170)
   elseif hour == 20 then
    self:set_new_tone(0, 0, 64, 150)
   elseif hour >= 21 and hour <= 23 then
@@ -203,8 +202,7 @@ self.game:set_value("ta", ta)
 end
 
 function tone_manager:rebuild_tone()
-	sol.timer.start(self, self.game.time_flow / 2, function() -- 5.5
-	
+  tone_timer = sol.timer.start(self, self.game.time_flow / 2, function() -- 5.5
       if cr ~= tr then
 	   if cr < tr then
 	    cr = cr + 1
@@ -254,6 +252,7 @@ function tone_manager:rebuild_tone()
 	  self.game:set_value("ca", ca)
 	return true
 	end)
+	tone_timer:set_suspended_with_map(true)
 end
 
 function tone_manager:on_finished()

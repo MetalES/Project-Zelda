@@ -1,0 +1,11 @@
+mirror : Hero Mode Maps (Reversed)
+normal : Not Hero Mode.
+test : Testing stuffs (tilemap, enemies)
+
+Testing with King Dodogo Map.
+
+Function to call : hero:teleport_to(map, dest, transition)
+Same function pointer as hero:teleport but it anamyse whever if we are in hero_mode and 
+warps the hero in the correct map.
+
+-> Works !

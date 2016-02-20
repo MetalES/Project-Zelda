@@ -1,0 +1,222 @@
+properties{
+  x = 0,
+  y = 0,
+  width = 320,
+  height = 240,
+  tileset = "hyrule",
+  music = "interiors/sanctuary_loop",
+}
+
+tile{
+  layer = 0,
+  x = 0,
+  y = 0,
+  width = 240,
+  height = 192,
+  pattern = "1",
+}
+
+tile{
+  layer = 0,
+  x = 96,
+  y = 88,
+  width = 16,
+  height = 16,
+  pattern = "43",
+}
+
+tile{
+  layer = 0,
+  x = 120,
+  y = 32,
+  width = 16,
+  height = 16,
+  pattern = "42",
+}
+
+tile{
+  layer = 0,
+  x = 56,
+  y = 72,
+  width = 16,
+  height = 16,
+  pattern = "43",
+}
+
+destructible{
+  layer = 0,
+  x = 8,
+  y = 13,
+  treasure_name = "random",
+  sprite = "entities/bush",
+  destruction_sound = "objects/e_bush",
+  weight = 1,
+  can_be_cut = true,
+  can_regenerate = true,
+}
+
+destructible{
+  layer = 0,
+  x = 40,
+  y = 29,
+  treasure_name = "random",
+  sprite = "entities/grass",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 56,
+  y = 45,
+  treasure_name = "random",
+  sprite = "entities/grass_bot_r",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 24,
+  y = 45,
+  treasure_name = "random",
+  sprite = "entities/grass_bot_l",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 40,
+  y = 45,
+  treasure_name = "random",
+  sprite = "entities/grass_flower",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 56,
+  y = 29,
+  treasure_name = "random",
+  sprite = "entities/grass_flower",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 24,
+  y = 29,
+  treasure_name = "random",
+  sprite = "entities/grass_flower",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 24,
+  y = 13,
+  treasure_name = "random",
+  sprite = "entities/grass_top_l",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 56,
+  y = 13,
+  treasure_name = "random",
+  sprite = "entities/grass_top_r",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  layer = 0,
+  x = 40,
+  y = 13,
+  treasure_name = "random",
+  sprite = "entities/grass_flower",
+  destruction_sound = "objects/e_bush",
+  can_be_cut = true,
+  damage_on_enemies = 0,
+  ground = "grass",
+}
+
+destructible{
+  name = "jar",
+  layer = 0,
+  x = 72,
+  y = 13,
+  sprite = "entities/pot",
+  destruction_sound = "objects/e_pot_shatter",
+  weight = 1,
+}
+
+destructible{
+  name = "jar_2",
+  layer = 0,
+  x = 72,
+  y = 29,
+  sprite = "entities/pot",
+  destruction_sound = "objects/e_pot_shatter",
+  weight = 1,
+}
+
+destructible{
+  name = "jar_3",
+  layer = 0,
+  x = 88,
+  y = 13,
+  sprite = "entities/pot",
+  destruction_sound = "objects/e_pot_shatter",
+  weight = 1,
+}
+
+destructible{
+  name = "jar_4",
+  layer = 0,
+  x = 104,
+  y = 13,
+  sprite = "entities/pot",
+  destruction_sound = "objects/e_pot_shatter",
+  weight = 1,
+}
+
+destructible{
+  name = "jar_5",
+  layer = 0,
+  x = 72,
+  y = 45,
+  sprite = "entities/pot",
+  destruction_sound = "objects/e_pot_shatter",
+  weight = 1,
+}
+
+destination{
+  layer = 0,
+  x = 88,
+  y = 37,
+  direction = 1,
+}
+

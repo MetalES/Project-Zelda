@@ -1,5 +1,6 @@
 local game = ...
 local fog_menu = {}
+local movement
 
 function game:display_fog(fog, speed, angle, opacity)
     local fog = fog or nil
@@ -15,17 +16,17 @@ function game:display_fog(fog, speed, angle, opacity)
 	self:get_map().fog_opacity = opacity
 	self:get_map().fog_has_been_drawn = false
 	
-	sol.menu.start(self:get_map(), fog_menu, true) -- the fog is displayed above the map.
+	sol.menu.start(self:get_map(), fog_menu, true)
 end
 
--- this event is called in quest_manager in on_started, call it from anyhere if you need to clean the fog
 function game:clear_fog()
   self.clear_all_fog = true
   self:get_map().fog = nil
-  self:get_map().fog_speed = 0
+  self:get_map().fog_speed = 1
   self:get_map().fog_angle = 0
   self:get_map().fog_opacity = 0
   self:get_map().fog_has_been_drawn = false
+  if movement ~= nil then movement:stop() end
 end
 
 function fog_menu:on_started()
@@ -33,8 +34,10 @@ function fog_menu:on_started()
   self:check()
 end
 
--- Checks whether the view displays the correct fog
--- and updates it if necessary.
+function fog_menu:on_finished()
+  movement:stop()
+end
+
 function fog_menu:check()
   if not self.game:get_map().fog_has_been_drawn and self.game:get_map().fog ~= nil then 
     self:display_fog()
@@ -51,13 +54,13 @@ function fog_menu:display_fog()
 	  self.fog = sol.surface.create("fogs/"..self.game:get_map().fog..".png")
       self.fog:set_opacity(self.game:get_map().fog_opacity)
 	  self.fog_size_x, self.fog_size_y = self.fog:get_size()
-      self.fog_m = sol.movement.create("straight")
+      movement = sol.movement.create("straight")
 	  
 	  function restart_overlay_movement()
-		self.fog_m:set_speed(self.game:get_map().fog_speed) 
-		self.fog_m:set_max_distance(((self.fog_size_x + self.fog_size_y) / 1.4) - 4)
-		self.fog_m:set_angle(self.game:get_map().fog_angle * math.pi / 4)
-		self.fog_m:start(self.fog, function()
+		movement:set_speed(self.game:get_map().fog_speed) 
+		movement:set_max_distance(((self.fog_size_x + self.fog_size_y) / 1.4) - 4)
+		movement:set_angle(self.game:get_map().fog_angle * math.pi / 4)
+		movement:start(self.fog, function()
 			self.fog:set_xy(self.fog_size_x, self.fog_size_y)
 			restart_overlay_movement()
 		end)

@@ -22,6 +22,7 @@ local text_x = 150
 
 --todo : Text_x
          --dialog refresh
+		 --sustain refresh while learning
 
 
 -- Misc
@@ -54,7 +55,7 @@ function game:stop_ocarina()
   sol.timer.stop_all(ocarina_manager)
   sol.menu.stop(ocarina_manager)
   self:get_item("ocarina"):transit_to_finish()
-  self:set_value("using_ocarina", false)
+  self:set_item_on_use(false)
 end
 
 function game:is_ocarina_song_learned(song_index)
@@ -442,7 +443,7 @@ function ocarina_manager:start_song_effect(index)
      self:return_no_effect()
 	end
   elseif index == 3 then -- Sun's Song
-    if self.game:get_map():get_world() ~= "outside" then
+    if self.game:get_map():get_world() ~= "field" then
 	  self:return_no_effect()
 	else
 	  if not self.game.has_played_sun_song then
@@ -609,6 +610,7 @@ function ocarina_manager:on_finished()
   self.game.indexed_song_to_learn = nil
   self.game.ocarina_soundfont = nil
   self.game.learning_new_song = false
+  self.game:set_value("using_ocarina", false)
   song_played = nil
   self.disable_input = false
   song_delay = 0
