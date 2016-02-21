@@ -38,6 +38,6 @@ Some ressource (including scripts) come from : Zelda BOM - wrightmat (https://gi
 #This project use as ressource :
   - Some Wrightmat's stuffs (sprites, scripts) -> https://github.com/wrightmat
   - Some Diarandor's stuffs (scripts, functions) -> https://github.com/Diarandor
-  - Christopho and Zelda Solarus Team's ressource (engine, scripts) -> https://github.com/christopho
+  - Christopho and Solarus Team's ressource (engine, scripts) -> https://github.com/christopho
   - Nintendo's Legend of Zelda (everything) -> https://www.nintendo.fr/
   - Daisuke's sprite + custom work (Link)
