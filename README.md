@@ -35,7 +35,7 @@ Current release version : TBD
 
 Some ressource (including scripts) come from : Zelda BOM - wrightmat (https://github.com/wrightmat/zbom)
 
-This project use as ressource :
+#This project use as ressource :
   - Some Wrightmat's stuffs (sprites, scripts) -> https://github.com/wrightmat
   - Some Diarandor's stuffs (scripts, functions) -> https://github.com/Diarandor
   - Christopho and Zelda Solarus Team's ressource (engine, scripts) -> https://github.com/christopho
