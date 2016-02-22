@@ -2,14 +2,13 @@ local item = ...
 local game = item:get_game()
 
 local item_name = "ocarina"
-local slot
 local sound_played_on_brandish = "/common/big_item"
 local sound_played_when_picked = nil
 local is_assignable = true
 local sound_dir = "/items/"..item_name.."/"
 local volume_bgm = game:get_value("old_volume")
 
-local state = 0
+sol.main.load_file("scripts/gameplay/hero/ocarina_controller")(game)
 
 function item:on_created()
   self:set_savegame_variable("item_"..item_name.."_possession")
@@ -19,14 +18,14 @@ function item:on_created()
 end
 
 function item:on_obtained()
-  if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
   sol.audio.set_music_volume(volume_bgm)
 end
 
 function item:transit_to_finish()
-  if show_bars == true and game:get_value("starting_cutscene") ~= true then game:hide_bars() end
+  if game:is_cutscene_bars_enabled() and not game:is_current_scene_cutscene() then game:show_cutscene_bars(false) end
   game:set_hud_enabled(true)
   self:set_finished()
+  game:get_hero():freeze()
   sol.audio.set_music_volume(volume_bgm)
   game:get_hero():set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield"))
   game:set_ability("shield", game:get_value("item_saved_shield"))
@@ -37,9 +36,10 @@ function item:transit_to_finish()
   game:set_command_joypad_binding("action", game:get_value("item_saved_jp_action"))
   game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
   game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
-  game:get_hero():unfreeze()
+  sol.timer.start(100, function()
+    game:get_hero():unfreeze()
+  end)
   game:set_pause_allowed(true)
-  state = 0
 end
 
 function item:store_equipment()
@@ -66,21 +66,14 @@ function item:store_equipment()
     game:set_pause_allowed(false)
 end
 
-function item:on_song_played(song)
-  game:set_time_flow(20)
-  game:set_value("song_4", true)
-end
-
 function item:on_using()
   self:store_equipment()  
-  game:using_item()
+  game:set_item_on_use(true)
+  game:show_cutscene_bars(true)
   game:set_value("using_ocarina", true)
   game:set_hud_enabled(false)
   sol.audio.set_music_volume((sol.audio.get_music_volume() / 3))
-  if not show_bars then game:show_bars() end
-  game:get_hero():set_animation("playing")
-  sol.timer.start(300, function()
-    state = 1
-	game:start_ocarina()
+  game:get_hero():set_animation("playing", function()
+	game:get_hero():start_ocarina()
   end)
 end

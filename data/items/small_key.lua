@@ -1,5 +1,5 @@
 local item = ...
-local volume_bgm = sol.audio.get_music_volume()
+local volume_bgm = item:get_game():get_value("old_volume")
 
 
 function item:on_created()
@@ -19,4 +19,5 @@ end
 
 function item:on_obtained()
 sol.audio.set_music_volume(volume_bgm)
+self:get_game():show_cutscene_bars(false)
 end

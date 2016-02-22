@@ -1,3 +1,13 @@
+--[[
+/script\Jump Controller Script.
+/author\Made by MetalZelda - 16.02.2016
+
+/desc\Custom Jump
+/instruction\Custom Jump to be compatible with the Roc's Cape
+
+/copyright\Credits if you plan to use the script would be nice. Not for resale. Script and project are part of educationnal project.
+]]
+
 local game = ...
 local jump_hdl = {}
 
@@ -121,8 +131,10 @@ function jump_hdl:first_jump()
   
     local hero_x, hero_y, hero_layer = hero:get_position()
 	current_height = current_height + 1
+	
+	if current_height >= 13 then can_down_thrust = false end
+	
 	if current_height >= first_jump then
-	  can_down_thrust = false
 	  sol.timer.start(25, function()
 	  if not self.game.is_down_thrusting then
 	    self:clip_determinate_second_jump()
@@ -265,16 +277,13 @@ function jump_hdl:on_command_released(commands)
   local hero = self.game:get_hero()
   local dir = hero:get_direction()
   
-  if not self.game.is_down_thrusting then
-    if commands == slot then
-      sol.timer.stop_all(self)
-      self:land()
-	end
+  if commands == slot and not self.game.is_down_thrusting then
+	can_down_thrust = false
+    sol.timer.stop_all(self)
+    self:land()
   end
-  
 end
 
--- Todo sword attack
 function jump_hdl:start_down_thrust()
   local folder = "characters/link/voice/"
   local hero = self.game:get_hero()
@@ -449,6 +458,7 @@ function jump_hdl:on_finished()
   current_height, ticks = 0, 0
   can_down_thrust = false
   
+  --todo
   for _ , str_dir in pairs(dirs) do
     if self.game:get_hero():get_animation() ~= "stopped"..with_shield then
 	  if self.game:is_command_pressed(str_dir) then
@@ -456,7 +466,6 @@ function jump_hdl:on_finished()
 		
 	  end
 	end
-
   end
   
   for teleporters in self.game:get_map():get_entities("teleporter") do
@@ -467,5 +476,6 @@ function jump_hdl:on_finished()
     walkable_switch:set_locked(false)
   end
   
+  self.game:get_item("roc_cape"):set_finished()  
   
 end
