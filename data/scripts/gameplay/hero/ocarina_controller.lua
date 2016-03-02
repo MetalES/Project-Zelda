@@ -53,7 +53,6 @@ end
 
 function game:stop_ocarina()
   sol.menu.stop(ocarina_manager)
-  self:get_item("ocarina"):transit_to_finish()
   self:set_item_on_use(false)
 end
 
@@ -73,8 +72,7 @@ function ocarina_manager:on_started()
   local horizontal_alignment = "left"
   local vertical_alignment = "middle"
 
-  self.game = game
-  self.game.ocarina_soundfont = self.game.ocarina_soundfont or "ocarina"
+  game.ocarina_soundfont = game.ocarina_soundfont or "ocarina"
   
   self:clear_note_played_if_error()
   
@@ -101,8 +99,8 @@ function ocarina_manager:on_started()
 	font_size = "14"
   }	
    
-  if self.game.learning_new_song then
-    self:retrieve_song_to_learn(self.game.indexed_song_to_learn)
+  if game.learning_new_song then
+    self:retrieve_song_to_learn(game.indexed_song_to_learn)
 	sol.audio.set_music_volume(0)
 	self.playing_ocarina = true
   end
@@ -111,37 +109,37 @@ end
 -- If a song has been played, no mater what position in the array, play the song
 function ocarina_manager:check_session()
   for t, n  in ipairs(played_note) do
-    if played_note[t] == 2 and played_note[t + 1] == 1 and played_note[t + 2] == 0 and played_note[t + 3] == 2 and played_note[t + 4] == 1 and played_note[t + 5] == 0 and self.game:is_ocarina_song_learned(1) then
+    if played_note[t] == 2 and played_note[t + 1] == 1 and played_note[t + 2] == 0 and played_note[t + 3] == 2 and played_note[t + 4] == 1 and played_note[t + 5] == 0 and game:is_ocarina_song_learned(1) then
 	  song_played = 0
-	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 0 and played_note[t + 3] == 1 and played_note[t + 4] == 0 and played_note[t + 5] == 2 and self.game:is_ocarina_song_learned(2) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 0 and played_note[t + 3] == 1 and played_note[t + 4] == 0 and played_note[t + 5] == 2 and game:is_ocarina_song_learned(2) then
 	  song_played = 1
-	elseif played_note[t] == 1 and played_note[t + 1] == 2 and played_note[t + 2] == 0 and played_note[t + 3] == 1 and played_note[t + 4] == 2 and played_note[t + 5] == 0 and self.game:is_ocarina_song_learned(3) then
+	elseif played_note[t] == 1 and played_note[t + 1] == 2 and played_note[t + 2] == 0 and played_note[t + 3] == 1 and played_note[t + 4] == 2 and played_note[t + 5] == 0 and game:is_ocarina_song_learned(3) then
 	  song_played = 2
-	elseif played_note[t] == 0 and played_note[t + 1] == 3 and played_note[t + 2] == 1 and played_note[t + 3] == 0 and played_note[t + 4] == 3 and played_note[t + 5] == 1 and self.game:is_ocarina_song_learned(4) then
+	elseif played_note[t] == 0 and played_note[t + 1] == 3 and played_note[t + 2] == 1 and played_note[t + 3] == 0 and played_note[t + 4] == 3 and played_note[t + 5] == 1 and game:is_ocarina_song_learned(4) then
 	  song_played = 3
-	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 1 and played_note[t + 3] == 4 and played_note[t + 4] == 3 and played_note[t + 5] == 1 and self.game:is_ocarina_song_learned(5) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 1 and played_note[t + 3] == 4 and played_note[t + 4] == 3 and played_note[t + 5] == 1 and game:is_ocarina_song_learned(5) then
 	  song_played = 4
-	elseif played_note[t] == 2 and played_note[t + 1] == 0 and played_note[t + 2] == 3 and played_note[t + 3] == 2 and played_note[t + 4] == 0 and played_note[t + 5] == 3 and self.game:is_ocarina_song_learned(6) then
+	elseif played_note[t] == 2 and played_note[t + 1] == 0 and played_note[t + 2] == 3 and played_note[t + 3] == 2 and played_note[t + 4] == 0 and played_note[t + 5] == 3 and game:is_ocarina_song_learned(6) then
 	  song_played = 5
-	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 1 and played_note[t + 3] == 2 and played_note[t + 4] == 1 and played_note[t + 5] == 2 and self.game:is_ocarina_song_learned(7) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 1 and played_note[t + 3] == 2 and played_note[t + 4] == 1 and played_note[t + 5] == 2 and game:is_ocarina_song_learned(7) then
 	  song_played = 6
-	elseif played_note[t] == 0 and played_note[t + 1] == 4 and played_note[t + 2] == 3 and played_note[t + 3] == 0 and played_note[t + 4] == 4 and played_note[t + 5] == 3 and self.game:is_ocarina_song_learned(8) then
+	elseif played_note[t] == 0 and played_note[t + 1] == 4 and played_note[t + 2] == 3 and played_note[t + 3] == 0 and played_note[t + 4] == 4 and played_note[t + 5] == 3 and game:is_ocarina_song_learned(8) then
 	  song_played = 7
-	elseif played_note[t] == 4 and played_note[t + 1] == 1 and played_note[t + 2] == 2 and played_note[t + 3] == 0 and played_note[t + 4] == 2 and played_note[t + 5] == 0 and self.game:is_ocarina_song_learned(9) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 1 and played_note[t + 2] == 2 and played_note[t + 3] == 0 and played_note[t + 4] == 2 and played_note[t + 5] == 0 and game:is_ocarina_song_learned(9) then
 	  song_played = 8
-	elseif played_note[t] == 3 and played_note[t + 1] == 4 and played_note[t + 2] == 3 and played_note[t + 3] == 4 and played_note[t + 4] == 0 and played_note[t + 5] == 3 and played_note[t + 6] == 0 and played_note[t + 7] == 3 and self.game:is_ocarina_song_learned(10) then
+	elseif played_note[t] == 3 and played_note[t + 1] == 4 and played_note[t + 2] == 3 and played_note[t + 3] == 4 and played_note[t + 4] == 0 and played_note[t + 5] == 3 and played_note[t + 6] == 0 and played_note[t + 7] == 3 and game:is_ocarina_song_learned(10) then
 	  song_played = 9
-	elseif played_note[t] == 4 and played_note[t + 1] == 0 and played_note[t + 2] == 4 and played_note[t + 3] == 3 and played_note[t + 4] == 4 and played_note[t + 5] == 0 and played_note[t + 6] == 1 and played_note[t + 7] == 3 and self.game:is_ocarina_song_learned(11) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 0 and played_note[t + 2] == 4 and played_note[t + 3] == 3 and played_note[t + 4] == 4 and played_note[t + 5] == 0 and played_note[t + 6] == 1 and played_note[t + 7] == 3 and game:is_ocarina_song_learned(11) then
 	  song_played = 10
-	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 0 and played_note[t + 3] == 0 and played_note[t + 4] == 2 and self.game:is_ocarina_song_learned(12) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 0 and played_note[t + 3] == 0 and played_note[t + 4] == 2 and game:is_ocarina_song_learned(12) then
 	  song_played = 11
-	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 4 and played_note[t + 3] == 0 and played_note[t + 4] == 3 and played_note[t + 5] == 4 and self.game:is_ocarina_song_learned(13) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 4 and played_note[t + 3] == 0 and played_note[t + 4] == 3 and played_note[t + 5] == 4 and game:is_ocarina_song_learned(13) then
 	  song_played = 12
-	elseif played_note[t] == 2 and played_note[t + 1] == 0 and played_note[t + 2] == 0 and played_note[t + 3] == 4 and played_note[t + 4] == 2 and played_note[t + 5] == 0 and played_note[t + 6] == 3 and self.game:is_ocarina_song_learned(14) then
+	elseif played_note[t] == 2 and played_note[t + 1] == 0 and played_note[t + 2] == 0 and played_note[t + 3] == 4 and played_note[t + 4] == 2 and played_note[t + 5] == 0 and played_note[t + 6] == 3 and game:is_ocarina_song_learned(14) then
 	  song_played = 13
-	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 0 and played_note[t + 3] == 4 and played_note[t + 4] == 3 and played_note[t + 5] == 0 and played_note[t + 6] == 1 and played_note[t + 7] == 0 and self.game:is_ocarina_song_learned(15) then
+	elseif played_note[t] == 4 and played_note[t + 1] == 3 and played_note[t + 2] == 0 and played_note[t + 3] == 4 and played_note[t + 4] == 3 and played_note[t + 5] == 0 and played_note[t + 6] == 1 and played_note[t + 7] == 0 and game:is_ocarina_song_learned(15) then
 	  song_played = 14
-	elseif played_note[t] == 1 and played_note[t + 1] == 0 and played_note[t + 2] == 1 and played_note[t + 3] == 0 and played_note[t + 4] == 2 and played_note[t + 5] == 1 and self.game:is_ocarina_song_learned(16) then
+	elseif played_note[t] == 1 and played_note[t + 1] == 0 and played_note[t + 2] == 1 and played_note[t + 3] == 0 and played_note[t + 4] == 2 and played_note[t + 5] == 1 and game:is_ocarina_song_learned(16) then
 	  song_played = 15
 	end
   end
@@ -175,8 +173,8 @@ function ocarina_manager:check_learning_session()
     sol.timer.start(self, 2250, function()
       if sustain ~= nil then sustain:stop() end
 	  sol.audio.set_music_volume(0)
-	  sol.audio.play_sound("items/ocarina/song/"..self.game.indexed_song_to_learn)
-	  self:play_song(self.game.indexed_song_to_learn)
+	  sol.audio.play_sound("items/ocarina/song/"..game.indexed_song_to_learn)
+	  self:play_song(game.indexed_song_to_learn)
     end)
   end
 end
@@ -202,20 +200,20 @@ function ocarina_manager:play_song(index)
   else
     self:clear_note_played_if_error()  
 	self.can_control = false
-    self:start_learn_song(self.game.indexed_song_to_learn)
+    self:start_learn_song(game.indexed_song_to_learn)
   end  
   
   sol.timer.start(self, song_delay, function()
     self.ocarina_se1:set_text_key("ocarina.you_played."..song_name_type)
-	self.ocarina_se2:set_text_key("quest_status.caption.ocarina_song_"..(song_played or self.game.indexed_song_to_learn)  + 1)
+	self.ocarina_se2:set_text_key("quest_status.caption.ocarina_song_"..(song_played or game.indexed_song_to_learn)  + 1)
 	self.ocarina_se2:set_color({color[0], color[1], color[2]})
 	self.can_draw_text = true
 	sol.timer.start(self, 2000, function()
-	  if self.game.learning_new_song then
-	    ocarina_manager:learned_song(self.game.indexed_song_to_learn)
+	  if game.learning_new_song then
+	    ocarina_manager:learned_song(game.indexed_song_to_learn)
 	  else
 	    self:start_song_effect(song_played)
-		self:on_finished()
+		game:stop_ocarina()
 	  end
 	end)
   end)
@@ -225,17 +223,17 @@ end
 
 function ocarina_manager:learned_song(index)
 sol.audio.play_music(nil)
-sol.audio.set_music_volume(self.game:get_value("old_volume"))
+sol.audio.set_music_volume(game:get_value("old_volume"))
   sol.timer.start(self, learning_song_delay - (song_delay * 1.50), function()
-    self.game:start_dialog("_ocarina."..index..".learned", function()
-	  self.game:set_ocarina_song_learned(index, true)
+    game:start_dialog("_ocarina."..index..".learned", function()
+	  game:set_ocarina_song_learned(index, true)
       sol.audio.play_music("cutscene/song_learned", function()
-        for teacher in self.game:get_map():get_entities("ocarina_teacher") do
+        for teacher in game:get_map():get_entities("ocarina_teacher") do
 		  teacher:on_song_learned(index)
+		  game:stop_ocarina()
 		end
 	  end)
 	end)
-    self:on_finished()
   end)
 end
 
@@ -309,14 +307,14 @@ self:start_learn_song()
 end
 
 function ocarina_manager:start_learn_song(index)
-  if not self.song_played and self.game.learning_new_song then
-    if self.game.indexed_song_to_learn >= 0 and self.game.indexed_song_to_learn <= 7 then
-	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this."..self.game.indexed_song_to_learn) 
+  if not self.song_played and game.learning_new_song then
+    if game.indexed_song_to_learn >= 0 and game.indexed_song_to_learn <= 7 then
+	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this."..game.indexed_song_to_learn) 
 	  self.can_draw_text = true
 	  text_x = 220
 	else
 	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this.type."..song_name_type)
-	  self.ocarina_se2:set_text_key("quest_status.caption.ocarina_song_"..self.game.indexed_song_to_learn + 1)
+	  self.ocarina_se2:set_text_key("quest_status.caption.ocarina_song_"..game.indexed_song_to_learn + 1)
 	  self.can_draw_text = true
 	end
   end
@@ -378,7 +376,7 @@ function ocarina_manager:repeat_if_not_done()
 	if time_played ~= 1 then
 	  sol.timer.start(self, 2500, function()
 	    self:clear_note_played_if_error()
-	    self:start_learn_song(self.game.indexed_song_to_learn)
+	    self:start_learn_song(game.indexed_song_to_learn)
 	    time_played = 1
 		delay_new = 0
 		time_between_note[0] = 0
@@ -390,7 +388,7 @@ function ocarina_manager:repeat_if_not_done()
 		 self.ocarina_se1:set_text_key("ocarina.learn.play_with.0")
 		 text_x = 200
 		 --Restore the default soundfont to ocarina because we are controlling the hero
-		 self.game.ocarina_soundfont = "ocarina"
+		 game.ocarina_soundfont = "ocarina"
 		 self:clear_note_played_if_error()
 	   end)
 	end
@@ -398,69 +396,69 @@ end
 
 function ocarina_manager:start_song_effect(index)
   if index == 0 then -- Zelda's Lullaby
-  	if not self.game:get_map():has_entity("ocarina_zelda") then
+  	if not game:get_map():has_entity("ocarina_zelda") then
 		self:return_no_effect()
 	else
-      for entities in self.game:get_map():get_entities("ocarina_zelda") do
+      for entities in game:get_map():get_entities("ocarina_zelda") do
 	    entities:on_zelda_lullaby_interaction()
 	  end
 	end
   elseif index == 1 then -- Song of Soaring
-    self.game:start_soaring_menu()
+    game:start_soaring_menu()
   elseif index == 2 then -- Epona's song
-    if self.game:get_value("got_epona") then -- If we have the horse
-	  local hero_x, hero_y, hero_layer = self.game:get_hero():get_position()
-	  local direction = self.game:get_hero():get_direction() % 2
+    if game:get_value("got_epona") then -- If we have the horse
+	  local hero_x, hero_y, hero_layer = game:get_hero():get_position()
+	  local direction = game:get_hero():get_direction() % 2
 	  local spawn_point_x, spawn_point_y
 	  local type_of = "wall" or "deep_water"
 	  
-	  	if self.game:get_map():get_ground(hero_x + 32, hero_y, hero_layer) == type_of then
+	  	if game:get_map():get_ground(hero_x + 32, hero_y, hero_layer) == type_of then
 		   spawn_point_x, spawn_point_y = -380, math.random(0,240)		
-		elseif self.game:get_map():get_ground(hero_x - 32, hero_y, hero_layer) == type_of then
+		elseif game:get_map():get_ground(hero_x - 32, hero_y, hero_layer) == type_of then
 		    spawn_point_x, spawn_point_y = 380, math.random(0,240)
-		elseif self.game:get_map():get_ground(hero_x, hero_y - 32, hero_layer) == type_of then
+		elseif game:get_map():get_ground(hero_x, hero_y - 32, hero_layer) == type_of then
 		    spawn_point_x, spawn_point_y = math.random(0,320), 300
-		elseif self.game:get_map():get_ground(hero_x, hero_y - 32, hero_layer) == type_of then
+		elseif game:get_map():get_ground(hero_x, hero_y - 32, hero_layer) == type_of then
 		    spawn_point_x, spawn_point_y = math.random(0,320), -300
 		end
-	  if not self.game:get_map():has_entity("epona") and not self.game.no_horse_possible then -- if we are in a valid place
-	    local epona = self.game:get_map():create_custom_entity({
+	  if not game:get_map():has_entity("epona") and not game.no_horse_possible then -- if we are in a valid place
+	    local epona = game:get_map():create_custom_entity({
 		model = "object/horse/epona",
 		x = hero_x + spawn_point_x,
 		y = hero_y + spawn_point_y,
 		layer = hero_layer,
 		direction = direction
 		})
-	  self.game:stop_ocarina()
+	  game:stop_ocarina()
 	  else
-	    self.game:get_map():get_entity("epona"):set_position(hero_x + spawn_point_x, hero_y, spawn_point_y)
+	    game:get_map():get_entity("epona"):set_position(hero_x + spawn_point_x, hero_y, spawn_point_y)
 		local target = sol.movement.create("target")
 		target:set_target(hero_x, hero_y)
-	    target:start(self.game:get_map():get_entity("epona"))
+	    target:start(game:get_map():get_entity("epona"))
 	  end
 	else
      self:return_no_effect()
 	end
   elseif index == 3 then -- Sun's Song
-    if self.game:get_map():get_world() ~= "field" then
+    if game:get_map():get_world() ~= "field" then
 	  self:return_no_effect()
 	else
-	  if not self.game.has_played_sun_song then
-	  self.game:set_time_flow(20)
-	  self.game.has_played_sun_song = true
+	  if not game.has_played_sun_song then
+	  game:set_time_flow(20)
+	  game.has_played_sun_song = true
 	  end
-	  self.game:stop_ocarina()
+	  game:stop_ocarina()
 	end
   elseif index == 4 then -- Song of Storm
-    if self.game:get_map():get_world() ~= "outside" then
+    if game:get_map():get_world() ~= "outside" then
       self:return_no_effect()
 	else
-	  -- self.game:start_storm(song_of_storm)
+	  -- game:start_storm(song_of_storm)
 	end
   elseif index == 5 then -- healing
-	if self.game:get_map():has_entity("ocarina_healing") then
-		for heal in self.game:get_map():get_entities("ocarina_healing") do
-	      local distance = self.game:get_hero():get_distance(heal)
+	if game:get_map():has_entity("ocarina_healing") then
+		for heal in game:get_map():get_entities("ocarina_healing") do
+	      local distance = game:get_hero():get_distance(heal)
 	      if distance <= 32 then
 	        heal:on_song_of_heal_interaction()
 	      else
@@ -472,9 +470,9 @@ function ocarina_manager:start_song_effect(index)
 	end
   
   elseif index == 6 then -- Byrna, TODO
-	if self.game:get_map():has_entity("ocarina_byrna") then
-		for heal in self.game:get_map():get_entities("ocarina_byrna") do
-	      local distance = self.game:get_hero():get_distance(heal)
+	if game:get_map():has_entity("ocarina_byrna") then
+		for heal in game:get_map():get_entities("ocarina_byrna") do
+	      local distance = game:get_hero():get_distance(heal)
 	      if distance <= 32 then
 	        heal:on_song_of_heal_interaction()
 	      else
@@ -486,9 +484,9 @@ function ocarina_manager:start_song_effect(index)
 	end
 	  
   elseif index == 7 then -- Song of Time
-    if self.game:get_map():has_entity("block_of_time") then
-		for block in self.game:get_map():get_entities("ocarina_song_of_time") do
-	      local distance = self.game:get_hero():get_distance(block)
+    if game:get_map():has_entity("block_of_time") then
+		for block in game:get_map():get_entities("ocarina_song_of_time") do
+	      local distance = game:get_hero():get_distance(block)
 	      if distance <= 32 then
 	        block:on_song_of_time_interaction()
 	      else
@@ -499,32 +497,32 @@ function ocarina_manager:start_song_effect(index)
 		self:return_no_effect()
 	end
   elseif index >= 8 and index <= 15 then
-     self.game:start_dialog("_ocarina."..index..".played", function(answer)
+     game:start_dialog("_ocarina."..index..".played", function(answer)
 	    if answer == 1 then
 		  --start the animation and warp
 		else
-		  self.game:stop_ocarina()
+		  game:stop_ocarina()
 		end
 	 end)
   end
 end
 
 function ocarina_manager:return_no_effect()
-  	self.game:start_dialog("_ocarina.played_but_no_effect.0", function()
-	  self.game:stop_ocarina()
+  	game:start_dialog("_ocarina.played_but_no_effect.0", function()
+	  game:stop_ocarina()
 	end)
 end
 
 function ocarina_manager:on_command_pressed(command)
   local handled = true
   if self.can_play then
-     if not self.game.learning_new_song and song_played == nil then
+     if not game.learning_new_song and song_played == nil then
 		  for k, input in pairs(input_array) do
 			if command == input then
-			  sol.audio.play_sound("/items/ocarina/soundfont/"..self.game.ocarina_soundfont.."/"..input)
+			  sol.audio.play_sound("/items/ocarina/soundfont/"..game.ocarina_soundfont.."/"..input)
 			    sustain = sol.timer.start(183, function()
-				  if self.game:is_command_pressed(input) and not self.game:is_command_pressed("attack") then
-			      sol.audio.play_sound("/items/ocarina/soundfont/"..self.game.ocarina_soundfont.."/"..input)
+				  if game:is_command_pressed(input) and not game:is_command_pressed("attack") then
+			      sol.audio.play_sound("/items/ocarina/soundfont/"..game.ocarina_soundfont.."/"..input)
 				  return true
 				  else
 				  return false
@@ -535,12 +533,12 @@ function ocarina_manager:on_command_pressed(command)
 			  return played_note
 			elseif command == "attack" then
 			  if sustain ~= nil then sustain:stop() end
-			  self.game:stop_ocarina()
+			  game:stop_ocarina()
 			end
 			handled = true
 		  end
 		  
-      elseif self.can_control and self.game.learning_new_song and self.disable_input and self.avoid_restart and not self.song_played then
+      elseif self.can_control and game.learning_new_song and self.disable_input and self.avoid_restart and not self.song_played then
 	  
 	    if command == "action" then
 		    self.disable_input = false
@@ -549,14 +547,14 @@ function ocarina_manager:on_command_pressed(command)
 		end
 		handled = true
 		
-	  elseif self.can_control and self.game.learning_new_song and not self.disable_input and not self.song_played then
+	  elseif self.can_control and game.learning_new_song and not self.disable_input and not self.song_played then
 	-- Learning a song, you can't cancel the phase
 		  for k, input in pairs(input_array) do
 				if command == input then
-				  sol.audio.play_sound("/items/ocarina/soundfont/"..self.game.ocarina_soundfont.."/"..input)
+				  sol.audio.play_sound("/items/ocarina/soundfont/"..game.ocarina_soundfont.."/"..input)
 					sustain = sol.timer.start(183, function()
-					  if self.game:is_command_pressed(input) or self.song_played then
-					  sol.audio.play_sound("/items/ocarina/soundfont/"..self.game.ocarina_soundfont.."/"..input)
+					  if game:is_command_pressed(input) or self.song_played then
+					  sol.audio.play_sound("/items/ocarina/soundfont/"..game.ocarina_soundfont.."/"..input)
 					  return true
 					  end
 					end)
@@ -585,14 +583,14 @@ function ocarina_manager:simulate_ocarina(pointer)
   elseif pointer == 4 then value = "action"
   end 
   
-  if self.game.ocarina_soundfont == "ocarina" then sfont_delay = 183
-  elseif self.game.ocarina_soundfont == "malon" then sfont_delay = 80 end
+  if game.ocarina_soundfont == "ocarina" then sfont_delay = 183
+  elseif game.ocarina_soundfont == "malon" then sfont_delay = 80 end
   
   if sustain ~= nil then sustain:stop() end
-  sol.audio.play_sound("/items/ocarina/soundfont/"..self.game.ocarina_soundfont.."/"..value)
-  if self.game.ocarina_soundfont ~= "harp" then
+  sol.audio.play_sound("/items/ocarina/soundfont/"..game.ocarina_soundfont.."/"..value)
+  if game.ocarina_soundfont ~= "harp" then
 	sustain = sol.timer.start(sfont_delay, function()
-	   sol.audio.play_sound("/items/ocarina/soundfont/"..self.game.ocarina_soundfont.."/"..value)
+	   sol.audio.play_sound("/items/ocarina/soundfont/"..game.ocarina_soundfont.."/"..value)
 	   return true
 	end)
   end
@@ -605,15 +603,34 @@ function ocarina_manager:on_finished()
   time_between_note = {}
   self.can_play = false
   self.song_played = false
-  self.game.indexed_song_to_learn = nil
-  self.game.ocarina_soundfont = nil
-  self.game.learning_new_song = false
-  self.game:set_value("using_ocarina", false)
+  game.indexed_song_to_learn = nil
+  game.ocarina_soundfont = nil
+  game.learning_new_song = false
+  game:set_value("using_ocarina", false)
   song_played = nil
   self.disable_input = false
   song_delay = 0
   self.playing_ocarina = false
   self.can_draw_text = false
+  
+  if game:is_cutscene_bars_enabled() and not game:is_current_scene_cutscene() then game:show_cutscene_bars(false) end
+  game:set_hud_enabled(true)
+  game:get_item("ocarina"):set_finished()
+  game:get_hero():freeze()
+  sol.audio.set_music_volume(game:get_value("old_volume"))
+  game:get_hero():set_shield_sprite_id("hero/shield"..game:get_value("item_saved_shield"))
+  game:set_ability("shield", game:get_value("item_saved_shield"))
+  game:set_ability("sword", game:get_value("item_saved_sword"))
+  game:set_command_keyboard_binding("action", game:get_value("item_saved_kb_action"))
+  game:set_command_keyboard_binding("item_1", game:get_value("item_1_kb_slot"))
+  game:set_command_keyboard_binding("item_2", game:get_value("item_2_kb_slot"))
+  game:set_command_joypad_binding("action", game:get_value("item_saved_jp_action"))
+  game:set_command_joypad_binding("item_1", game:get_value("item_1_jp_slot"))
+  game:set_command_joypad_binding("item_2", game:get_value("item_2_jp_slot"))
+  sol.timer.start(100, function()
+    game:get_hero():unfreeze()
+  end)
+  game:set_pause_allowed(true)
 end
 
 function ocarina_manager:clear_note_played_if_error()
