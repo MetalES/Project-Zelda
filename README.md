@@ -4,7 +4,7 @@
 /!\ <DISCLAIMER> /!\
 
 This project is made for free and for educationnal purposes only as an attempt to learn how video game making works and for Fair Use.
-The Legend of Zelda, and all of characters, sprites, musics, sounds, content involving this franchise are property of their respective owners.
+The Legend of Zelda, and all of characters, sprites, musics, sounds, content involving this franchise are intellectual property of their respective owners.
 
 There is a lot of stuffs not uploaded on the GIT, I wanna keep them safely before the release of the demo. (Approx. Summer 2016)
 You will find some basic stuffs here and there though.
