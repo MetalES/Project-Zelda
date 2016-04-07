@@ -17,13 +17,27 @@ Don't ask me to fix the git if the file you downloaded provide errors in your qu
 Repo Update rate : each version update.
 
 This game is being made using the Solarus engine*
-Current GIT version : 0.22
-Current Test version : 0.23.1273
-Development version progression : 77%
-Global Progress : 15%
+Current GIT version : 0.225b
+Current Test version : 0.23.2577
+Development version progression : 5%
+Global Progress : 18%
 Current public release version : Unknown
 
 #Version updates (advancement tracking) :
+
+#0.225b - April 7th 2016
+- Reworked Time System (Minute indicator, Day/Night, corected trajectory)(The clock hour indicator still have a weird trajectore at 6.PM, don't know how and what cause this. Maybe the bitmap font itself.)
+- Mail System overhauled and functionnal
+- OOT shop system implemented and functionnal
+- Quest_manager got deleted (replaced by individual object files.
+- Improved stability
+- Reworking Game Over
+- Removed check timers on hud elements (Cutscene Bars & Map Name)
+- Removed check timer on Fog script
+- Fog Script don't need a savegame value anymore
+- Hyrule Field BGM has it's own script rather then being a game manager function.
+- Fading audio implemented
+- Ported from 1.4.5 to 1.5 dev.
 
 #0.22 - Feb 12th 2016
 - See Issues tracking. It is time to debug this thing.
