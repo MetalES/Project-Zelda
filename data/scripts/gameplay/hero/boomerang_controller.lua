@@ -1,12 +1,3 @@
---[[
-/script\boomerang Controller Script.
-/author\Made by MetalZelda - 22.02.2016
-
-/desc\Controller script for the boomerang.
-
-/copyright\Credits if you plan to use the script would be nice. Not for resale. Script and project are part of educationnal project.
-]]
-
 local boomerang_controller = {}
 -- Preload everything, these values are loaded when the game creates the item. So the game don't need to load them when called
 boomerang_controller.slot  = "item_1";
@@ -17,20 +8,10 @@ boomerang_controller.distance = 204;
 boomerang_controller.speed = 204;
 boomerang_controller.collision_sprite  = "entities/item.collision";
 boomerang_controller.boomerang_sprite  = "entities/boomerang";
-boomerang_controller.sound_hit_valid  = "items/boomerang/hit_valid_target";
-boomerang_controller.sound_tracting_hero  = "items/boomerang/link_tracted";
-boomerang_controller.sound_collision_wall  = "items/item_metal_collision_wall";
-boomerang_controller.sound_firing_loop  = "items/boomerang/firing_loop";
-boomerang_controller.sound_firing_start  = "items/boomerang/firing_start";
-boomerang_controller.sound_firing_boomerang  = "items/boomerang/firing_start0";
-boomerang_controller.sound_hero_firing_boomerang = "characters/link/voice/throw0";
-boomerang_controller.sound_hero_catching_boomerang = "characters/link/voice/catch_boomerang";
-boomerang_controller.sound_arming  = "common/item_show";
 boomerang_controller.hook_x = 0;
 boomerang_controller.hook_y = 0;
 boomerang_controller.hero_free_tunic = "";
 boomerang_controller.hero_armed_tunic = "";
-boomerang_controller.hero_intro_animation  = "boomerang_intro";
 boomerang_controller.new_x = 0;
 boomerang_controller.new_y = 0;
 boomerang_controller.gx = 0;
@@ -38,8 +19,6 @@ boomerang_controller.gy = 0;
 boomerang_controller.lx = 0;
 boomerang_controller.ly = 0;
 boomerang_controller.llayer = 0;
-boomerang_controller.link_boom_x = 0;
-boomerang_controller.link_boom_y = 0;
 boomerang_controller.current_boomerang = nil -- the current boomerang entity
  
 local is_halted_by_anything_else = false
@@ -47,7 +26,6 @@ local avoid_return = false
 local from_teleporter = false
 local is_shot = false
 local ended_by_pickable = false
-local retrieve_boomerang_position = false
 local has_canceled_while_boomerang_active = false
 local has_pressed_cancel = false
 local has_received_boomerang = false
@@ -57,10 +35,6 @@ function boomerang_controller:start_boomerang(game, level)
   self.game = game
   avoid_return = true
   
-  self.current_tunic = self.game:get_ability("tunic")
-  self.hero_free_tunic = "hero/item/boomerang/boomerang_moving_free_tunic"..self.current_tunic
-  self.hero_armed_tunic = "hero/item/boomerang/boomerang_moving_armed_tunic"..self.current_tunic
-  
   if self.level == 1 then
     self.distance = 150
 	self.speed = 164
@@ -69,30 +43,23 @@ function boomerang_controller:start_boomerang(game, level)
     self.speed = 204
   end
   
-  if self.game:get_value("_item_slot_2") == "boomerang" then 
-    self.slot = "item_2" 
-	self.opposite_slot = "item_1"
-    self.opposite_slot_to_number = 1
-  else
-    self.slot = "item_1" 
-	self.opposite_slot = "item_2"
-    self.opposite_slot_to_number = 2
-  end
-  
   if self.game.is_going_to_another_item then 
 	self.game:set_item_on_use(false)
   else 
+    self.game:set_value("current_shield", self.game:get_ability("shield"))
     self.game:show_cutscene_bars(true) 
 	sol.audio.play_sound("common/bars_dungeon")
-	self.game:get_item("boomerang"):store_equipment("boomerang")
+	self.game:set_ability("shield", 0)
+	self.game:get_hero():set_shield_sprite_id("hero/shield_item")
   end
+  
    
   self.game:get_hero():set_animation("boomerang_outro", function()
     self.game:set_value("item_boomerang_state", 1)
     self.game:get_hero():set_walking_speed(45)
     self.game:get_hero():unfreeze()
     self.game:get_hero():set_tunic_sprite_id(self.hero_free_tunic)
-    self.game:set_custom_command_effect("attack", "return")
+	self.game:set_custom_command_effect("attack", "return")
 	self.game.is_going_to_another_item = false 
     has_canceled_while_boomerang_active = false
 	avoid_return = false
@@ -101,13 +68,12 @@ function boomerang_controller:start_boomerang(game, level)
 
   for teleporter in self.game:get_map():get_entities("teleporter") do
 	teleporter.on_activated = function()
-	  retrieve_boomerang_position = false
 	  is_halted_by_anything_else = true
       has_canceled_while_boomerang_active = false
 	  self.current_boomerang = nil
 	  from_teleporter = true
 	  is_shot = false
-	  self.game:set_value("item_boomerang_state", 0)
+	  if not self.game:is_current_scene_cutscene() then self.game:show_cutscene_bars(false) end
 	  self.game:get_hero():freeze()
 	  self:stop_boomerang()
 	end
@@ -123,6 +89,7 @@ function boomerang_controller:start_ground_check()
     hero:set_tunic_sprite_id("hero/tunic"..self.current_tunic)
     is_halted_by_anything_else = true
 	has_canceled_while_boomerang_active = true
+	if hero:get_state() == "hurt" then hero:set_invincible(true, 1000) hero:set_blinking(true, 1000) end
 	boomerang_controller:stop_boomerang() 
   end
 
@@ -138,8 +105,41 @@ function boomerang_controller:start_ground_check()
 	end
 
 	if hero:get_state() == "swimming" or (hero:get_state() == "jumping" and not is_shot) then hero:set_position(self.lx + self.new_x, self.ly + self.new_y); end_by_collision() end
-	if hero:get_state() == "falling" or hero:get_state() == "stairs" or hero:get_animation() == "swimming_stopped" or hero:get_state() == "hurt" or self.game:get_map():get_ground(self.lx + self.gx, self.ly + self.gy, self.llayer) == "lava" or hero:get_state() == "treasure" then end_by_collision() end
+	if (hero:get_state() == "falling" and hero:get_animation() == "boomerang_catch") or hero:get_state() == "stairs" or hero:get_animation() == "swimming_stopped" or hero:get_state() == "hurt" or self.game:get_map():get_ground(self.lx + self.gx, self.ly + self.gy, self.llayer) == "lava" or hero:get_state() == "treasure" then end_by_collision() end
 
+	-- check if the item has changed
+	if self.game:get_value("_item_slot_2") == "boomerang" then 
+      self.slot = "item_2" 
+	  self.opposite_slot = "item_1"
+      self.opposite_slot_to_number = 1
+    else
+      self.slot = "item_1" 
+	  self.opposite_slot = "item_2"
+      self.opposite_slot_to_number = 2
+    end
+	
+	self.current_tunic = self.game:get_ability("tunic")
+	self.hero_free_tunic = "hero/item/boomerang/boomerang_moving_free_tunic"..self.current_tunic
+    self.hero_armed_tunic = "hero/item/boomerang/boomerang_moving_armed_tunic"..self.current_tunic
+	
+	if not self.game:is_suspended() then
+	  if self.game:get_value("_item_slot_1") ~= "boomerang" and self.game:get_value("_item_slot_2") ~= "boomerang" then 
+	    if self.current_boomerang ~= nil then
+	      has_canceled_while_boomerang_active = true
+	    end
+	    if hero:get_animation() == "boomerang_catch" or hero:get_animation() == "stopped" or hero:get_animation() == "stopped_with_shield" then
+	      self.game:set_value("item_boomerang_state", 3)
+	      hero:unfreeze()
+		  has_canceled_while_boomerang_active = true
+		  hero:set_tunic_sprite_id("hero/tunic"..self.current_tunic)
+	    end
+	    self:stop_boomerang()
+      end
+	  if self.game.has_changed_tunic and self.game:is_command_pressed(self.slot) and hero:get_animation() ~= "boomerang_intro" and (self.game:get_value("item_boomerang_state") == 1 or self.game:get_value("item_boomerang_state") == 2) then self.game.has_changed_tunic = false hero:set_tunic_sprite_id(self.hero_armed_tunic) end
+	  if self.game.has_changed_tunic and not self.game:is_command_pressed(self.slot) then self.game.has_changed_tunic = false hero:set_tunic_sprite_id(self.hero_free_tunic) end
+	  if not self.game:is_command_pressed(self.slot) and self.game:get_value("item_boomerang_state") == 2 and not is_shot then self.game:simulate_command_released(self.slot) end
+	end
+	
   return true
   end)
 end
@@ -155,19 +155,17 @@ function boomerang_controller:create_boomerang()
   local go
   local go_back
   local stop
-  local orig_correct, boomerang_sprite_x, boomerang_sprite_y, entities_finaly = 0, 0, 0, 0
+  local orig_correct, hook_x, hook_y, entities_finaly = 0, 0, 0, 0
   local correct_trajectory = 5
   local collision
   local collision_sprite
   local boomerang_sprite
   local boomerang
   
-  retrieve_boomerang_position = true
-  
-  if hero:get_direction() == 0 then self.hook_x = 10; self.hook_y = -5;
-  elseif hero:get_direction() == 1 then self.hook_x = 0; self.hook_y = -10; orig_correct = 1; entities_finaly = 8; correct_trajectory = 6 --10 work 8 default -- 6
-  elseif hero:get_direction() == 2 then self.hook_x = -10; self.hook_y = -5
-  else self.hook_x = 0; self.hook_y = 0; correct_trajectory = 0
+  if hero:get_direction() == 0 then hook_x = 10; hook_y = -5;
+  elseif hero:get_direction() == 1 then hook_x = 0; hook_y = -10; orig_correct = 1; entities_finaly = 8; correct_trajectory = 6
+  elseif hero:get_direction() == 2 then hook_x = -10; hook_y = -5
+  else hook_x = 0; hook_y = 0; correct_trajectory = 0
   end
 
   local function set_can_traverse_rules(entity)
@@ -191,10 +189,10 @@ function boomerang_controller:create_boomerang()
   function go()
   
     sol.timer.start(250, function()
-      sol.audio.play_sound(self.sound_firing_loop)
+      sol.audio.play_sound("items/boomerang/firing_loop")
     return is_shot
     end)
-    sol.audio.play_sound(self.sound_firing_start)
+    sol.audio.play_sound("items/boomerang/firing_start")
 	
 	sol.timer.start(50, function()
 	  local lx, ly, llayer = boomerang:get_position()
@@ -205,7 +203,6 @@ function boomerang_controller:create_boomerang()
 			direction = 0,
 			sprite = boomerang_controller.boomerang_sprite,
 		    })
-		trail:get_sprite():set_frame_delay(40)
 		trail:get_sprite():fade_out(6, function() trail:remove() end)
 	  return is_shot
 	end)
@@ -219,12 +216,14 @@ function boomerang_controller:create_boomerang()
     go_movement:start(boomerang)
 
     function go_movement:on_obstacle_reached()
-	  collision = map:create_custom_entity({ x = boomerang_sprite_x + boomerang_controller.hook_x, y = boomerang_sprite_y - boomerang_controller.hook_y, layer = layer, direction = 0})
+	
+	local boomerang_sprite_x, boomerang_sprite_y = boomerang:get_position()
+	  collision = map:create_custom_entity({ x = boomerang_sprite_x + hook_x, y = (boomerang_sprite_y + 8) + hook_y, layer = layer, direction = 0})
 	  collision_sprite = collision:create_sprite(boomerang_controller.collision_sprite)
       function collision_sprite:on_animation_finished()
 	    collision:remove()
 	  end
-      sol.audio.play_sound(boomerang_controller.sound_collision_wall)
+      sol.audio.play_sound("items/item_metal_collision_wall")
       go_back()
     end
 
@@ -248,7 +247,6 @@ function boomerang_controller:create_boomerang()
     movement:start(boomerang)
 	
     going_back = true
-	retrieve_boomerang_position = false
 
     function movement:on_position_changed()
       for _, entity in ipairs(entities_caught) do
@@ -269,6 +267,7 @@ function boomerang_controller:create_boomerang()
 	for _, entity in ipairs(entities_caught) do
       entity:set_position(hx, hy + entities_finaly, hz)
     end
+	self.game:set_value("item_boomerang_state", 3)
     if boomerang ~= nil then
       boomerang:remove()
 	  boomerang_controller.current_boomerang = nil
@@ -289,7 +288,7 @@ function boomerang_controller:create_boomerang()
 	  sol.timer.start(1, function()
 	    hero:set_animation("boomerang_catch")
 	  end)
-	  sol.audio.play_sound(self.sound_hero_catching_boomerang)
+	  sol.audio.play_sound("characters/link/voice/catch_boomerang")
 	end
 	
   sol.timer.start(121, function()
@@ -322,17 +321,12 @@ function boomerang_controller:create_boomerang()
   end)
 end
 
-   sol.timer.start(10, function()
-	boomerang_sprite_x, boomerang_sprite_y = boomerang:get_position()
-	return retrieve_boomerang_position
-   end)
-  
   -- Create the boomerang.
   boomerang = map:create_custom_entity({
     direction = direction,
     layer = layer,
-    x = x + boomerang_controller.hook_x,
-    y = y + boomerang_controller.hook_y,
+    x = x + hook_x,
+    y = y + hook_y,
     width = 8,
     height = 8,
   })
@@ -405,11 +399,12 @@ end
 
 function boomerang_controller:on_command_pressed(command)
   local hero = self.game:get_hero()
-  if command == self.slot and not is_shot then
+  
+  if command == self.slot and not is_shot and not self.game:is_suspended() then
     avoid_return = true
-	sol.audio.play_sound(self.sound_arming)
+	sol.audio.play_sound("common/item_show")
 	hero:set_tunic_sprite_id("hero/tunic"..self.current_tunic)
-	hero:set_animation(self.hero_intro_animation)
+	hero:set_animation("boomerang_intro")
 	sol.timer.start(self, 100, function()
 	  hero:unfreeze()
 	  hero:set_tunic_sprite_id(self.hero_armed_tunic)
@@ -418,39 +413,37 @@ function boomerang_controller:on_command_pressed(command)
 	  avoid_return = false
 	  if not self.game:is_command_pressed(self.slot) then self.game:simulate_command_released(self.slot) end
 	end)
-  end
-end
-
-function boomerang_controller:on_key_pressed(key)
-  -- if the opposite slot is the boomerang / bow / dominion rod, finish this item and start the other item.
-  if key == (self.game:get_value("keyboard_item_"..self.opposite_slot_to_number) or self.game:get_value("joypad_item_"..self.opposite_slot_to_number)) and (self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "hookshot" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "bow" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "dominion_rod") and not avoid_return then
-	self.game.is_going_to_another_item = true
-	is_halted_by_anything_else = true
-	self.game:set_item_on_use(true)
-	self:stop_boomerang()
-	self.game:get_hero():freeze()
-	self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-	sol.timer.start(10, function()
-	  self.game:set_command_keyboard_binding("item_"..self.opposite_slot_to_number, self.game:get_value("keyboard_item_"..self.opposite_slot_to_number))
-      self.game:set_command_joypad_binding("item_"..self.opposite_slot_to_number, self.game:get_value("joypad_item_"..self.opposite_slot_to_number))
-	  self.game:set_custom_command_effect("action", nil)
-	  self.game:get_item(self.game:get_value("_item_slot_"..self.opposite_slot_to_number)):on_using()
-	end)
-	if self.current_boomerang ~= nil then has_canceled_while_boomerang_active = true else has_canceled_while_boomerang_active = false end
-	if is_shot and self.current_boomerang == nil then is_shot = false avoid_return = true end
-  elseif key == (self.game:get_value("keyboard_attack") or self.game:get_value("joypad_attack")) and not avoid_return and not self.game.is_going_to_another_item then
+  elseif command == self.opposite_slot and not self.game:is_suspended() then
+    if (self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "hookshot" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "bow" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "dominion_rod") and not avoid_return then
+	  self.game.is_going_to_another_item = true
+	  is_halted_by_anything_else = true
+	  self.game:set_item_on_use(true)
+	  self:stop_boomerang()
+	  self.game:get_hero():freeze()
+	  self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
+	  sol.timer.start(10, function()
+	    self.game:set_custom_command_effect("action", nil)
+	    self.game:get_item(self.game:get_value("_item_slot_"..self.opposite_slot_to_number)):on_using()
+	  end)
+	  if self.current_boomerang ~= nil then has_canceled_while_boomerang_active = true else has_canceled_while_boomerang_active = false end
+	  if is_shot and self.current_boomerang == nil then is_shot = false avoid_return = true end	
+	end
+  elseif command == "attack" and not avoid_return and not self.game.is_going_to_another_item and not self.game:is_suspended() then
     self:stop_boomerang()
 	if not self.game:is_current_scene_cutscene() then self.game:show_cutscene_bars(false) end
 	has_pressed_cancel = true
 	if self.current_boomerang ~= nil then
 	  has_canceled_while_boomerang_active = true
 	end
+  elseif command == "pause" then
+    return false
   end
+  return true
 end
 
 function boomerang_controller:on_command_released(command)
 local hero = self.game:get_hero()
-  if command == self.slot and self.game:get_value("item_boomerang_state") == 2 and not is_shot then
+  if command == self.slot and self.game:get_value("item_boomerang_state") == 2 and not is_shot and not self.game:is_suspended() then
     avoid_return = true
 	is_shot = true
     hero:freeze()
@@ -458,8 +451,8 @@ local hero = self.game:get_hero()
 	hero:set_animation("boomerang_shoot")
 	sol.timer.start(self, 100, function()
 	  self:create_boomerang()
-	  sol.audio.play_sound(self.sound_firing_boomerang)
-	  sol.audio.play_sound(self.sound_hero_firing_boomerang)
+	  sol.audio.play_sound("items/boomerang/firing_start0")
+	  sol.audio.play_sound("characters/link/voice/throw0")
 	  hero:set_walking_speed(50)
 	  hero:unfreeze()
 	  hero:set_tunic_sprite_id(self.hero_free_tunic)
@@ -477,7 +470,6 @@ function boomerang_controller:stop_boomerang()
   avoid_return = false
   
   if (not self.game:is_current_scene_cutscene() and self.game:is_cutscene_bars_enabled() and not ended_by_pickable and not self.game.is_going_to_another_item and has_received_boomerang) then self.game:show_cutscene_bars(false) has_received_boomerang = false end
-  if not self.game.is_going_to_another_item then self.game:get_item("boomerang"):restore_equipment() end
   
   if not is_halted_by_anything_else then
     if not from_teleporter then sol.audio.play_sound("common/item_show") end
@@ -485,15 +477,29 @@ function boomerang_controller:stop_boomerang()
 	self.game:get_hero():freeze()
 	self.game:get_hero():set_animation("boomerang_outro")
 	sol.timer.start(100, function()
+	  self.game:set_ability("shield", self.game:get_value("current_shield"))
 	  self.game:get_hero():unfreeze()
+	  if self.game.is_using_lantern then
+	    self.game:get_hero():set_tunic_sprite_id("hero/item/lantern.tunic"..self.game:get_ability("tunic"))
+	  else
+	    self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
+	  end
 	  sol.menu.stop(self)
 	  self.game:get_item("boomerang"):set_finished()
 	end)
   else 
-    -- if has_pressed_cancel then
-	  -- self.game:get_hero():unfreeze()
-	-- end
     is_halted_by_anything_else = false
+	if not self.game.is_going_to_another_item then
+	  if self.game:get_hero():get_state() == "falling" then
+	    sol.timer.start(800, function()
+	      self.game:set_ability("shield", self.game:get_value("current_shield"))
+	      self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
+		end)
+	  else
+	    self.game:set_ability("shield", self.game:get_value("current_shield"))
+	    self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
+	  end
+	end
 	self.game:get_item("boomerang"):set_finished()
 	sol.menu.stop(self)
   end

@@ -11,11 +11,7 @@ self.can_control = true
 
   -- Create all graphic objects.
   self.surface = sol.surface.create(320, 240)
-  self.background = sol.surface.create("menus/selection/background/"..time_of_day.."/background.png")
-  self.background_img = sol.surface.create("menus/selection_menu_background.png")
-  self.cloud_img = sol.surface.create("menus/selection_menu_cloud.png")
-  self.save_container_img = sol.surface.create("menus/selection_menu_save_container.png")
-  self.option_container_img = sol.surface.create("menus/selection_menu_option_container.png")
+  self.background = sol.surface.create("menus/selection/background/night/background.png")
   
   self.draw_option_container = true
   
@@ -23,7 +19,7 @@ self.can_control = true
   self.bird_sprite1 = sol.sprite.create("menus/selection/background/"..time_of_day.."/bird")
   
   self.bird_x, self.bird_y =  math.random(-60, -22), math.random(150, 0)
-  self.bird1_x, self.bird1_y = math.random(-200, -22), math.random(70, 0)
+  self.bird1_x, self.bird1_y = math.random(-200, -22), math.random(70, 20)
   
   self.cloud0 = sol.surface.create("menus/selection/background/night/cloud0.png")
   self.cloud1 = sol.surface.create("menus/selection/background/night/cloud1.png")
@@ -77,7 +73,7 @@ self.can_control = true
 
   -- Run the menu.
   self:read_savegames()
-  sol.audio.play_music("/menu/file_selection")
+  sol.audio.play_music("menu_file_selection")
   self:init_phase_select_file()
 
   -- Show an opening transition.
@@ -188,7 +184,6 @@ function savegame_menu:on_draw(dst_surface)
   self.menu_name_box_graphic:draw_region(0, 104, 146, 20, self.surface, 47, 45)
   
   -- Savegames container.
-  self.background_img:draw(self.surface, 45, 38)
   self.title_text:draw(self.surface, 120, 54)
 
   -- Phase-specific draw method.
@@ -479,7 +474,6 @@ function savegame_menu:key_pressed_phase_select_file(key)
       -- The user chooses a savegame.
       local slot = self.slots[self.cursor_position]
       if sol.game.exists(slot.file_name) then
-        -- The file exists: run it after a fade-out effect.
 		self.selected_quest = self.cursor_position
         self:init_phase_display_quest()
       else
@@ -634,7 +628,7 @@ function savegame_menu:key_pressed_phase_copy_which_file(key)
       -- The user chooses a savegame to delete.
       local slot = self.slots[self.cursor_position]
       if sol.game.exists(slot.file_name) then
-  	  sol.audio.play_sound("error")
+  	  sol.audio.play_sound("wrong")
 	  else
 	  self.is_copy_erase = false
 	  sol.audio.play_sound("menu/menu_open")
@@ -984,14 +978,11 @@ function savegame_menu:init_phase_display_quest()
   self.hero_sprite:set_direction(3)
   
   if self.savegame:get_ability("shield") > 0 then
-  self.shield_sprite = sol.sprite.create("hero/shield"..self.savegame:get_ability("shield") or 1)
-  self.shield_sprite:set_animation("walking")
-  self.shield_sprite:set_frame_delay(50)
-  self.shield_sprite:set_direction(3)
+    self.shield_sprite = sol.sprite.create("hero/shield"..self.savegame:get_ability("shield") or 1)
+    self.shield_sprite:set_animation("walking")
+    self.shield_sprite:set_frame_delay(50)
+    self.shield_sprite:set_direction(3)
   end
-  
-  self.item_sprite = sol.sprite.create("entities/items")
-  
 end
 
 function savegame_menu:key_pressed_phase_display_quest(key)
@@ -1008,7 +999,6 @@ function savegame_menu:key_pressed_phase_display_quest(key)
 		  sol.audio.play_music(nil)
           sol.timer.start(self, 2000, function()
             sol.menu.stop(self)
-			self.can_control = true
 	        sol.main:start_savegame(self.savegame)
           end)
 		end)
@@ -1047,19 +1037,16 @@ function savegame_menu:direction_pressed_phase_display_quest(direction8)
 end
 
 function savegame_menu:draw_phase_display_quest()
-  local y = 115
-  -- Current savegame slot
-  
   self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 133)
   self.file_box_erase:draw_region(0, 0, 64, 16, self.surface, 63, 150)
   
   if self.savegame:get_value("hero_mode") then
-  self.file_box_graphic:draw_region(0, 124, 177, 56, self.surface, 62, 75)
-  self.file_box_graphic:draw_region(64, 0, 64, 16, self.surface, 63, 75)
-  self.file_box_graphic:draw_region(128, 0, 11, 11, self.surface, 58, 77)
+    self.file_box_graphic:draw_region(0, 124, 177, 56, self.surface, 62, 75)
+    self.file_box_graphic:draw_region(64, 0, 64, 16, self.surface, 63, 75)
+    self.file_box_graphic:draw_region(128, 0, 11, 11, self.surface, 58, 77)
   else
-  self.file_box_graphic:draw_region(0, 32, 177, 56, self.surface, 62, 75)
-  self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 75)
+    self.file_box_graphic:draw_region(0, 32, 177, 56, self.surface, 62, 75)
+    self.file_box_graphic:draw_region(0, 0, 64, 16, self.surface, 63, 75)
   end
   self.hero_name:draw(self.surface, 136, 82)
   self.hero_sprite:draw(self.surface, 81, 116)
@@ -1072,21 +1059,21 @@ function savegame_menu:draw_phase_display_quest()
   {67, 13, 121},
   {80, 14, 134},
   {94, 15, 148},
-  {187, 15, 76}, 
-  {202, 15, 91},
-  {217, 15, 106},
-  {111, 16, 0},
-  {127, 15, 16},
-  {142, 15, 31},
-  {157, 15, 46},
-  {172, 15, 61},
+  {187, 16, 75}, 
+  {202, 16, 90},
+  {217, 16, 105},
+  {112, 16, 0},
+  {127, 16, 15},
+  {142, 16, 30},
+  {157, 16, 45},
+  {172, 16, 60},
   }
  
-   for i, dst_positions in ipairs(dst_position) do
-     if self.savegame:get_value("dungeon_"..i.."_finished") then
-        self.file_box_graphic:draw_region(dst_positions[3], 88, dst_positions[2] , 16, self.surface, dst_positions[1], y)
-     end
-   end
+  for i, dst_positions in ipairs(dst_position) do
+    if self.savegame:get_value("dungeon_"..i.."_finished") then
+      self.file_box_graphic:draw_region(dst_positions[3], 88, dst_positions[2] , 16, self.surface, dst_positions[1], 115)
+    end
+  end
   
   if self.savegame:get_ability("shield") > 0 then
     self.shield_sprite:draw(self.surface, 80, 116)
@@ -1096,9 +1083,8 @@ function savegame_menu:draw_phase_display_quest()
   self.hearts_view:rebuild_surface()
   self.hearts_view:on_draw(self.surface)
    
- 
- self.file:draw(self.surface, 73, 82)
- self.number_img:draw(self.surface, 113, 82)
+  self.file:draw(self.surface, 73, 82)
+  self.number_img:draw(self.surface, 113, 82)
 
   -- Bottom buttons.
   self:draw_bottom_buttons()
@@ -1106,7 +1092,6 @@ function savegame_menu:draw_phase_display_quest()
   -- Cursor.
   self:draw_savegame_cursor()
 end
-
 
 ----------------------
 -- Phase "options" --
@@ -1261,8 +1246,6 @@ function savegame_menu:direction_pressed_phase_options(direction8)
       local index = (option.current_index % #option.values) + 1
       self:set_option_value(option, index)
       sol.audio.play_sound("menu/option_modifyvalue")
-      self.left_arrow_sprite:set_frame(0)
-      self.right_arrow_sprite:set_frame(0)
       handled = true
 
     elseif direction8 == 4 then  -- Left.
@@ -1270,8 +1253,6 @@ function savegame_menu:direction_pressed_phase_options(direction8)
       local index = (option.current_index + #option.values - 2) % #option.values + 1
       self:set_option_value(option, index)
       sol.audio.play_sound("menu/option_modifyvalue")
-      self.left_arrow_sprite:set_frame(0)
-      self.right_arrow_sprite:set_frame(0)
       handled = true
 
     end
@@ -1594,32 +1575,29 @@ end
 function savegame_menu:set_initial_values(savegame)
   savegame:set_value("player_name", self.player_name)
   
-  	if self.can_hero_mode then
-	  savegame:set_value("hero_mode", true)
-	end
-
-  savegame:set_starting_location("cutscene/intro", "default")
+  --Hero mode
+  if self.can_hero_mode then
+    savegame:set_value("hero_mode", true)
+  end
+  
+  --Time System related flags
+  savegame:set_value("current_hour", 11)
+  savegame:set_value("current_minute", 30)
+  savegame:set_value("current_day", 1)
+  savegame.time_flow = 1000
+  
+  --Starting Location, global for both hero mode and normal mode
+  savegame:set_starting_location("dungeons/d_earth/entrance", "default")
   savegame:set_value("old_volume", sol.audio.get_music_volume())
   savegame:set_value("item_cloak_darkness_state", 0)
-	
-  savegame:set_value("item_saved_tunic", savegame:get_ability("tunic"))
-  savegame:set_value("item_saved_sword", savegame:get_ability("sword"))
-  savegame:set_value("item_saved_shield", savegame:get_ability("shield"))
-
-  savegame:set_value("item_saved_kb_action", savegame:get_value("_keyboard_action"))
-  savegame:set_value("item_1_kb_slot", savegame:get_value("_keyboard_item_1"))
-  savegame:set_value("item_2_kb_slot", savegame:get_value("_keyboard_item_2"))
-
-  savegame:set_value("item_saved_jp_action", savegame:get_value("_joypad_action"))
-  savegame:set_value("item_1_jp_slot", savegame:get_value("_joypad_item_1"))
-  savegame:set_value("item_2_jp_slot", savegame:get_value("_joypad_item_2"))	
+  savegame:set_value("item_bow_state", 0)
+  savegame:set_value("item_bow_current_arrow_type", 0)  
 
   -- Initially give 3 hearts, the first tunic and the first wallet.
   savegame:set_max_life(12)
   savegame:set_life(savegame:get_max_life())
   savegame:set_value("i1025",0)
   savegame:set_value("i1024",0)
- 
   savegame:get_item("tunic"):set_variant(1)
   savegame:set_ability("tunic", 1)
   savegame:get_item("rupee_bag"):set_variant(1)

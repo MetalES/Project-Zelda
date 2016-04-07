@@ -201,15 +201,15 @@ function options_submenu:on_command_pressed(command)
       self:next_submenu()
       handled = true
     elseif command == "up" then
-      sol.audio.play_sound("cursor")
+      sol.audio.play_sound("/menu/cursor")
       self:set_cursor_position((self.cursor_position + 8) % 10 + 1)
       handled = true
     elseif command == "down" then
-      sol.audio.play_sound("cursor")
+      sol.audio.play_sound("/menu/cursor")
       self:set_cursor_position(self.cursor_position % 10 + 1)
       handled = true
     elseif command == "action" then
-      sol.audio.play_sound("danger")
+      sol.audio.play_sound("/menu/start_custom_option")
       if self.cursor_position == 1 then
         -- Change the video mode.
         sol.video.switch_mode()
@@ -221,18 +221,18 @@ function options_submenu:on_command_pressed(command)
         local command_to_customize = self.command_names[self.cursor_position - 1]
         self.game:capture_command_binding(command_to_customize, function()
 		-- save values to savegame
-		  if self.command_names[self.cursor_position - 1] == "action" then 
-		  sol.main.game:set_value("item_saved_kb_action", sol.main.game:get_command_keyboard_binding("action"))
-		  sol.main.game:set_value("item_saved_jp_action", sol.main.game:get_command_joypad_binding("action"))		  
-		  elseif self.command_names[self.cursor_position - 1] == "item_1" then 
-		  sol.main.game:set_value("item_1_kb_slot", sol.main.game:get_command_keyboard_binding("item_1"))
-		  sol.main.game:set_value("item_1_jp_slot", sol.main.game:get_command_joypad_binding("item_1"))
-		  elseif self.command_names[self.cursor_position - 1] == "item_2" then 
-		  sol.main.game:set_value("item_2_kb_slot", sol.main.game:get_command_keyboard_binding("item_2"))
-		  sol.main.game:set_value("item_2_jp_slot", sol.main.game:get_command_joypad_binding("item_2"))
-		  end
+		  -- if self.command_names[self.cursor_position - 1] == "action" then 
+		  -- self.game:set_value("keyboard_action", self.game:get_command_keyboard_binding("action"))
+		  -- self.game:set_value("joypad_action_action", self.game:get_command_joypad_binding("action"))		  
+		  -- elseif self.command_names[self.cursor_position - 1] == "item_1" then 
+		  -- self.game:set_value("keyboard_item_1", self.game:get_command_keyboard_binding("item_1"))
+		  -- self.game:set_value("joypad_item_1", self.game:get_command_joypad_binding("item_1"))
+		  -- elseif self.command_names[self.cursor_position - 1] == "item_2" then 
+		  -- self.game:set_value("keyboard_item_2", self.game:get_command_keyboard_binding("item_2"))
+		  -- self.game:set_value("joypad_item_1", self.game:get_command_joypad_binding("item_2"))
+		  -- end
 
-          sol.audio.play_sound("danger")
+          sol.audio.play_sound("menu/finished_custom_option")
           self:set_caption("options.caption.press_action_customize_key")
           self.cursor_sprite:set_animation("small")
           self:load_command_texts()

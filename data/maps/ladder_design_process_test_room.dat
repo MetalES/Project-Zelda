@@ -1,0 +1,177 @@
+properties{
+  x = 0,
+  y = 0,
+  width = 320,
+  height = 240,
+  min_layer = 0,
+  max_layer = 2,
+  tileset = "cave",
+}
+
+tile{
+  layer = 0,
+  x = -24,
+  y = 24,
+  width = 16,
+  height = 8,
+  pattern = "50",
+}
+
+tile{
+  layer = 0,
+  x = -24,
+  y = -8,
+  width = 16,
+  height = 32,
+  pattern = "51",
+}
+
+wall{
+  layer = 0,
+  x = -32,
+  y = 16,
+  width = 8,
+  height = 8,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 0,
+  x = -8,
+  y = 16,
+  width = 8,
+  height = 8,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+sensor{
+  name = "ladder_0_1",
+  layer = 0,
+  x = -16,
+  y = 37,
+  width = 16,
+  height = 16,
+}
+
+sensor{
+  name = "layer_ladder_sensor_3",
+  layer = 0,
+  x = -16,
+  y = 13,
+  width = 16,
+  height = 16,
+}
+
+tile{
+  layer = 1,
+  x = -24,
+  y = -16,
+  width = 16,
+  height = 8,
+  pattern = "48",
+}
+
+wall{
+  layer = 1,
+  x = -8,
+  y = -16,
+  width = 8,
+  height = 32,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 1,
+  x = -32,
+  y = -16,
+  width = 8,
+  height = 32,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+sensor{
+  name = "ladder_0_0",
+  layer = 1,
+  x = -16,
+  y = -11,
+  width = 16,
+  height = 16,
+}
+
+sensor{
+  name = "layer_ladder_sensor_2",
+  layer = 1,
+  x = -16,
+  y = 21,
+  width = 16,
+  height = 16,
+}
+
+wall{
+  layer = 2,
+  x = -32,
+  y = -16,
+  width = 8,
+  height = 32,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 2,
+  x = -8,
+  y = -16,
+  width = 8,
+  height = 32,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 2,
+  x = -32,
+  y = 16,
+  width = 8,
+  height = 8,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+
+wall{
+  layer = 2,
+  x = -8,
+  y = 16,
+  width = 8,
+  height = 8,
+  stops_hero = true,
+  stops_npcs = true,
+  stops_enemies = true,
+  stops_blocks = true,
+  stops_projectiles = true,
+}
+

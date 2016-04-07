@@ -1,17 +1,16 @@
 local game = ...
+local map_name_builder = require("scripts/hud/map_name")
 
 function game:initialize_hud()
 
   -- Set up the HUD.
   local bars_builder = require("scripts/hud/cutscene_bars")
-  local map_name_builder = require("scripts/hud/map_name")
   local clock_builder = require("scripts/hud/day_night_clock")
   local floor_builder = require("scripts/hud/floor")
   local rupees_builder = require("scripts/hud/rupees")
   local hearts_builder = require("scripts/hud/hearts")
   local item_icon_builder = require("scripts/hud/item_icon")
   local magic_bar_builder = require("scripts/hud/magic_bar")
-  local pickables_builder = require("scripts/hud/pickables")
   local small_keys_builder = require("scripts/hud/small_keys")
   local stamina_bar_builder = require("scripts/hud/stamina_bar")
   local attack_icon_builder = require("scripts/hud/attack_icon")
@@ -52,15 +51,11 @@ function game:initialize_hud()
   self.hud[#self.hud + 1] = menu
 
   local menu = rupees_builder:new(self)
-  menu:set_dst_position(8, -20)
-  self.hud[#self.hud + 1] = menu
-
-  local menu = pickables_builder:new(self)
-  menu:set_dst_position(-255, -30)
+  menu:set_dst_position(15, -20)
   self.hud[#self.hud + 1] = menu
 
   local menu = small_keys_builder:new(self)
-  menu:set_dst_position(8, -33)
+  menu:set_dst_position(15, -33)
   self.hud[#self.hud + 1] = menu
 
   local menu = floor_builder:new(self)
@@ -92,6 +87,9 @@ function game:initialize_hud()
   self.hud[#self.hud + 1] = menu
   self.hud.boss_life = menu
   
+  for _, bars in ipairs(self.bars) do
+    sol.menu.start(self, bars, false)
+  end
 
   self:set_hud_enabled(true)
   self:set_clock_enabled(true)
@@ -155,9 +153,39 @@ function game:hud_on_map_changed(map)
   end
 end
 
+-- Display Cutscene Bars
+function game:show_cutscene_bars(boolean)
+  local boolean = boolean or false
+  if boolean then
+    for _, bars in ipairs(self.bars) do
+	  if not bars:is_active() then
+        bars:show_bars()
+      end
+	end
+  else
+    for _, bars in ipairs(self.bars) do
+	  if bars:is_active() then
+        bars:hide_bars()
+      end
+	end
+  end
+end
+
+function game:is_cutscene_bars_enabled()
+  for _, bars in ipairs(self.bars) do
+    return bars:is_active()
+  end
+end
+
 function game:hud_on_paused()
   if self:is_hud_enabled() then
     for _, menu in ipairs(self.hud) do
+      if menu.on_paused ~= nil then
+        menu:on_paused()
+      end
+    end
+	
+	for _, menu in ipairs(self.bars) do
       if menu.on_paused ~= nil then
         menu:on_paused()
       end
@@ -183,7 +211,11 @@ function game:hud_on_unpaused()
         menu:on_unpaused()
       end
     end
-	
+	for _, menu in ipairs(self.bars) do
+      if menu.on_unpaused ~= nil then
+        menu:on_unpaused()
+      end
+    end
   end
 end
 
@@ -192,25 +224,26 @@ function game:is_hud_enabled()
 end
 
 function game:set_clock_enabled(enabled)
-  if enabled == true then
+  if enabled then
     for _, clocks in ipairs(self.clock) do
          sol.menu.start(self, clocks, true)
     end
-  elseif enabled == false then
+	self.clock_was_enabled = true
+  else
     for _, clocks in ipairs(self.clock) do
          sol.menu.stop(clocks)
     end
+	self.clock_was_enabled = false
   end
+end
+
+function game:was_clock_enabled()
+  return self.clock_was_enabled
 end
 
 function game:set_hud_enabled(hud_enabled)
   if hud_enabled ~= self.hud_enabled then
     game.hud_enabled = hud_enabled
-
-	for _, bars in ipairs(self.bars) do
-        sol.menu.start(self, bars, false)
-    end
-	
     for _, menu in ipairs(self.hud) do
       if hud_enabled then
         sol.menu.start(self, menu)
@@ -218,14 +251,15 @@ function game:set_hud_enabled(hud_enabled)
         sol.menu.stop(menu)
       end
     end
-
   end
 end
 
-function game:show_map_name(map_name, display_extra)
-  game.map_name_string = map_name or nil
-  game.display_extra = display_extra or nil
-  self:set_value("previous_map_name_displayed", game.map_name_string)
+function game:show_map_name(map_name, display_extra, paused)
+  map_name_builder:show_name(map_name, display_extra or nil, paused or false)
+end
+
+function game:clear_map_name()
+  map_name_builder:clear()
 end
 
 function game:get_custom_command_effect(command)

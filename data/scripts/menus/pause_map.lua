@@ -3,25 +3,32 @@ local map_submenu = submenu:new()
 
 local outside_world_size = { width = 8000, height = 13452 } --Hyrule
 local outside_world_minimap_size = { width = 225, height = 388 }
-local outside_world_2_size = { width = 2240, height = 3360 } --Subrosia
-local outside_world_2_minimap_size = { width = 225, height = 300 }
-local outside_world_3_size = { width = 16800, height = 6720 } --North
-local outside_world_3_minimap_size = { width = 659, height = 255 }
 local map_shown = false
 
 function map_submenu:on_started()
 
   submenu.on_started(self)
   -- only in dungeons
-  self.boss_map_sprite = sol.sprite.create("menus/dungeon_boss_stair")
-  self.boss_map_sprite:set_animation("default")
+  
   -- Common to dungeons and outside dungeons.
   self.hero_head_sprite = sol.sprite.create("menus/hero_head")
-  self.hero_head_sprite:set_animation("tunic" .. self.game:get_value("item_saved_tunic"))
+  self.hero_head_sprite:set_animation("tunic" .. self.game:get_ability("tunic"))
   self.up_arrow_sprite = sol.sprite.create("menus/arrow")
+  self.up_arrow_sprite:set_animation("blink")
   self.up_arrow_sprite:set_direction(1)
   self.down_arrow_sprite = sol.sprite.create("menus/arrow")
+  self.down_arrow_sprite:set_animation("blink")
   self.down_arrow_sprite:set_direction(3)
+  
+  --check if we are in hero mode
+  local hero_mode = self.game:get_value("hero_mode") or false
+  local final_path
+
+  if hero_mode then
+    final_path = "mirror/"
+  else
+    final_path = "normal/"
+  end
 
   self.dungeon = self.game:get_dungeon()
   if self.dungeon == nil then
@@ -47,16 +54,6 @@ function map_submenu:on_started()
       map_shown = true
       self.world_minimap_img = sol.surface.create("menus/outside_world_map.png")
       self.world_minimap_visible_xy.y = math.min(outside_world_minimap_size.height - 133, math.max(0, hero_minimap_y - 65))
-    elseif self.game:get_item("world_map"):get_variant() > 1 and self.game:get_map():get_world() == "outside_subrosia" then
-      -- if in Subrosia with upgraded World Map, then show the map
-      map_shown = true
-      self.world_minimap_img = sol.surface.create("menus/outside_world_map_2.png")
-      self.world_minimap_visible_xy.y = math.min(outside_world_minimap_size.height - 133, math.max(0, hero_minimap_y - 65))
-    elseif self.game:get_item("world_map"):get_variant() > 2 and self.game:get_map():get_world() == "outside_north" then
-      -- if in North Hyrule with upgraded World Map, then show the map
-      map_shown = true
-      self.world_minimap_img = sol.surface.create("menus/outside_world_map_3.png")
-      self.world_minimap_visible_xy.y = math.min(outside_world_minimap_size.height - 133, math.max(0, hero_minimap_y - 65))
     else
       -- if World Map not in inventory, show clouds in map screen
       map_shown = false
@@ -67,6 +64,7 @@ function map_submenu:on_started()
   else
     -- In a dungeon.
     self.dungeon_index = self.game:get_dungeon_index()
+	self.boss_map_sprite = sol.sprite.create("menus/dungeon_boss_stair")
 
     -- Caption text.
     self:set_caption("map.caption.dungeon_name_" .. self.dungeon_index)
@@ -86,6 +84,9 @@ function map_submenu:on_started()
     self.hero_floor = self.game:get_map():get_floor()
     self.nb_floors = self.dungeon.highest_floor - self.dungeon.lowest_floor + 1
     self.nb_floors_displayed = math.min(7, self.nb_floors)
+	self.boss_floor_stair = self.game.dungeons[self.dungeon_index].boss.floor
+
+	
     if self.hero_floor == nil then
       -- The hero is not on a known floor of the dungeon.
       self.highest_floor_displayed = self.dungeon.highest_floor
@@ -95,9 +96,9 @@ function map_submenu:on_started()
       self.selected_floor = self.hero_floor
       if self.nb_floors <= 8 then
         self.highest_floor_displayed = self.dungeon.highest_floor
-      elseif self.floor >= self.dungeon.highest_floor - 2 then
-        self.highest_floor_displayed = self.dungeon.highest_floor
-      elseif self.floor <= self.dungeon.lowest_floor + 2 then
+      elseif self.hero_floor >= self.dungeon.highest_floor - 2 then
+        self.highest_floor_displayed = self.dungeon.highest_floor -- - 1, caused a bug when on the 14th floor
+      elseif self.hero_floor <= self.dungeon.lowest_floor + 2 then
         self.highest_floor_displayed = self.dungeon.lowest_floor + 6
       else
         self.highest_floor_displayed = self.hero_floor + 3
@@ -107,7 +108,7 @@ function map_submenu:on_started()
     -- Minimap.
     self.dungeon_map_img = sol.surface.create(123, 119)
     self.dungeon_map_spr = sol.sprite.create(
-      "menus/dungeon_maps/map" .. self.dungeon_index)
+      "menus/dungeon_maps/".. final_path .. "map" .. self.dungeon_index)
     self:load_dungeon_map_image()
   end
 
@@ -216,9 +217,7 @@ end
 function map_submenu:draw_world_map(dst_surface)
 
   -- Draw the minimap.
-  self.world_minimap_img:draw_region(
-      self.world_minimap_visible_xy.x, self.world_minimap_visible_xy.y, 255, 133,
-      dst_surface, 48, 59)
+  self.world_minimap_img:draw_region(self.world_minimap_visible_xy.x, self.world_minimap_visible_xy.y, 255, 133, dst_surface, 48, 59)
 
   if map_shown then
     -- Draw the hero's position.
@@ -263,26 +262,21 @@ function map_submenu:draw_dungeon_items(dst_surface)
 
   -- Map.
   if self.game:has_dungeon_map() then
-    self.dungeon_map_icons_img:draw_region(0, 0, 17, 17, dst_surface, 50, 168)
+    self.dungeon_map_icons_img:draw_region(0, 0, 17, 17, dst_surface, 56, 169)
   end
 
   -- Compass.
   if self.game:has_dungeon_compass() then
-    self.dungeon_map_icons_img:draw_region(17, 0, 17, 17, dst_surface, 69, 168)
-  end
-
-  -- Big key.
-  if self.game:has_dungeon_big_key() then
-    self.dungeon_map_icons_img:draw_region(34, 0, 17, 17, dst_surface, 88, 168)
+    self.dungeon_map_icons_img:draw_region(17, 0, 16, 17, dst_surface, 80, 168)
   end
 
   -- Boss key.
   if self.game:has_dungeon_boss_key() then
-    self.dungeon_map_icons_img:draw_region(51, 0, 17, 17, dst_surface, 107, 168)
+    self.dungeon_map_icons_img:draw_region(33, 0, 15, 17, dst_surface, 105, 169)
   end
 
   -- Small keys.
-  self.dungeon_map_icons_img:draw_region(68, 0, 9, 17, dst_surface, 126, 168)
+  self.dungeon_map_icons_img:draw_region(69, 0, 9, 17, dst_surface, 126, 168)
   self.small_keys_text:draw(dst_surface, 140, 180)
 end
 
@@ -293,50 +287,49 @@ function map_submenu:draw_dungeon_floors(dst_surface)
   local src_y = (15 - self.highest_floor_displayed) * 12
   local src_width = 32
   local src_height = self.nb_floors_displayed * 12 + 1
-  local dst_x = 79
-  local dst_y = 70 + (8 - self.nb_floors_displayed) * 6
+  local dst_x = 78
+  local dst_y = 64 + (8 - self.nb_floors_displayed) * 6
   local old_dst_y = dst_y
 
-  self.dungeon_floors_img:draw_region(src_x, src_y, src_width, src_height,
-      dst_surface, dst_x, dst_y)
+  self.dungeon_floors_img:draw_region(src_x, src_y, src_width, src_height, dst_surface, dst_x, dst_y)
 
   -- Draw the current floor with other colors.
   src_x = 64
   src_y = (15 - self.selected_floor) * 12
   src_height = 13
   dst_y = old_dst_y + (self.highest_floor_displayed - self.selected_floor) * 12
-  self.dungeon_floors_img:draw_region(src_x, src_y, src_width, src_height,
-      dst_surface, dst_x, dst_y)
+  self.dungeon_floors_img:draw_region(src_x, src_y, src_width, src_height, dst_surface, dst_x, dst_y)
  
   -- Draw the hero's icon if any.
   local lowest_floor_displayed = self.highest_floor_displayed - self.nb_floors_displayed + 1
-  if self.hero_floor ~= nil
-      and self.hero_floor >= lowest_floor_displayed
-      and self.hero_floor <= self.highest_floor_displayed then
+  if self.hero_floor ~= nil and self.hero_floor >= lowest_floor_displayed and self.hero_floor <= self.highest_floor_displayed then
     dst_x = 61
     dst_y = old_dst_y + (self.highest_floor_displayed - self.hero_floor) * 12
     self.hero_head_sprite:draw(dst_surface, dst_x, dst_y)
   end
 
   -- Draw the boss icon if any.
-  if self.game:has_dungeon_compass()
-      and self.boss_floor ~= nil
-      and self.boss_floor >= lowest_floor_displayed
-      and self.boss_floor <= highest_floor_displayed then
-
-    dst_y = old_dst_y + (self.highest_floor_displayed - self.boss_floor) * 12 + 3
-    self.dungeon_map_icons_img:draw_region(78, 0, 8, 8, dst_surface, 113, dst_y)
-    self.boss_map_sprite:draw(dst_surface, dst_x, dst_y)
+  if self.game:has_dungeon_compass() then
+      if self.boss_floor ~= nil and self.boss_floor >= lowest_floor_displayed and self.boss_floor <= highest_floor_displayed then
+        dst_y = old_dst_y + (self.highest_floor_displayed - self.boss_floor) * 12 + 3
+        self.dungeon_map_icons_img:draw_region(78, 0, 8, 8, dst_surface, 113, dst_y)
+      end
+	  if self.boss_floor_stair ~= nil and self.boss_floor_stair <= self.highest_floor_displayed and self.boss_floor_stair >= lowest_floor_displayed then
+           dst_y = old_dst_y + (self.highest_floor_displayed - self.boss_floor_stair) * 12 + 1
+	       self.boss_map_sprite:draw(dst_surface, 61 + 51, dst_y)
+	  end
   end
 
   -- Draw the arrows.
+  
+  if self.highest_floor_displayed < self.dungeon.highest_floor then
+    self.up_arrow_sprite:draw(dst_surface, 88, 62)
+  end
+  
   if lowest_floor_displayed > self.dungeon.lowest_floor then
-    down_arrow_sprite:draw(dst_surface, 89, 89)
+    self.down_arrow_sprite:draw(dst_surface, 88, 155)
   end
 
-  if self.highest_floor_displayed < self.dungeon.highest_floor then
-    down_arrow_sprite:draw(dst_surface, 89, 56)
-  end
 end
 
 -- Converts x,y relative to the real floor into coordinates relative

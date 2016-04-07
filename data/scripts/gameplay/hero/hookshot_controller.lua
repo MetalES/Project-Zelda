@@ -1,77 +1,44 @@
---[[
-/script\Hookshot Controller Script.
-/author\Made by MetalZelda - 22.02.2016
-
-/desc\Controller script for the hookshot.
-
-/copyright\Credits if you plan to use the script would be nice. Not for resale. Script and project are part of educationnal project.
-]]
-
 local hookshot_controller = {}
-
--- Preload everything, these values are loaded when the game creates the item. So the game don't need to load them when called
-hookshot_controller.slot  = "item_1";
-hookshot_controller.opposite_slot  = "item_2";
-hookshot_controller.opposite_slot_to_number  = 2;
-hookshot_controller.current_tunic  = "";
-hookshot_controller.distance = 204;
-hookshot_controller.collision_sprite  = "entities/item.collision";
-hookshot_controller.hookshot_sprite  = "entities/hookshot";
-hookshot_controller.links_sprite  = "entities/hookshot";
-hookshot_controller.sound_hit_valid  = "items/hookshot/hit_valid_target";
-hookshot_controller.sound_tracting_hero  = "items/hookshot/link_tracted";
-hookshot_controller.sound_collision_wall  = "items/item_metal_collision_wall";
-hookshot_controller.sound_firing_loop  = "items/hookshot/firing_loop";
-hookshot_controller.sound_firing_start  = "items/hookshot/firing_start";
-hookshot_controller.sound_arming  = "items/hookshot/arming";
-hookshot_controller.hook_x = 0;
-hookshot_controller.hook_y = 0;
-hookshot_controller.hero_free_tunic = "";
-hookshot_controller.hero_armed_tunic = "";
-hookshot_controller.hero_intro_animation  = "hookshot_intro";
-hookshot_controller.new_x = 0;
-hookshot_controller.new_y = 0;
-hookshot_controller.gx = 0;
-hookshot_controller.gy = 0;
-hookshot_controller.lx = 0;
-hookshot_controller.ly = 0;
-hookshot_controller.llayer = 0;
-hookshot_controller.link_hook_x = 0;
-hookshot_controller.link_hook_y = 0;
-hookshot_controller.current_hookshot = nil -- the current hookshot entity
-hookshot_controller.current_leader = nil   -- the current leader entity
- 
+-- Initialize item related thing, these values are loaded when the game creates the item.
+-- Sound is already preloaded so it is useless to store these here.
+hookshot_controller.slot  = "item_1"; -- Identifier that get the Item Slot
+hookshot_controller.opposite_slot  = "item_2"; -- Identifier that get the opposite slot
+hookshot_controller.opposite_slot_to_number  = 2; -- Integer that get the opposite slot
+hookshot_controller.collision_sprite = "entities/item.collision"; -- Item : Collision Sprite
+hookshot_controller.hookshot_sprite = "entities/hookshot"; -- Item : The Hookshot Sprite
+hookshot_controller.links_sprite = "entities/hookshot"; -- Item : Hookshot Link Sprite
+hookshot_controller.hero_free_tunic = "";  -- used to store the hero sprite id when he is free, useful if he change tunic
+hookshot_controller.hero_armed_tunic = "";  -- used to store the hero sprite id when he pressed an input, useful if he change tunic
+hookshot_controller.new_x = 0; -- X Warp position in real time when the ground is not solid depending on Hero's Direction
+hookshot_controller.new_y = 0; -- Y Warp position in real time when the ground is not solid depending on Hero's Direction
+hookshot_controller.gx = 0; -- Ground X, the ground surrouding the hero
+hookshot_controller.gy = 0; -- Ground Y, the ground surrouding the hero
+hookshot_controller.lx = 0; -- Link X : Player X Position in the World in real time
+hookshot_controller.ly = 0; -- Link Y : Player Y Position in the World in real time
+hookshot_controller.llayer = 0; -- Link Layer : Player Z (Layer) Position in the World in real time
+hookshot_controller.current_hookshot = nil -- The current hookshot entity
+hookshot_controller.current_leader = nil   -- The current leader entity
+-- initialize booleans
 local is_halted_by_anything_else = false
 local avoid_return = false
 local from_teleporter = false
 local is_shot = false
 local ended_by_pickable = false
-local retrieve_hookshot_position = false
+local timer
 
 function hookshot_controller:start_hookshot(game)
   self.game = game
-  
-  self.current_tunic = self.game:get_ability("tunic")
-  self.hero_free_tunic = "hero/item/hookshot/hookshot_moving_free_tunic"..self.current_tunic
-  self.hero_armed_tunic = "hero/item/hookshot/hookshot_moving_concentrate_tunic"..self.current_tunic
-  
-  if self.game:get_value("_item_slot_2") == "hookshot" then 
-    self.slot = "item_2" 
-	self.opposite_slot = "item_1"
-    self.opposite_slot_to_number = 1
-  else
-    self.slot = "item_1" 
-	self.opposite_slot = "item_2"
-    self.opposite_slot_to_number = 2
-  end
+  self.game:set_item_on_use(true)
   
   if not self.game.is_going_to_another_item then 
+    self.game:set_value("current_shield", self.game:get_ability("shield"))
     self.game:show_cutscene_bars(true) 
 	sol.audio.play_sound("common/bars_dungeon")
-	self.game:get_item("hookshot"):store_equipment("hookshot")
+	self.game:set_ability("shield", 0)
+	self.game:get_hero():set_shield_sprite_id("hero/shield_item")
   end
    
-  self.game:get_hero():set_animation(self.hero_intro_animation, function()
+  self.game:get_hero():set_animation("hookshot_intro", function()
     self.game:set_value("item_hookshot_state", 1)
     self.game:get_hero():set_walking_speed(40)
     self.game:get_hero():unfreeze()
@@ -90,7 +57,6 @@ function hookshot_controller:start_hookshot(game)
 	  self:stop_hookshot()
 	end
   end
-  
   sol.audio.play_sound("common/item_show")
   
   self:start_ground_check() 
@@ -101,16 +67,16 @@ function hookshot_controller:start_ground_check()
   
   local function end_by_collision() 
     if hero:get_state() == "treasure" then ended_by_pickable = true end
-    hero:set_tunic_sprite_id("hero/tunic"..self.current_tunic)
+    hero:set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
     is_halted_by_anything_else = true
+	if hero:get_state() == "hurt" then hero:set_invincible(true, 1000) hero:set_blinking(true, 1000) end
 	hookshot_controller:stop_hookshot() 
   end
-
-  sol.timer.start(self, 50, function()
+  
+  timer = sol.timer.start(self, 50, function()
 	self.lx, self.ly, self.llayer = self.game:get_hero():get_position()
 	
-	-- Todo : when hero:on_direction_changed() will be available, delete this, and replace the whole thing by input checking and values instead of direction checking
-	
+	-- todo hero:on_direction changed will change all of this. It would be not timer dependant.
 	if hero:get_direction() == 0 then self.new_x = -1; self.new_y = 0; self.gx = 1; self.gy = 0
 	elseif hero:get_direction() == 1 then self.new_x = 0; self.new_y = 1 ; self.gy = -1;  self.gx = 0
 	elseif hero:get_direction() == 2 then self.new_x = 1; self.new_y = 0 ; self.gy = 0;  self.gx = -1
@@ -120,8 +86,34 @@ function hookshot_controller:start_ground_check()
 	if hero:get_state() == "swimming" or (hero:get_state() == "jumping" and not is_shot) then hero:set_position(self.lx + self.new_x, self.ly + self.new_y); end_by_collision() end
 	if hero:get_state() == "falling" or hero:get_state() == "stairs" or hero:get_animation() == "swimming_stopped" or hero:get_state() == "hurt" or self.game:get_map():get_ground(self.lx + self.gx, self.ly + self.gy, self.llayer) == "lava" or hero:get_state() == "treasure" then end_by_collision() end
 
+	
+	if self.game:get_value("_item_slot_1") ~= "hookshot" and self.game:get_value("_item_slot_2") ~= "hookshot" then 
+	  if self.current_hookshot == nil then
+	    self:stop_hookshot()
+	  end
+    end
+	
+	-- check if the item has changed
+	if self.game:get_value("_item_slot_2") == "hookshot" then 
+      self.slot = "item_2" 
+	  self.opposite_slot = "item_1"
+      self.opposite_slot_to_number = 1
+    else
+      self.slot = "item_1" 
+	  self.opposite_slot = "item_2"
+      self.opposite_slot_to_number = 2
+    end
+
+    self.hero_free_tunic = "hero/item/hookshot/hookshot_moving_free_tunic"..self.game:get_ability("tunic")
+    self.hero_armed_tunic = "hero/item/hookshot/hookshot_moving_concentrate_tunic"..self.game:get_ability("tunic")
+	
+    if self.game.has_changed_tunic and self.game:is_command_pressed(self.slot) and  self.game:get_value("item_hookshot_state") == 2 then hero:set_tunic_sprite_id(self.hero_armed_tunic) self.game.has_changed_tunic = false end
+	if self.game.has_changed_tunic and not self.game:is_command_pressed(self.slot) then self.game.has_changed_tunic = false hero:set_tunic_sprite_id(self.hero_free_tunic) end
+	if not self.game:is_command_pressed(self.slot) and self.game:get_value("item_hookshot_state") == 2 and not is_shot then self.game:simulate_command_released(self.slot) end
+	
   return true
   end)
+  timer:set_suspended_with_map(true)
 end
 
 function hookshot_controller:create_hookshot()
@@ -133,12 +125,11 @@ function hookshot_controller:create_hookshot()
   local hooked_entity
   local hooked = false
   local entities_caught = {}
+  local orig_correct, entities_finaly, hook_x, hook_y = 0, 0, 0, 0
+  local correct_trajectory = 5
   local go
   local go_back
-  local hook_to_entity
   local stop
-  local orig_correct, hookshot_sprite_x, hookshot_sprite_y, entities_finaly = 0, 0, 0, 0
-  local correct_trajectory = 5
   local collision
   local collision_sprite
   local hookshot_sprite
@@ -146,12 +137,10 @@ function hookshot_controller:create_hookshot()
   local hookshot
   local leader
   
-  retrieve_hookshot_position = true
-  
-  if hero:get_direction() == 0 then self.hook_x = 10; self.hook_y = -1;
-  elseif hero:get_direction() == 1 then self.hook_x = 0; self.hook_y = -10; orig_correct = 1; entities_finaly = 8; correct_trajectory = 6 --10 work 8 default -- 6
-  elseif hero:get_direction() == 2 then self.hook_x = -10; self.hook_y = -1
-  else self.hook_x = 0; self.hook_y = 0; correct_trajectory = 0
+  if hero:get_direction() == 0 then hook_x = 10; hook_y = -1;
+  elseif hero:get_direction() == 1 then hook_x = 0; hook_y = -10; orig_correct = 1; entities_finaly = 8; correct_trajectory = 6
+  elseif hero:get_direction() == 2 then hook_x = -10; hook_y = -1
+  else hook_x = 0; hook_y = 0; correct_trajectory = 0
   end
 
   local function set_can_traverse_rules(entity)
@@ -171,21 +160,17 @@ function hookshot_controller:create_hookshot()
     entity.apply_cliffs = true
   end
 
-  -- Returns if the hero would land on an obstacle at the specified coordinates.
-  -- This is similar to entity:test_obstacles() but also checks layers below
-  -- in case the ground is empty (because the hero will fall there).
   local function test_hero_obstacle_layers(candidate_x, candidate_y, candidate_layer)
     local hero_x, hero_y, hero_layer = hero:get_position()
     candidate_layer = candidate_layer or hero_layer
     if hero:test_obstacles(candidate_x - hero_x, candidate_y - hero_y, candidate_layer) then
-      return true       -- Found an obstacle.
+      return true
     end
 
     if candidate_layer == 0 then
-      return false      -- Cannot go deeper and no obstacle was found.
+      return false
     end
 
-    -- Test if we are on empty ground.
     local origin_x, origin_y = hero:get_origin()
     local top_left_x, top_left_y = candidate_x - origin_x, candidate_y - origin_y
     local width, height = hero:get_size()
@@ -200,28 +185,28 @@ function hookshot_controller:create_hookshot()
 
   -- Starts the hookshot movement from the hero.
   function go()
-  
     sol.timer.start(62, function()
-      sol.audio.play_sound(self.sound_firing_loop)
+      sol.audio.play_sound("items/hookshot/firing_loop")
     return is_shot
     end)
-    sol.audio.play_sound(self.sound_firing_start)
+    sol.audio.play_sound("items/hookshot/firing_start")
   
     local go_movement = sol.movement.create("straight")
     local angle = direction * math.pi / 2
-    go_movement:set_speed(hookshot_controller.distance)
+    go_movement:set_speed(204)
     go_movement:set_angle(angle)
     go_movement:set_smooth(false)
-    go_movement:set_max_distance(hookshot_controller.distance)
+    go_movement:set_max_distance(182)
     go_movement:start(hookshot)
 
     function go_movement:on_obstacle_reached()
-	  collision = map:create_custom_entity({ x = hookshot_sprite_x + hookshot_controller.hook_x, y = hookshot_sprite_y + hookshot_controller.hook_y, layer = layer, direction = 0})
+	  local hookshot_sprite_x, hookshot_sprite_y = hookshot:get_position()
+	  collision = map:create_custom_entity({ x = hookshot_sprite_x + hook_x, y = hookshot_sprite_y + hook_y, layer = layer, direction = 0})
 	  collision_sprite = collision:create_sprite(hookshot_controller.collision_sprite)
       function collision_sprite:on_animation_finished()
 	    collision:remove()
 	  end
-      sol.audio.play_sound(hookshot_controller.sound_collision_wall)
+      sol.audio.play_sound("items/item_metal_collision_wall")
       go_back()
     end
 
@@ -239,7 +224,7 @@ function hookshot_controller:create_hookshot()
 	 
     local movement = sol.movement.create("straight")
     local angle = (direction + 2) * math.pi / 2
-    movement:set_speed(hookshot_controller.distance)
+    movement:set_speed(204)
     movement:set_angle(angle)
     movement:set_smooth(false)
     movement:set_max_distance(hookshot:get_distance(hero))
@@ -247,7 +232,6 @@ function hookshot_controller:create_hookshot()
     movement:start(hookshot)
 	
     going_back = true
-	retrieve_hookshot_position = false
 
     function movement:on_position_changed()
       for _, entity in ipairs(entities_caught) do
@@ -285,7 +269,7 @@ function hookshot_controller:create_hookshot()
 
     local movement = sol.movement.create("straight")
     local angle = direction * math.pi / 2
-    movement:set_speed(hookshot_controller.distance)
+    movement:set_speed(204)
     movement:set_angle(angle)
     movement:set_smooth(false)
     movement:set_max_distance(hookshot:get_distance(hero) - correct_trajectory)
@@ -295,8 +279,8 @@ function hookshot_controller:create_hookshot()
     hero:get_movement():stop()
     hero:set_animation("hookshot_tracting")
     hero:set_direction(direction)
-	sol.audio.play_sound(self.sound_hit_valid)
-	sol.audio.play_sound(self.sound_tracting_hero)
+	sol.audio.play_sound("items/hookshot/hit_valid_target")
+	sol.audio.play_sound("items/hookshot/link_tracted")
 
     local past_positions = {}
     past_positions[1] = { hero:get_position() }
@@ -349,21 +333,15 @@ function hookshot_controller:create_hookshot()
   
   -- Destroys the hookshot and restores control to the player, the hero isn't tracted.
   function stop_tracted()
-	retrieve_hookshot_position = false
 	hookshot_controller:stop_hookshot()  
   end
-
-   sol.timer.start(self, 10, function()
-	hookshot_sprite_x, hookshot_sprite_y = hookshot:get_position()
-	return retrieve_hookshot_position
-   end)
   
   -- Create the hookshot.
   hookshot = map:create_custom_entity({
     direction = direction,
     layer = layer,
-    x = x + hookshot_controller.hook_x,
-    y = y + hookshot_controller.hook_y,
+    x = x + hook_x,
+    y = y + hook_y,
     width = 16,
     height = 16,
   })
@@ -505,45 +483,44 @@ end
 
 function hookshot_controller:on_command_pressed(command)
   local hero = self.game:get_hero()
-  if command == self.slot and not is_shot then
+  if command == self.slot and not is_shot and not self.game:is_suspended() then
     avoid_return = true
-	sol.audio.play_sound(self.sound_arming)
+	sol.audio.play_sound("items/hookshot/arming")
 	hero:set_tunic_sprite_id(self.hero_armed_tunic)
     hero:set_walking_speed(25)
 	self.game:set_value("item_hookshot_state", 2)
 	avoid_return = false
-  end
-end
-
-function hookshot_controller:on_key_pressed(key)
-  -- if the opposite slot is the boomerang / bow / dominion rod, finish this item and start the other item.
-  if key == (self.game:get_value("keyboard_item_"..self.opposite_slot_to_number) or self.game:get_value("joypad_item_"..self.opposite_slot_to_number)) and (self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "boomerang" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "bow" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "dominion_rod") and not is_shot then
-	is_halted_by_anything_else = true
-	is_shot = false
-	self.game.is_going_to_another_item = true
-	self:stop_hookshot()
-	self.game:get_hero():freeze()
-	self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-	sol.timer.start(10, function()
-	  self.game:set_command_keyboard_binding("item_"..self.opposite_slot_to_number, self.game:get_value("keyboard_item_"..self.opposite_slot_to_number))
-      self.game:set_command_joypad_binding("item_"..self.opposite_slot_to_number, self.game:get_value("joypad_item_"..self.opposite_slot_to_number))
-	  self.game:set_custom_command_effect("action", nil)
-	  self.game:get_item(self.game:get_value("_item_slot_"..self.opposite_slot_to_number)):on_using()
-	end)
-  elseif key == (self.game:get_value("keyboard_attack") or self.game:get_value("joypad_attack")) and not avoid_return and not is_shot and not self.game.is_going_to_another_item then
-	self.game:get_hero():freeze()
+  elseif command == "pause" then
+    return false
+  elseif command == self.opposite_slot and not self.game:is_suspended() then
+    if (self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "boomerang" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "bow" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "dominion_rod") and not is_shot then
+      is_halted_by_anything_else = true
+	  is_shot = false
+	  self.game.is_going_to_another_item = true
+	  self:stop_hookshot()
+	  self.game:get_hero():freeze()
+	  self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
+	  sol.timer.start(10, function()
+	    self.game:set_custom_command_effect("action", nil)
+	    self.game:get_item(self.game:get_value("_item_slot_"..self.opposite_slot_to_number)):on_using()
+	  end)
+    end
+  elseif command == "attack" and not avoid_return and not is_shot and not self.game.is_going_to_another_item and not self.game:is_suspended() then
+    self.game:get_hero():freeze()
     self:stop_hookshot()
   end
+  return true
 end
 
+
 function hookshot_controller:on_command_released(command)
-  if command == self.slot and self.game:get_value("item_hookshot_state") == 2 and not is_shot then
+  if command == self.slot and self.game:get_value("item_hookshot_state") == 2 and not is_shot and not self.game:is_suspended() then
     avoid_return = true
 	is_shot = true
     self.game:get_hero():freeze()
-    self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.current_tunic)
+    self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
 	self.game:get_hero():set_animation("hookshot_shoot")
-	self:create_hookshot()
+	self:create_hookshot()  
   end
 end
 
@@ -552,10 +529,9 @@ function hookshot_controller:stop_hookshot()
   self.game:set_custom_command_effect("attack", nil)
   self.game:set_custom_command_effect("action", nil)
   self.game:set_value("item_hookshot_state", 0)
-  self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.current_tunic)
+  self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
   avoid_return = false
   is_shot = false
-  retrieve_hookshot_position = false
   
   if self.current_hookshot ~= nil then
     self.current_hookshot:remove()
@@ -567,18 +543,32 @@ function hookshot_controller:stop_hookshot()
   end
   
   if (not self.game:is_current_scene_cutscene() and not ended_by_pickable and not self.game.is_going_to_another_item) then self.game:show_cutscene_bars(false) end
-  if not self.game.is_going_to_another_item then self.game:get_item("hookshot"):restore_equipment() end
   
   if not is_halted_by_anything_else then
     if not from_teleporter then sol.audio.play_sound("common/item_show") end
 	from_teleporter = false
 	self.game:get_hero():freeze()
 	self.game:get_hero():set_animation("hookshot_intro", function()
+	  self.game:set_ability("shield", self.game:get_value("current_shield"))
 	  self.game:get_hero():unfreeze()
+	  self.game:set_item_on_use(false)
+	  self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_value("current_shield"))
 	  self.game:get_item("hookshot"):set_finished()
 	end) 
   else
     is_halted_by_anything_else = false
+	self.game:set_item_on_use(false)
+	if not self.game.is_going_to_another_item then
+	  if self.game:get_hero():get_state() == "falling" then
+	    sol.timer.start(800, function()
+	      self.game:set_ability("shield", self.game:get_value("current_shield"))
+	      self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
+		end)
+	  else
+	    self.game:set_ability("shield", self.game:get_value("current_shield"))
+	    self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
+	  end
+	end
 	self.game:get_item("hookshot"):set_finished()
   end
   ended_by_pickable = false

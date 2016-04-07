@@ -1,0 +1,117 @@
+properties{
+  x = 0,
+  y = 0,
+  width = 320,
+  height = 240,
+  min_layer = 0,
+  max_layer = 2,
+  tileset = "sage_sanctuary",
+  music = "cutscene_sage_sanctuary_loop",
+}
+
+tile{
+  layer = 0,
+  x = 136,
+  y = 128,
+  width = 56,
+  height = 48,
+  pattern = "9",
+}
+
+destination{
+  name = "from_dungeon",
+  layer = 0,
+  x = 160,
+  y = 165,
+  direction = 1,
+  default = true,
+}
+
+dynamic_tile{
+  name = "6",
+  layer = 0,
+  x = -56,
+  y = -56,
+  pattern = "1",
+  width = 48,
+  height = 40,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "7",
+  layer = 0,
+  x = -56,
+  y = -16,
+  pattern = "2",
+  width = 48,
+  height = 40,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "8",
+  layer = 0,
+  x = -56,
+  y = 24,
+  pattern = "3",
+  width = 48,
+  height = 40,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "9",
+  layer = 0,
+  x = -56,
+  y = 64,
+  pattern = "4",
+  width = 56,
+  height = 40,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "10",
+  layer = 0,
+  x = -56,
+  y = 104,
+  pattern = "5",
+  width = 48,
+  height = 40,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "11",
+  layer = 0,
+  x = -56,
+  y = 144,
+  pattern = "6",
+  width = 48,
+  height = 40,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "4",
+  layer = 0,
+  x = -56,
+  y = 184,
+  pattern = "7",
+  width = 48,
+  height = 40,
+  enabled_at_start = true,
+}
+
+dynamic_tile{
+  name = "5",
+  layer = 0,
+  x = -56,
+  y = 224,
+  pattern = "8",
+  width = 56,
+  height = 40,
+  enabled_at_start = true,
+}
+

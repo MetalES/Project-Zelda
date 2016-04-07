@@ -62,7 +62,8 @@ function action_icon:compute_icon_region_y()
       ["change"] = 13,
       ["swim"] = 14,
 	  ["play"] = 15,
-	  ["roll"] = 16
+	  ["roll"] = 16,
+	  ["clear"] = 17,
     }
     self.icon_region_y = 24 * effects_indexes[self.effect_displayed]
   end

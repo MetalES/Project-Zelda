@@ -1,88 +1,93 @@
 local game = ...
--- these data are from Book of Mudora, need to change it
+local hero_mode = game:get_value("hero_mode") or false
+local final_path = "normal/"
+
+if hero_mode then
+  final_path = "mirror/"
+end
 
 -- Define the existing dungeons and their floors for the minimap menu.
 game.dungeons = {
   [1] = {
     floor_width = 2256,
     floor_height = 2256,
-    lowest_floor = -2,
-    highest_floor = 0,
-    maps = { "dungeons/d_hyrule_castle/normal/0/test", "dungeons/d_spirit/1" },
+    lowest_floor = -8,
+    highest_floor = 6,
+    maps = {final_path .. "Dungeon/ForbiddenWood/test" },
     boss = {
-      floor = 0,
+      floor = 6,
       x = 2032,
       y = 536,
       savegame_variable = "b1046",
     },
   },
-  [2] = {
-    floor_width = 2032,
-    floor_height = 1760,
-    lowest_floor = 0,
-    highest_floor = 0,
-    maps = { "" },
-    boss = {
-      floor = 0,
-      x = 1130,
-      y = 30,
-      savegame_variable = "b1058",
-    },
-  },
-  [3] = {
-    floor_width = 2032,
-    floor_height = 1760,
-    lowest_floor = 0,
-    highest_floor = 2,
-    maps = { "204" },
-    boss = {
-      floor = 0,
-      x = 824,
-      y = 1024,
-      savegame_variable = "b1079",
-    },
-  },
-  [4] = {
-    floor_width = 1696,
-    floor_height = 1760,
-    lowest_floor = 0,
-    highest_floor = 0,
-    maps = { "205" },
-    boss = {
-      floor = 0,
-      x = 200,
-      y = 464,
-      savegame_variable = "b1110",
-    },
-  },
-  [5] = {
-    floor_width = 2032,
-    floor_height = 1600,
-    lowest_floor = -1,
-    highest_floor = 0,
-    maps = { "206", "207" },
-  },
-  [6] = {
-    floor_width = 1024,
-    floor_height = 1760,
-    lowest_floor = -2,
-    highest_floor = -1,
-    maps = { "208", "209" },
-  },
-  [7] = {
-    floor_width = 912,
-    floor_height = 800,
-    lowest_floor = 0,
-    highest_floor = 7,
-    maps = { "210", "211", "212", "213", "214", "215", "216", "217" },
-  },
-  [8] = {
-    floor_width = 2032,
-    floor_height = 1760,
-    lowest_floor = -1,
-    highest_floor = 0,
-    maps = { "218", "219" },
-  },
+  -- [2] = {
+    -- floor_width = 2032,
+    -- floor_height = 1760,
+    -- lowest_floor = 0,
+    -- highest_floor = 0,
+    -- maps = { "" },
+    -- boss = {
+      -- floor = 0,
+      -- x = 1130,
+      -- y = 30,
+      -- savegame_variable = "b1058",
+    -- },
+  -- },
+  -- [3] = {
+    -- floor_width = 2032,
+    -- floor_height = 1760,
+    -- lowest_floor = 0,
+    -- highest_floor = 0,
+    -- maps = { "204" },
+    -- boss = {
+      -- floor = 0,
+      -- x = 824,
+      -- y = 1024,
+      -- savegame_variable = "b1079",
+    -- },
+  -- },
+  -- [4] = {
+    -- floor_width = 1696,
+    -- floor_height = 1760,
+    -- lowest_floor = 0,
+    -- highest_floor = 0,
+    -- maps = { "205" },
+    -- boss = {
+      -- floor = 0,
+      -- x = 200,
+      -- y = 464,
+      -- savegame_variable = "b1110",
+    -- },
+  -- },
+  -- [5] = {
+    -- floor_width = 2032,
+    -- floor_height = 1600,
+    -- lowest_floor = -1,
+    -- highest_floor = 0,
+    -- maps = { "206", "207" },
+  -- },
+  -- [6] = {
+    -- floor_width = 1024,
+    -- floor_height = 1760,
+    -- lowest_floor = -2,
+    -- highest_floor = -1,
+    -- maps = { "208", "209" },
+  -- },
+  -- [7] = {
+    -- floor_width = 912,
+    -- floor_height = 800,
+    -- lowest_floor = 0,
+    -- highest_floor = 7,
+    -- maps = { "210", "211", "212", "213", "214", "215", "216", "217" },
+  -- },
+  -- [8] = {
+    -- floor_width = 2032,
+    -- floor_height = 1760,
+    -- lowest_floor = -1,
+    -- highest_floor = 0,
+    -- maps = { "218", "219" },
+  -- },
 }
 
 -- Returns the index of the current dungeon if any, or nil.
@@ -117,11 +122,6 @@ end
 function game:has_dungeon_compass(dungeon_index)
   dungeon_index = dungeon_index or self:get_dungeon_index()
   return self:get_value("dungeon_" .. dungeon_index .. "_compass")
-end
-
-function game:has_dungeon_big_key(dungeon_index)
-  dungeon_index = dungeon_index or self:get_dungeon_index()
-  return self:get_value("dungeon_" .. dungeon_index .. "_big_key")
 end
 
 function game:has_dungeon_boss_key(dungeon_index)

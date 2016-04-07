@@ -1,13 +1,3 @@
---[[
-/script\Jump Controller Script.
-/author\Made by MetalZelda - 16.02.2016
-
-/desc\Custom Jump
-/instruction\Custom Jump to be compatible with the Roc's Cape
-
-/copyright\Credits if you plan to use the script would be nice. Not for resale. Script and project are part of educationnal project.
-]]
-
 local roc_cape_controller = {}
 
 roc_cape_controller.slot = "item_1"
@@ -54,15 +44,12 @@ function roc_cape_controller:start_roc_cape(game)
   self.hero_direction = self.hero:get_direction()
   self.hero_x, self.hero_y, self.hero_layer = self.hero:get_position()
   self.hero:unfreeze()
-  self.game.is_roc_cape_finish = true
+  self.game:set_item_on_use(true)
   
   self.current_tunic = self.game:get_ability("tunic")
   self.hero_flying_tunic = "hero/tunic"..self.current_tunic
   self.hero_flying_tunic_roc = "hero/item/roc_cape/roc_cape.tunic_"..self.current_tunic
   self.hero_down_thrust_tunic = "hero/item/roc_cape/roc_cape_down_thrust.tunic_"..self.current_tunic
-  
-  
-  self.game:get_item("roc_cape"):store_equipment("roc_cape")
   
   tile = self.game:get_map():create_custom_entity({x = self.hero_x, y = self.hero_y, layer = self.hero_layer,direction = 0, width = 8, height = 8})
   tile:set_origin(4, 4)
@@ -80,15 +67,8 @@ function roc_cape_controller:start_roc_cape(game)
   hero_new_sprite:create_sprite(self.hero_flying_tunic)
   hero_new_sprite:set_direction(self.hero:get_direction())
   hero_new_sprite:get_sprite():set_animation("rolling")
-  
-  --todo
-  if not self.hero.is_walking then
-    hero_speed = 0
-  else
-    hero_speed = 88
-  end
-  
-  print(hero_speed)
+   
+  hero_speed = 88
   
   function tile:on_update() 
     local hero_x, hero_y, hero_layer = roc_cape_controller.hero:get_position()
@@ -215,70 +195,48 @@ function roc_cape_controller:has_landed()
       if is_solid_ground(ground) then
         self.hero:reset_solid_ground()
       end
-    end)
+  end)
   sol.menu.stop(self)
 end
 
 function roc_cape_controller:on_command_pressed(commands)
   local hero = self.game:get_hero()
-  local handled = true
- 
-    for dir_hero ,str_dir in pairs(self.direction) do
-        if self.game:is_command_pressed(str_dir) then 
-		    -- The player pressed the opposite direction
-		    if dir_hero == (((hero_new_sprite:get_direction() + 2) %4 )) then
-			  sol.timer.start(self, 25, function()
-			    hero_speed = hero_speed - 1
-		    	if hero_speed <= 0 then
-				  hero_speed = 0
-				  return false
-				end
-		        hero:set_walking_speed(hero_speed)
-			  return self.game:is_command_pressed(str_dir)
-		      end)
-		  elseif dir_hero ~= hero_new_sprite:get_direction() and (dir_hero ~= (((hero_new_sprite:get_direction() + 1) %4 )) or dir_hero ~= (((hero_new_sprite:get_direction() + 3) %4 ))) then
-			-- The player pressed a side direction
-			  sol.timer.start(self, 25, function()
-			    hero_speed = hero_speed - 1
-		    	if hero_speed <= 0 then
-				  hero_speed = 0
-				  return false
-				end
-		        hero:set_walking_speed(hero_speed)
-			  return self.game:is_command_pressed(str_dir)
-		      end)
-		  elseif dir_hero == hero_new_sprite:get_direction() then
-		    -- The player pressed the same direction as the new_sprite direction, physically, he is faster then the walking speed.
-		    sol.timer.start(self, 25, function()
-			    hero_speed = hero_speed + 4
-		    	if hero_speed >= 100 then
-				  hero_speed = 100
-				  return false
-				end
-		        hero:set_walking_speed(hero_speed)
-			  return self.game:is_command_pressed(str_dir)
-		    end)
-		  end		  
-		end
-    end
- handled = true
-end
-
-function roc_cape_controller:on_key_pressed(key)
-  if key == (self.game:get_value("keyboard_attack") or self.game:get_value("joypad_attack")) and can_down_thrust and not self.game.is_down_thrusting and self.game:is_skill_learned(6) then
-    self:start_down_thrust()
+  for dir_hero, str_dir in pairs(self.direction) do
+    if self.game:is_command_pressed(str_dir) then 
+	  if dir_hero == ((hero_new_sprite:get_direction() + 1) %4) or dir_hero == ((hero_new_sprite:get_direction() + 3) %4) or dir_hero == ((hero_new_sprite:get_direction() + 2) %4) then
+	  -- The player pressed a side direction or the opposite direction
+		sol.timer.start(self, 25, function()
+		  hero_speed = hero_speed - 1
+		  hero:set_walking_speed(hero_speed)
+		return self.game:is_command_pressed(str_dir) and hero_speed ~= 0
+		end)
+	  elseif dir_hero == hero_new_sprite:get_direction() then
+	  -- The player pressed the same direction as the new_sprite direction, physically, he is faster then the walking speed besause of gravity.
+	    sol.timer.start(self, 25, function()
+		  hero_speed = hero_speed + 4
+		  hero:set_walking_speed(hero_speed)
+		return self.game:is_command_pressed(str_dir) and hero_speed ~= 100 
+		end)
+	  end		  
+	end
   end
+  
+  if commands == "attack" and can_down_thrust and not self.game.is_down_thrusting and self.game:is_skill_learned(6) then
+	self:start_down_thrust()  -- Down thrust only if the skill is learned
+  end
+ return true
 end
 
 function roc_cape_controller:on_command_released(commands)
   local hero = self.game:get_hero()
   local dir = hero:get_direction()
   
-  if commands == self.slot and not self.game.is_down_thrusting and self.game.is_roc_cape_finish then
+  if commands == self.slot and not self.game.is_down_thrusting then
 	can_down_thrust = false
     sol.timer.stop_all(self)
     self:land()
   end
+return true
 end
 
 function roc_cape_controller:start_down_thrust()
@@ -287,9 +245,8 @@ function roc_cape_controller:start_down_thrust()
   local dx, dy, dl = hero_new_sprite:get_position()
   local tims = 0
   
-  self.game:set_command_keyboard_binding("item_1", nil); self.game:set_command_joypad_binding("item_1", nil)
-  self.game:set_command_keyboard_binding("item_2", nil); self.game:set_command_joypad_binding("item_2", nil) 
-  
+  self.game.is_down_thrusting = true
+
   sword_entity = self.game:get_map():create_custom_entity({
     model = "hero/down_thrust",
     x = dx, 
@@ -315,7 +272,6 @@ function roc_cape_controller:start_down_thrust()
   end)
   
   self:can_move(false)
-  self.game.is_down_thrusting = true
   sol.audio.play_sound(self.sound_jump_2)
   
   -- reload the sprite animation : delete everything and remade it
@@ -398,7 +354,7 @@ function roc_cape_controller:attack()
 end
  
 function roc_cape_controller:can_move(boolean)
- 
+ -- disable movement
   if not boolean then 
    kb_up = self.game:get_command_keyboard_binding("up")
    kb_down = self.game:get_command_keyboard_binding("down")
@@ -409,27 +365,27 @@ function roc_cape_controller:can_move(boolean)
    jp_right = self.game:get_command_joypad_binding("right")
    jp_down = self.game:get_command_joypad_binding("down")
   
-    self.game:simulate_command_released("up")
-    self.game:simulate_command_released("down")
-    self.game:simulate_command_released("left")
-    self.game:simulate_command_released("right")
-    self.game:set_command_keyboard_binding("up", nil)
-    self.game:set_command_keyboard_binding("down", nil)
-    self.game:set_command_keyboard_binding("left", nil)
-    self.game:set_command_keyboard_binding("right", nil)
-    self.game:set_command_joypad_binding("up", nil)
-    self.game:set_command_joypad_binding("down", nil)
-    self.game:set_command_joypad_binding("left", nil)
-    self.game:set_command_joypad_binding("right", nil)
+   self.game:simulate_command_released("up")
+   self.game:simulate_command_released("down")
+   self.game:simulate_command_released("left")
+   self.game:simulate_command_released("right")
+   self.game:set_command_keyboard_binding("up", nil)
+   self.game:set_command_keyboard_binding("down", nil)
+   self.game:set_command_keyboard_binding("left", nil)
+   self.game:set_command_keyboard_binding("right", nil)
+   self.game:set_command_joypad_binding("up", nil)
+   self.game:set_command_joypad_binding("down", nil)
+   self.game:set_command_joypad_binding("left", nil)
+   self.game:set_command_joypad_binding("right", nil)
   else
-    self.game:set_command_keyboard_binding("up", kb_up)
-    self.game:set_command_keyboard_binding("down", kb_down)
-    self.game:set_command_keyboard_binding("left", kb_left)
-    self.game:set_command_keyboard_binding("right", kb_right)
-    self.game:set_command_joypad_binding("up", jp_up)
-    self.game:set_command_joypad_binding("down", jp_down)
-    self.game:set_command_joypad_binding("left", jp_left)
-    self.game:set_command_joypad_binding("right", jp_right)
+   self.game:set_command_keyboard_binding("up", kb_up)
+   self.game:set_command_keyboard_binding("down", kb_down)
+   self.game:set_command_keyboard_binding("left", kb_left)
+   self.game:set_command_keyboard_binding("right", kb_right)
+   self.game:set_command_joypad_binding("up", jp_up)
+   self.game:set_command_joypad_binding("down", jp_down)
+   self.game:set_command_joypad_binding("left", jp_left)
+   self.game:set_command_joypad_binding("right", jp_right)
   end
 end
    
@@ -438,10 +394,10 @@ function roc_cape_controller:on_finished()
    self.game:get_hero():set_invincible(false)
    self.game:get_hero():set_visible(true)
    self.game:set_custom_command_effect("action", nil)
-   self.game.is_roc_cape_finish = false
    
    current_height, ticks = 0, 0
    can_down_thrust = false
+   
    for teleporters in self.game:get_map():get_entities("teleporter") do
    teleporters:set_enabled(true)
    end
@@ -450,11 +406,11 @@ function roc_cape_controller:on_finished()
    walkable_switch:set_locked(false)
    end
    
+   self.game:set_item_on_use(false)
    self.game:get_item("roc_cape"):set_finished()  
-   self.game:get_item("roc_cape"):restore_equipment()  
    
    sol.timer.stop_all(self)
    sol.menu.stop(self)
 end
    
-   return roc_cape_controller
+return roc_cape_controller

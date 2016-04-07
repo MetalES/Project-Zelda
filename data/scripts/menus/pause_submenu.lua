@@ -14,31 +14,12 @@ function submenu:on_started()
   self.background_color:set_opacity(216)
   
   self.background_surfaces = sol.surface.create("pause_submenus.png", true)
-  
-  self.color_layer_surface = sol.surface.create(320, 240) -- background color
-  
+   
   self.save_dialog_sprite = sol.sprite.create("menus/pause_save_dialog")
   self.save_dialog_state = 0
 
   local dialog_font, dialog_font_size = sol.language.get_dialog_font()
   local menu_font, menu_font_size = sol.language.get_menu_font()
-  
-  self.mailbag_counter = sol.text_surface.create{
-     horizontal_alignment = "center",
-     vertical_alignment = "top",
-     text = self.game:get_value("unread_mail_amount") or nil,
-     font = "white_digits",
-  }
-  
-   local amount = self.game:get_item("gold_skulltula"):get_amount()
-   local maximum = self.game:get_item("gold_skulltula"):get_max_amount()
-
-   self.gold_skulltula_counter = sol.text_surface.create{
-     horizontal_alignment = "center",
-     vertical_alignment = "top",
-     text = self.game:get_value("amount_of_skulltulas"),
-     font = (amount == maximum) and "green_digits" or "white_digits",
-   }
 
   self.question_text_1 = sol.text_surface.create{
     horizontal_alignment = "center",
@@ -74,7 +55,6 @@ function submenu:on_started()
   self.caption_text_1 = sol.text_surface.create{
     horizontal_alignment = "center",
     vertical_alignment = "middle",
-    font = "fixed",
     font = menu_font,
     font_size = menu_font_size,
   }
@@ -82,7 +62,6 @@ function submenu:on_started()
   self.caption_text_2 = sol.text_surface.create{
     horizontal_alignment = "center",
     vertical_alignment = "middle",
-    font = "fixed",
     font = menu_font,
     font_size = menu_font_size,
   }
@@ -162,7 +141,7 @@ function submenu:on_command_pressed(command)
 
   if self.save_dialog_state == 0 then
     -- The save dialog is not shown
-    if command == "attack" and not sol.menu.is_started(self.game.pause_submenus[6]) and not self.game:get_value("avoid_can_save_from_qsmenu") then
+    if command == "attack" and not sol.menu.is_started(self.game.pause_submenus[6]) and not self.avoid_can_save_from_qsmenu and not self.displaying_scroll then
       sol.audio.play_sound("/common/dialog/message_end")
       self.save_dialog_state = 1
       self.save_dialog_choice = 0
@@ -223,7 +202,6 @@ function submenu:on_command_pressed(command)
 end
 
 function submenu:draw_background(dst_surface)
-
   local submenu_index = self.game:get_value("pause_last_submenu")
   local width, height = dst_surface:get_size()
 
@@ -233,19 +211,7 @@ function submenu:draw_background(dst_surface)
 	  
     self.background_surfaces:draw_region(
       320 * (submenu_index - 1), 0, 320, 240,
-      dst_surface, (width - 320) / 2, (height - 240) / 2)
-	  
-	 self.color_layer_surface:draw_region(
-	 0, 0, 320, 240, dst_surface, (width - 320) / 2, 
-	 (height - 240) / 2)
-	 
-	 if sol.menu.is_started(self.game.pause_submenus[6]) or sol.menu.is_started(self.game.pause_submenus[7]) then
-	 self.color_layer_surface:fill_color({0,0,0})
-     self.color_layer_surface:set_opacity(150)
-	 else
-	 self.color_layer_surface:set_opacity(0)
-	 end
-	 
+      dst_surface, (width - 320) / 2, (height - 240) / 2)	 
 end
 
 function submenu:draw_save_dialog_if_any(dst_surface)

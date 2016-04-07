@@ -113,7 +113,7 @@ function condition_manager:initialize(game)
     end
     return false
   end
-
+  
   function hero:start_confusion(delay)
     local aDirectionPressed = {
       right = false,
@@ -174,12 +174,7 @@ function condition_manager:initialize(game)
     hero:freeze()
     hero:set_animation("electrocuted")
     sol.audio.play_sound("spark")
-	
-	if game:get_value("hero_mode") then
-	  game:remove_life(4)
-	else
-      game:remove_life(2)
-	end
+    game:remove_life(2)
 
     hero:set_condition('electrocution', true)
     condition_manager.timers['electrocution'] = sol.timer.start(hero, delay, function()

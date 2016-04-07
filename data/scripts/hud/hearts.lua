@@ -16,7 +16,7 @@ end
 function hearts:initialize(game)
 
   self.game = game
-  self.surface = sol.surface.create(108, 18) --90
+  self.surface = sol.surface.create(99, 18) --90 109
   self.dst_x = 0
   self.dst_y = 0
   self.empty_heart_sprite = sol.sprite.create("hud/empty_heart")
@@ -105,11 +105,17 @@ function hearts:check()
 end
 
 function hearts:repeat_danger_sound()
+  local timer
+  if self.game:get_life() <= self.game:get_max_life() / 8 then
+    timer = 1000
+  elseif self.game:get_life() <= self.game:get_max_life() / 4 then
+    timer = 1500
+  end
 
-  if self.game:get_life() <= self.game:get_max_life() / 4 then
+  if self.game:get_life() <= self.game:get_max_life() / 4 or self.game:get_life() <= self.game:get_max_life() / 6 then
 
     sol.audio.play_sound("danger")
-    self.danger_sound_timer = sol.timer.start(self, 1500, function()
+    self.danger_sound_timer = sol.timer.start(self, timer, function()
       self:repeat_danger_sound()
     end)
     self.danger_sound_timer:set_suspended_with_map(true)
@@ -124,7 +130,7 @@ function hearts:rebuild_surface()
 
   -- Display the hearts.
   for i = 0, self.nb_max_hearts_displayed - 1 do
-    local x, y = (i % 12) * 9, math.floor(i / 12) * 9 -- i/10
+    local x, y = (i % 11) * 9, math.floor(i / 11) * 9 -- i/12
     self.empty_heart_sprite:draw(self.surface, x, y)
     if i < math.floor(self.nb_current_hearts_displayed / 4) then
       -- This heart is full.
@@ -136,7 +142,7 @@ function hearts:rebuild_surface()
   local i = math.floor(self.nb_current_hearts_displayed / 4)
   local remaining_fraction = self.nb_current_hearts_displayed % 4
   if remaining_fraction ~= 0 then
-    local x, y = (i % 12) * 9, math.floor(i / 12) * 9  -- i/10
+    local x, y = (i % 11) * 9, math.floor(i / 11) * 9  -- i/10
     self.all_hearts_img:draw_region((remaining_fraction - 1) * 9, 0, 9, 9, self.surface, x, y)
   end
 end

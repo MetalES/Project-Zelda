@@ -10,7 +10,6 @@ local options_builder = require("scripts/menus/pause_options")
 local mail_quest_builder = require("scripts/menus/pause_quest_status_mail")
 local bomber_notebook_builder = require("scripts/menus/pause_quest_bomber_notebook")
 
-
 function game:start_pause_menu()
 
   self.pause_submenus = {
@@ -23,9 +22,8 @@ function game:start_pause_menu()
 	bomber_notebook_builder:new(self)
   }
   
-  self:clear_map_name()  
   self:set_clock_enabled(false)
-
+  
   local submenu_index = self:get_value("pause_last_submenu") or 1
   if submenu_index <= 0
       or submenu_index > #self.pause_submenus then
@@ -33,7 +31,7 @@ function game:start_pause_menu()
   end
   self:set_value("pause_last_submenu", submenu_index)
   sol.audio.play_sound("/menu/pause_open")
-  sol.audio.set_music_volume(game:get_value("old_volume") / 3)
+  sol.audio.set_music_volume(self:get_value("old_volume") / 3)
   sol.menu.start(self, self.pause_submenus[submenu_index], false)
 end
 
@@ -43,9 +41,7 @@ function game:stop_pause_menu()
   local submenu_index = self:get_value("pause_last_submenu")
   sol.menu.stop(self.pause_submenus[submenu_index])
   self.pause_submenus = {}
-  
   self:set_clock_enabled(true)
-	
   self:set_custom_command_effect("action", nil)
   self:set_custom_command_effect("attack", nil)
 end

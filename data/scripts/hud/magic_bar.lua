@@ -28,6 +28,7 @@ end
 -- and updates it if necessary.
 function magic_bar:check()
   local need_rebuild = false
+  
   local max_magic = self.game:get_max_magic()
   local magic = self.game:get_magic()
 
@@ -54,10 +55,10 @@ function magic_bar:check()
     end
     if increment ~= 0 then
       self.magic_displayed = self.magic_displayed + increment
-
+      rebuild_animation = true
       -- Play the magic bar sound.
       if (magic - self.magic_displayed) % 10 == 1 then
-		sol.audio.play_sound("magic_bar")
+	      sol.audio.play_sound("magic_bar")
       end
     end
   end
@@ -79,8 +80,8 @@ function magic_bar:rebuild_surface()
   -- Max magic.
   self.container_sprite:draw(self.surface)
 
-  -- Current magic.              46  24  2                         8
-  self.magic_bar_img:draw_region(55, 24, 2 + self.magic_displayed, 8, self.surface)
+  -- Current magic.              46 55                           
+  self.magic_bar_img:draw_region(50, 24, 2 + self.magic_displayed, 8, self.surface)
 end
 
 function magic_bar:set_dst_position(x, y)

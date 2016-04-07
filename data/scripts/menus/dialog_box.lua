@@ -44,7 +44,7 @@ local char_delays = {
   fast = 20,  -- Default.
   instant = 0
 }
-local letter_sound_delay = 50
+local letter_sound_delay = 50--100
 local box_width = 280
 local box_height = 60
 
@@ -77,6 +77,7 @@ end
 
 -- Exits the dialog box system.
 function game:quit_dialog_box()
+
   if dialog_box ~= nil then
     if game:is_dialog_enabled() then
       sol.menu.stop(dialog_box)
@@ -87,6 +88,7 @@ end
 
 -- Called by the engine when a dialog starts.
 function game:on_dialog_started(dialog, info)
+
   dialog_box.dialog = dialog
   dialog_box.info = info
   dialog_box:set_color({255,255,255}) -- Reset color text to white.
@@ -95,6 +97,7 @@ end
 
 -- Called by the engine when a dialog finishes.
 function game:on_dialog_finished(dialog)
+
   sol.menu.stop(dialog_box)
   dialog_box.dialog = nil
   dialog_box.info = nil
@@ -182,8 +185,11 @@ function dialog_box:on_started()
   local map = game:get_map()
   local camera_x, camera_y, camera_width, camera_height = map:get_camera_position()
   local top = false
+  local middle = false
   if self.vertical_position == "top" then
     top = true
+  elseif self.vertical_position == "middle" then
+    middle = true
   elseif self.vertical_position == "auto" then
     local hero_x, hero_y = map:get_entity("hero"):get_position()
     if hero_y >= camera_y + (camera_height / 2 + 10) then
@@ -191,18 +197,25 @@ function dialog_box:on_started()
     end
   end
 
-  -- reset the hero to frame 0, he will still not be able to move.
   local hero = map:get_hero()
-  if hero:get_state() ~= "treasure" and hero:get_state() ~= "grabbing" and hero:get_state() ~= "swimming" and hero:get_animation() ~= "brandish" and hero:get_animation() ~= "playing" then
-     hero:unfreeze()
+  if hero:get_state() ~= "treasure" and hero:get_state() ~= "grabbing" and not map.is_shopping and not game.using_ocarina and hero:get_animation() ~= "brandish_sword"  then
+    hero:unfreeze()
   end
   -- Set the coordinates of graphic objects.
   local x = camera_width / 2 - 140
-  local y = top and 32 or (camera_height - 96) --33 as top
-
-  if self.style == "empty" then
-    y = y + (top and -24 or 24)
+  local y 
+  
+  if top then
+    y = 24
+  elseif middle then
+    y = 88
+  else 
+    y = (camera_height - 96)
   end
+
+  -- if self.style == "empty" then
+    -- y = y + (top and -24 or 24)
+  -- end
 
   self.box_dst_position = { x = x, y = y }
   self.question_dst_position = { x = x + 18, y = y + 27 }
@@ -307,14 +320,6 @@ function dialog_box:show_next_dialog()
   else
     -- Finish the dialog, returning the answer or nil if there was no question.
     local status = self.selected_answer
-
-    -- Conform to the built-in handling of shop items.
-    if self.dialog.id == "_shop.question" then
-      -- The engine expects a boolean answer after the "do you want to buy"
-      -- shop item dialog.
-      status = self.selected_answer == 1
-    end
-
     game:stop_dialog(status)
   end
 end
@@ -403,54 +408,47 @@ function dialog_box:add_character()
       -- Fast.
       self.char_delay = char_delays["fast"]
 	  
-	elseif current_chat == "^" then
-	--instantly
+	elseif current_char == "l" then
+	  -- Instantly
 	  self.char_delay = char_delays["instant"]
 	
-    elseif current_char == "r" then
-      self:create_surface("red")
-      self:set_color({255,102,102})
-
-    elseif current_char == "g" then
-      self:create_surface("green")
-      self:set_color({102,255,102})
-
-    elseif current_char == "b" then
-      self:create_surface("blue")
-      self:set_color({102,102,255})
-
-    elseif current_char == "y" then
-      self:create_surface("yellow")
-      self:set_color({255,255,0})
-
-    elseif current_char == "c" then
-      self:create_surface("cyan")
-      self:set_color({0,255,255})
-
-    elseif current_char == "m" then
-      self:create_surface("magenta")
-      self:set_color({255,0,255})
-
-    elseif current_char == "o" then
-      self:create_surface("orange")
-      self:set_color({255,165,0})
-
-    elseif current_char == "p" then
-      self:create_surface("purple")
-      self:set_color({181,0,181})
-
-    elseif current_char == "s" then
-      self:create_surface("silver")
-      self:set_color({192,192,192})
-
-    elseif current_char == "w" then
-      self:create_surface("default")
-      self:set_color({255,255,255})
+	elseif current_char == "d" then
+	  -- Automatic text
+	  self.disable_input_through_this_dialog = true
+	  
+	elseif current_char == "^" then
+	  -- Pass this text, no matter if the player decided this or not.
+	  game:simulate_command_pressed("action")
 	
-	elseif current_char == "l" then
-	  self:create_surface("brown")
-      self:set_color({210,105,30})
-
+    elseif current_char == "[" then
+	  -- Predefined color.
+	  local next_char = line:sub(self.char_index, self.char_index)
+	  -- The syntax is "$[color]".
+	  local right_position = line:find ("]", self.char_index, true)
+	  local color = line:sub(self.char_index, right_position - 1)
+	  self.char_index = right_position + 1
+	  
+	  self:create_surface(color)
+      self:set_color(color)
+	  
+	elseif current_char == "(" then
+	  -- Predefined text (an input for example).
+	  local next_char = line:sub(self.char_index, self.char_index)
+	  -- The syntax is "$(text)".
+	  local right_position = line:find (")", self.char_index, true)
+	  local text = line:sub(self.char_index, right_position - 1)
+	  self.char_index = right_position + 1
+	  
+	  self:create_surface(text)
+	  
+	  if text == "item_1" then
+	    text = game:get_command_keyboard_binding("item_1") .. " / " .. game:get_command_joypad_binding("item_1")
+	  elseif text == "item_2" then
+	    text = game:get_command_keyboard_binding("item_2") .. " / " .. game:get_command_joypad_binding("item_2")
+	  end
+	  
+      self:set_text(text)
+	  
     else
       -- Not a special char, actually.
       text_surface:set_text(text_surface:get_text() .. "$")
@@ -480,7 +478,8 @@ function dialog_box:add_character()
    
   if not special and current_char ~= nil and self.need_letter_sound then
     -- Play a letter sound sometimes.
-    sol.audio.play_sound("/common/dialog/message_letter")
+	
+    if not game.disable_message_box_sound then sol.audio.play_sound("/common/dialog/message_letter") end
     self.need_letter_sound = false
     sol.timer.start(self, letter_sound_delay, function()
       self.need_letter_sound = true
@@ -567,7 +566,7 @@ function dialog_box:on_draw(dst_surface)
 
   if self.style == "empty" then
     -- Draw a dark rectangle.
-    dst_surface:fill_color({0, 0, 0}, x, y, 220, 60)
+    -- dst_surface:fill_color({0, 0, 0}, x, y, 220, 60)
   else
     -- Draw the dialog box.
     self.box_img:draw_region(0, 0, box_width, box_height, self.dialog_surface, x, y)
@@ -609,7 +608,7 @@ function dialog_box:on_draw(dst_surface)
   end
 
   -- Draw the end message arrow.
-  if self:is_full() then
+  if self:is_full() and self.selected_answer == nil then
     self.end_lines_sprite:draw(self.dialog_surface, x + 132, y + 56)
   end
 
@@ -630,7 +629,7 @@ function dialog_box:create_surface(name)
   local new_line = self.line_surfaces[name][self.line_index]
   local nb_spaces = #current_line:get_text() - #new_line:get_text() + 1
   if nb_spaces > 0 then
-    for i = 1, nb_spaces do new_line:set_text(new_line:get_text() .. " ") end
+    for i = 1, nb_spaces do new_line:set_text(new_line:get_text() .. " ") end 
   end
   -- Change the current surface to the new surface.
   self.current_line_surface = self.line_surfaces[name]
@@ -638,5 +637,30 @@ end
 
 function dialog_box:set_color(color)
   -- Change color.
+  if type(color) == "string" then
+    if color == "white" or color == "default" then color = {255,255,255}
+    elseif color == "red" then color = {255,102,102}
+    elseif color == "green" then color = {102,255,102}
+    elseif color == "blue" then color = {102,102,255}
+    elseif color == "yellow" then color = {255,255,0}
+	elseif color == "magenta" then color = {255,0,255}
+	elseif color == "cyan" then color = {0,255,255}
+    elseif color == "pink" then color = {255,0,150}
+    elseif color == "brown" then color = {153,76,0}
+    elseif color == "orange" then color = {255,165,0}
+	elseif color == "purple" then color = {181,0,181}
+	elseif color == "black" then color = {0, 0, 0}
+	elseif color == "silver" then color = {192,192,192}
+	end
+  end
+
   for i = 1, nb_visible_lines do self.current_line_surface[i]:set_color(color) end
+end
+
+function dialog_box:set_text(text)
+  local current_line = self.current_line_surface[self.line_index]
+  
+  self.current_line_surface[self.line_index]:set_text(" " .. self.current_line_surface[self.line_index]:get_text() .. " " .. text)
+  
+  -- for i = 1, nb_visible_lines do self.current_line_surface[i]:set_text(" " .. text) end
 end

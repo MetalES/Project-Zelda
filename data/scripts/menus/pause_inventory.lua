@@ -3,40 +3,39 @@ local inventory_submenu = submenu:new()
 
 local item_names = {
   "lamp",
-  "boomerang",
-  "bomb_counter",
-  "bow",
-  "hookshot",
-  "apple_counter",
-  "bottle_1",
-
-  "deku_nuts_counter",
-  "ocarina",
-  "bombchu_counter",
-  "dig_mit",
-  "hammer",
-  "boots",
-  "bottle_2",
-
-  "stick_counter",
   "fire_rod",
   "ice_rod",
-  "cloak_darkness",
+  "bow",
+  "boomerang",
   "roc_cape",
-  "dominion_rod",
+  "hookshot",
+  
+  "cloak_darkness",
+  "ocarina",
+  "bomb_counter",
+  "bombchu_counter",
+  "hammer",
+  "deku_nuts_counter",
+  "fishing_rod",
+  
+  "bottle_1",
+  "bottle_2",
   "bottle_3",
-
-  "jade_counter",
+  "bottle_4",
   "din_fire",
   "farore_wind",
   "nayru_love",
-  "amber_counter", -- trade 1
-  "alchemy_counter", -- trade 2
-  "bottle_4"
+
+  "dig_mit",
+  "dominion_rod",
+  -- "alchemy_counter",
+  -- "plume_counter",
+  -- "crystal_counter",
+  -- "ore_counter", trading 1
+  -- "bottle_4" trading 2
 }
 
 function inventory_submenu:on_started()
-
   submenu.on_started(self)
 
   self.cursor_sprite = sol.sprite.create("menus/pause_cursor")
@@ -78,7 +77,6 @@ function inventory_submenu:on_started()
 end
 
 function inventory_submenu:on_finished()
-
   if submenu.on_finished then
     submenu.on_finished(self)
   end
@@ -94,7 +92,6 @@ function inventory_submenu:on_finished()
 end
 
 function inventory_submenu:set_cursor_position(row, column)
-
   self.cursor_row = row
   self.cursor_column = column
 
@@ -122,22 +119,18 @@ function inventory_submenu:set_cursor_position(row, column)
 end
 
 function inventory_submenu:get_selected_index()
-
   return self.cursor_row * 7 + self.cursor_column
 end
 
 function inventory_submenu:is_item_selected()
-
   local item_name = item_names[self:get_selected_index() + 1]
   return self.game:get_item(item_name):get_variant() > 0
 end
 
 function inventory_submenu:on_command_pressed(command)
-  
   local handled = submenu.on_command_pressed(self, command)
 
   if not handled then
-
     if command == "action" then
       if self.game:get_command_effect("action") == nil
             and self.game:get_custom_command_effect("action") == "info" then
@@ -161,7 +154,7 @@ function inventory_submenu:on_command_pressed(command)
       if self.cursor_column == 0 then
         self:previous_submenu()
       else
-        sol.audio.play_sound("/menu/cursor")
+        sol.audio.play_sound("menu/cursor")
         self:set_cursor_position(self.cursor_row, self.cursor_column - 1)
       end
       handled = true
@@ -170,18 +163,18 @@ function inventory_submenu:on_command_pressed(command)
       if self.cursor_column == 6 then
         self:next_submenu()
       else
-        sol.audio.play_sound("/menu/cursor")
+        sol.audio.play_sound("menu/cursor")
         self:set_cursor_position(self.cursor_row, self.cursor_column + 1)
       end
       handled = true
 
     elseif command == "up" then
-      sol.audio.play_sound("/menu/cursor")
+      sol.audio.play_sound("menu/cursor")
       self:set_cursor_position((self.cursor_row + 3) % 4, self.cursor_column)
       handled = true
 
     elseif command == "down" then
-      sol.audio.play_sound("/menu/cursor")
+      sol.audio.play_sound("menu/cursor")
       self:set_cursor_position((self.cursor_row + 1) % 4, self.cursor_column)
       handled = true
 
@@ -192,7 +185,6 @@ function inventory_submenu:on_command_pressed(command)
 end
 
 function inventory_submenu:on_draw(dst_surface)
-
   self:draw_background(dst_surface)
   self:draw_caption(dst_surface)
 
@@ -251,12 +243,12 @@ function inventory_submenu:show_info_message()
 
   self.game:set_custom_command_effect("action", nil)
   self.game:set_custom_command_effect("attack", nil)
+  self.game:set_dialog_style("default")
   self.game:start_dialog("_item_description." .. item_name .. "." .. variant, function()
     self.game:set_custom_command_effect("action", "info")
     self.game:set_custom_command_effect("attack", "save")
     self.game:set_dialog_position("auto")  -- Back to automatic position.
   end)
-
 end
 
 -- Assigns the selected item to a slot (1 or 2).
@@ -333,4 +325,3 @@ function inventory_submenu:finish_assigning_item()
 end
 
 return inventory_submenu
-

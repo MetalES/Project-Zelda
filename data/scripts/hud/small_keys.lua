@@ -1,28 +1,27 @@
--- The small keys counter shown during dungeons or maps with small keys enabled.
-
+-- Allows small keys to be displayed on maps with small keys enabled.
 local small_keys = {}
 
 function small_keys:new(game)
-
   local object = {}
   setmetatable(object, self)
   self.__index = self
 
   object:initialize(game)
-
   return object
 end
 
 function small_keys:initialize(game)
+  local nb_keys_displayed = 0
 
   self.game = game
   self.visible = false
-  self.surface = sol.surface.create(32, 64)
+  self.surface = sol.surface.create(80, 16)
   self.icon_img = sol.surface.create("hud/small_key_icon.png")
+  
   self.digits_text = sol.text_surface.create{
     font = "white_digits",
-    horizontal_alignment = "center",
-    vertical_alignment = "middle",
+    horizontal_alignment = "left",
+    vertical_alignment = "top",
   }
 
   self:check()
@@ -30,7 +29,6 @@ function small_keys:initialize(game)
 end
 
 function small_keys:check()
-
   local need_rebuild = false
 
   -- Check the number of small keys.
@@ -61,10 +59,9 @@ function small_keys:check()
 end
 
 function small_keys:rebuild_surface()
-
   self.surface:clear()
   self.icon_img:draw(self.surface)
-  self.digits_text:draw(self.surface, 24, 7)
+  self.digits_text:draw(self.surface, 20, 3)
 end
 
 function small_keys:set_dst_position(x, y)
@@ -73,7 +70,6 @@ function small_keys:set_dst_position(x, y)
 end
 
 function small_keys:on_draw(dst_surface)
-
   if self.visible then
     local x, y = self.dst_x, self.dst_y
     local width, height = dst_surface:get_size()
@@ -83,10 +79,8 @@ function small_keys:on_draw(dst_surface)
     if y < 0 then
       y = height + y
     end
-
     self.surface:draw(dst_surface, x, y)
   end
 end
 
 return small_keys
-
