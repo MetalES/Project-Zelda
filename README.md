@@ -1,4 +1,4 @@
-#Current Build : Unplayable.
+#Current GIT Build : Unplayable.
 0.23 would break this. Public release planned, mostly prototype for testing items because can't debug and bug-track these. There is a lot of item.
 
 /!\ <DISCLAIMER> /!\
@@ -6,7 +6,7 @@
 This project is made for free and for educationnal purposes only as an attempt to learn how video game making works and for Fair Use.
 The Legend of Zelda, and all of characters, sprites, musics, sounds, content involving this franchise are intellectual property of their respective owners.
 
-There is a lot of stuffs not uploaded on the GIT, I wanna keep them safely before the release of the demo. (Approx. Summer 2016)
+There is a lot of stuffs not uploaded on the GIT, I wanna keep them safely before the release of the demo.
 You will find some basic stuffs here and there though.
 You can take anything you wants here, but do not forget to credit authors for their works on the taken object. (See at the end of this readme).
 I decline every responsabilities that my scripts represents, if that make crashs in your project. They are still in their early phase.
@@ -38,6 +38,9 @@ Current public release version : Unknown
 - Hyrule Field BGM has it's own script rather then being a game manager function.
 - Fading audio implemented
 - Ported from 1.4.5 to 1.5 dev.
+- Title Screen is now on map
+- File Select : Corrected drawn object
+- Appearing chest is now a map function (see scripts/metadata/map)
 
 #0.22 - Feb 12th 2016
 - See Issues tracking. It is time to debug this thing.
