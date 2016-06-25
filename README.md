@@ -1,3 +1,6 @@
+Repo hasn't been updates, in fact, I have a crappy internet connexion so everything takes a lot of time, will be updated when my IC will allow me to do it.
+
+
 #Current GIT Build : Unplayable.
 0.23 would break this. Public release planned, mostly prototype for testing items because can't debug and bug-track these. There is a lot of item.
 
@@ -18,7 +21,7 @@ Repo Update rate : each version update.
 
 This game is being made using the Solarus engine*
 Current GIT version : 0.225b
-Current Test version : 0.23.2577
+Current Test version : 0.26.444
 Development version progression : 5%
 Global Progress : 18%
 Current public release version : Unknown
