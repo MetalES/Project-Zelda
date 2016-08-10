@@ -1,8 +1,9 @@
 Repo hasn't been updates, in fact, I have a crappy internet connexion so everything takes a lot of time, will be updated when my IC will allow me to do it.
 
+A huge update will occur soon, waiting for issue 27 to be closed
 
 #Current GIT Build : Unplayable.
-0.23 would break this. Public release planned, mostly prototype for testing items because can't debug and bug-track these. There is a lot of item.
+0.30 is coming
 
 /!\ <DISCLAIMER> /!\
 
@@ -21,12 +22,20 @@ Repo Update rate : each version update.
 
 This game is being made using the Solarus engine*
 Current GIT version : 0.225b
-Current Test version : 0.26.444
-Development version progression : 5%
-Global Progress : 18%
+Current Test version : 0.29.140.alpha (major, minor, test, state)
+
+Development version progression : 0.29 -> 0.3 (14%)
+Global Progress : 24%
 Current public release version : Unknown
 
 #Version updates (advancement tracking) :
+
+#0.29 - July, 28th 2016
+- Clean code
+- Simplified Hero database
+- All sounds declared
+- Implemented side quests trading system
+- Spoils Bag + entities
 
 #0.225b - April 7th 2016
 - Reworked Time System (Minute indicator, Day/Night, corected trajectory)(The clock hour indicator still have a weird trajectore at 6.PM, don't know how and what cause this. Maybe the bitmap font itself.)
