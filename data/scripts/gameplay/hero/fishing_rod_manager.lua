@@ -1,35 +1,13 @@
-local fish_rod_controller = {}
--- Initialize item related thing, these values are loaded when the game creates the item.
--- Sound is already preloaded so it is useless to store these here.
-fish_rod_controller.slot  = "item_1"; -- Identifier that get the Item Slot
-fish_rod_controller.opposite_slot  = "item_2"; -- Identifier that get the opposite slot
-fish_rod_controller.opposite_slot_to_number  = 2; -- Integer that get the opposite slot
-fish_rod_controller.wire_sprite = "entities/fishing_rod"; -- Item : The Rod's wire
-fish_rod_controller.plug_sprite = "entities/fishing_rod"; -- Item : fishing_rod's bait
-fish_rod_controller.hero_free_tunic = "";  -- used to store the hero sprite id when he is free, useful if he change tunic
-fish_rod_controller.hero_armed_tunic = "";  -- used to store the hero sprite id when he pressed an input, useful if he change tunic
-fish_rod_controller.new_x = 0; -- X Warp position in real time when the ground is not solid depending on Hero's Direction
-fish_rod_controller.new_y = 0; -- Y Warp position in real time when the ground is not solid depending on Hero's Direction
-fish_rod_controller.gx = 0; -- Ground X, the ground surrouding the hero
-fish_rod_controller.gy = 0; -- Ground Y, the ground surrouding the hero
-fish_rod_controller.lx = 0; -- Link X : Player X Position in the World in real time
-fish_rod_controller.ly = 0; -- Link Y : Player Y Position in the World in real time
-fish_rod_controller.llayer = 0; -- Link Layer : Player Z (Layer) Position in the World in real time
-fish_rod_controller.current_plug = nil   -- The current leader entity
+local fish_rod_controller = {
+  slot = "item_1",
+  state = 0
+}
 
-local is_halted_by_anything_else = false
-local avoid_return = false
-local from_teleporter = false
-local is_shot = false
-local ended_by_pickable = false
-local is_dowsing = false
-local has_finished_movement = false
-local need_trail_update = false
-
-local direction = {[1] = "right";[2] = "up"; [3] = "left"; [4] = "down"}
+local forced_stop, avoid_return, is_shot, ended_by_pickable, is_dowsing, has_finished_movement, need_trail_update = false
+local directions = {[1] = "right";[2] = "up"; [3] = "left"; [4] = "down"}
+local state = {"falling", "hurt"}
 
 local fishing_rod_sprite
-local link_sprite
 local fishing_rod
 local check_ground_timer
 local bait_trail 
@@ -39,106 +17,74 @@ local water_effect
 
 function fish_rod_controller:start_fishing_rod(game)
   self.game = game
+  self.hero = game:get_hero()
   self.map = game:get_map()
   self.camera = self.map:get_camera()
-  self.game:set_item_on_use(true)
+  
+  game:set_item_on_use(true)
   
   self.dowsed_distance = 50
   self.charging_time = 0
   
-  if not self.game.is_going_to_another_item then 
-    self.game:set_value("current_shield", self.game:get_ability("shield"))
-    self.game:show_cutscene_bars(true) 
-	sol.audio.play_sound("common/bars_dungeon")
-	self.game:set_ability("shield", 0)
-	self.game:get_hero():set_shield_sprite_id("hero/shield_item")
-  end
-   
-   
-  -- self.game:get_hero():set_animation("fishing_rod_intro", function()
-    -- self.game:set_value("item_fishing_rod_state", 1)
-    -- self.game:get_hero():unfreeze()
-    -- self.game:get_hero():set_tunic_sprite_id(self.hero_free_tunic)
-	-- self.game.is_going_to_another_item = false 
-	self.game:set_custom_command_effect("attack", "return")
-	sol.menu.start(self.game:get_map(), self)	
-  -- end)
-
-  for teleporter in self.game:get_map():get_entities("teleporter") do
-	teleporter.on_activated = function()
-	  avoid_return = true
-	  from_teleporter = true
-	  self.game:set_value("item_fishing_rod_state", 0)
-	  self.game:get_hero():freeze()
-	  self:stop_fishing_rod()
-	end
-  end
-  sol.audio.play_sound("common/item_show")
+  sol.menu.start(self.map, self)
   
-  self:start_ground_check() 
+  game:simulate_command_pressed(self.slot)
+  
+  self:check() 
 end
 
-function fish_rod_controller:start_ground_check()
-  local hero = self.game:get_hero()
+function fish_rod_controller:check()
+  local hero = self.hero
   
   local function end_by_collision() 
-    if hero:get_state() == "treasure" then ended_by_pickable = true end
-    hero:set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-    is_halted_by_anything_else = true
-	if hero:get_state() == "hurt" then hero:set_invincible(true, 1000) hero:set_blinking(true, 1000) end
-	fish_rod_controller:stop_fishing_rod()
+    local state = hero:get_state()
+    force_stop = true
+    if state == "treasure" then ended_by_pickable = true end
+	sol.menu.stop(fish_rod_controller)
   end
   
-  timer = sol.timer.start(self, 50, function()
-	self.lx, self.ly, self.llayer = self.game:get_hero():get_position()
+  sol.timer.start(self, 50, function()
+    local item_name = self.game:get_item_assigned(2) or nil
+    local item_opposite = item_name ~= nil and item_name:get_name() or nil
+    local item = item_opposite == "fishing_rod" or nil
 	
-	-- todo hero:on_direction changed will change all of this. It would be not timer dependant.
-	if hero:get_direction() == 0 then self.new_x = -1; self.new_y = 0; self.gx = 1; self.gy = 0
-	elseif hero:get_direction() == 1 then self.new_x = 0; self.new_y = 1 ; self.gy = -1;  self.gx = 0
-	elseif hero:get_direction() == 2 then self.new_x = 1; self.new_y = 0 ; self.gy = 0;  self.gx = -1
-	elseif hero:get_direction() == 3 then self.new_x = 0; self.new_y = -1; self.gy = 1;  self.gx = 0
-	end
-
-	if hero:get_state() == "swimming" or (hero:get_state() == "jumping" and not is_shot) then hero:set_position(self.lx + self.new_x, self.ly + self.new_y); end_by_collision() end
-	if hero:get_state() == "falling" or hero:get_state() == "stairs" or hero:get_animation() == "swimming_stopped" or hero:get_state() == "hurt" or self.game:get_map():get_ground(self.lx + self.gx, self.ly + self.gy, self.llayer) == "lava" or hero:get_state() == "treasure" then end_by_collision() end
-
-	
-	if self.game:get_value("_item_slot_1") ~= "fishing_rod" and self.game:get_value("_item_slot_2") ~= "fishing_rod" then 
-	  if self.current_fishing_rod == nil then
-	    self:stop_fishing_rod()
+	for _, state in ipairs(state) do
+	  if hero:get_state() == state then
+		end_by_collision() 
+		return
 	  end
-    end
+	end
 	
-	-- check if the item has changed
-	if self.game:get_value("_item_slot_2") == "fishing_rod" then 
-      self.slot = "item_2" 
-	  self.opposite_slot = "item_1"
-      self.opposite_slot_to_number = 1
-    else
-      self.slot = "item_1" 
-	  self.opposite_slot = "item_2"
-      self.opposite_slot_to_number = 2
-    end
-
-    -- self.hero_free_tunic = "hero/item/fishing_rod/fishing_rod_moving_free_tunic"..self.game:get_ability("tunic")
-    -- self.hero_armed_tunic = "hero/item/fishing_rod/fishing_rod_moving_concentrate_tunic"..self.game:get_ability("tunic")
+	-- Check if the item has changed
+	self.slot = item and "item_2" or "item_1"
 	
-    -- if self.game.has_changed_tunic and self.game:is_command_pressed(self.slot) and  self.game:get_value("item_fishing_rod_state") == 2 then hero:set_tunic_sprite_id(self.hero_armed_tunic) self.game.has_changed_tunic = false end
-	-- if self.game.has_changed_tunic and not self.game:is_command_pressed(self.slot) then self.game.has_changed_tunic = false hero:set_tunic_sprite_id(self.hero_free_tunic) end
-	-- if not self.game:is_command_pressed(self.slot) and self.game:get_value("item_fishing_rod_state") == 2 and not is_shot then self.game:simulate_command_released(self.slot) end
-	
+	if not self.game:is_suspended() then
+	  local assigned_1 = self.game:get_item_assigned(1) ~= nil and self.game:get_item_assigned(1):get_name() or nil 
+	  local assigned_2 = self.game:get_item_assigned(2) ~= nil and self.game:get_item_assigned(2):get_name() or nil
+	  
+	  if fishing_rod == nil then
+	    if (assigned_1 == nil or assigned_1 ~= "fishing_rod") and (assigned_2 == nil or assigned_2 ~= "fishing_rod") then  
+	      sol.menu.stop(self)
+	      return
+	    end
+	  end
+	  
+	  if not self.game:is_command_pressed(self.slot) and not is_shot then 
+	    self.game:simulate_command_released(self.slot) 
+	  end
+	end
+    
   return true
   end)
-  timer:set_suspended_with_map(true)
 end
 
 function fish_rod_controller:create_fishing_rod()
+  local script = self
   local map = self.map
-  local hero = self.game:get_hero()
+  local hero = self.hero
   local x, y, layer = hero:get_position()
-  local direction = hero:get_direction()
-  local go
-  local stop
+  local direction = hero:get_direction()  
+  local go, stop
 
   local function set_can_traverse_rules(entity)
     entity:set_can_traverse("crystal", true)
@@ -162,11 +108,11 @@ function fish_rod_controller:create_fishing_rod()
     sol.audio.play_sound("items/fishing_rod/start_swing")
     sol.audio.play_sound("items/fishing_rod/throwing")
   
-    fish_rod_controller:shift_fish_rod_sprite()
+    script:shift_fish_rod_sprite()
     local m = sol.movement.create("straight")
     m:set_speed(100)
 	m:set_angle(direction * math.pi / 2)
-    m:set_max_distance(fish_rod_controller.dowsed_distance)
+    m:set_max_distance(script.dowsed_distance)
     m:start(fishing_rod)
 
     function m:on_obstacle_reached()
@@ -174,38 +120,37 @@ function fish_rod_controller:create_fishing_rod()
 	  if fy == 0 and not has_finished_movement then
 		if shadow ~= nil then fishing_rod:remove_sprite(shadow) shadow = nil end
 		sol.timer.stop_all(self)
-	    fish_rod_controller:check_ground()
-		fish_rod_controller.item_landed = true
-		fish_rod_controller.can_control = true
+	    script:check_ground()
+		script.item_landed = true
+		script.can_control = true
 		hero:set_animation("fishing_rod_calm")
-		if fish_rod_controller.map:get_ground(fishing_rod:get_position()) ~= "deep_water" then sol.audio.play_sound("items/fishing_rod/land_on_solid_ground") end
+		if script.map:get_ground(fishing_rod:get_position()) ~= "deep_water" then sol.audio.play_sound("items/fishing_rod/land_on_solid_ground") end
 		has_finished_movement = true
 	  end
     end
 
     function m:on_finished()
-	  fish_rod_controller.item_landed = true
-	  fish_rod_controller.can_control = true
+	  script.item_landed = true
+	  script.can_control = true
 	  if shadow ~= nil then fishing_rod:remove_sprite(shadow) shadow = nil end
-	  fish_rod_controller:check_ground()
+	  script:check_ground()
 	  hero:set_animation("fishing_rod_calm")
-	  if fish_rod_controller.map:get_ground(fishing_rod:get_position()) ~= "deep_water" then sol.audio.play_sound("items/fishing_rod/land_on_solid_ground") end
+	  if script.map:get_ground(fishing_rod:get_position()) ~= "deep_water" then sol.audio.play_sound("items/fishing_rod/land_on_solid_ground") end
     end
   end
   
   function stop()
     avoid_return = false
 	is_shot = false
-	local hx, hy, hz = fishing_rod:get_position()
+	
 	check_ground_timer:stop()
 	hero:unfreeze()
+	
     if fishing_rod ~= nil then
       fishing_rod:remove()
     end
-    if link_sprite ~= nil then
-      link_sprite:remove()
-    end
-	self.game:set_value("item_fishing_rod_state", 1)
+
+	sol.menu.stop(script)
   end
 
   -- Create the fishing rod.
@@ -228,12 +173,12 @@ function fish_rod_controller:create_fishing_rod()
     local entity_type = entity:get_type()
     if entity_type == "hero" then
       -- Reaching the hero while going back: stop fishing.
-      if fish_rod_controller.item_landed then
+      if script.item_landed then
 	    self.camera:start_tracking(hero)
 		sol.timer.start(1, function()
 		  if self:is_bait_trail_active() then self:stop_trail() end
 		end)
-		fish_rod_controller.item_landed = false
+		script.item_landed = false
         stop()
       end
     elseif entity.is_fishable ~= nil and entity:is_fishable() then
@@ -260,6 +205,8 @@ function fish_rod_controller:start_trail_on_bait()
 	  x = lx,
 	  y = ly,
 	  layer = llayer,
+	  width = 8,
+	  height = 16,
   	  direction = (self.game:get_hero():get_direction() + 2) % 4,
 	  sprite = "effects/hero/swimming_trails",
     })
@@ -297,9 +244,9 @@ function fish_rod_controller:check_ground()
 	  
     if self.map:get_ground(fishing_rod:get_position()) == "deep_water" and need_update then
 	  need_update = false
-      local water_splash = self.map:create_custom_entity({x = x, y = y, layer = z, direction = 0})    
+      local water_splash = self.map:create_custom_entity({x = x, y = y, layer = z, width = 16, height = 16, direction = 0})    
       local sprite = water_splash:create_sprite("entities/carried_ground_effect")
-      sprite:set_animation("water")
+      sprite:set_animation("deep_water")
 
 	  function water_splash:on_animation_finished() water_splash:remove() end
 	  if not self:is_bait_trail_active() and self.game:is_command_pressed("action") then self:start_trail_on_bait() end
@@ -325,7 +272,7 @@ function fish_rod_controller:dowse()
   self.dowsed_distance = self.dowsed_distance + 2
   
   sol.timer.start(self, 1, function()
-	if self.game:is_command_pressed(self.slot) and not self.game:is_suspended() and is_dowsing then self:dowse() end
+	if game:is_command_pressed(self.slot) and not game:is_suspended() and is_dowsing then self:dowse() end
   end)
 end
 
@@ -359,243 +306,268 @@ function fish_rod_controller:on_command_released(command)
 end
 
 function fish_rod_controller:on_command_pressed(command)
-  local hero = self.game:get_hero()
+  local game = self.game
+  local suspended = game:is_suspended()
+  local hero = game:get_hero()
   local x, y = hero:get_position()
+  local direction = hero:get_direction()
+  
   local final_bx, final_by
   
   local function align_bait_to_hero()
     local bx, by = fishing_rod:get_position()
-	local direction = hero:get_direction()
-	if direction == 0 then
-	  final_bx = bx - 1
-	  if by > y then
-	    final_by = by - 1
-	  elseif by < y then
-	    final_by = by + 1
-	  else
-		final_by = by
-	  end
-	elseif direction == 1 then
-	  final_by = by + 1
-	  if bx > x then
-		final_bx = bx - 1
-	  elseif bx < x then
-		final_bx = bx + 1
-	  else
-		final_bx = bx
-	  end
-	elseif direction == 2 then
-	  final_bx = bx + 1
-	  if by > y then
-		final_by = by - 1
-	  elseif by < y then
-		final_by = by + 1
+	if direction == 0 or direction == 2 then -- Left or Right
+	  final_bx = direction == 0 and bx - 1 or bx + 1
+	  
+	  if by ~= y then
+	    final_by = by > y and by - 1 or by + 1
 	  else
 	    final_by = by
 	  end
-	else
-	  final_by = by - 1
-	  if bx > x then
-		final_bx = bx - 1
-	  elseif bx < x then
-	    final_bx = bx + 1
+	  
+	elseif direction == 1 or direction == 3 then -- Up or Down
+	  final_by = direction == 1 and by + 1 or by - 1
+	  
+	  if bx ~= x then
+	    final_bx = bx > x and bx - 1 or bx + 1
 	  else
-		final_bx = bx
+	    final_bx = bx
 	  end
+	
 	end
   return final_bx, final_by	  
   end
   
   local function shift_bait_by_direction_input()
-    local direction = hero:get_direction()
 	local bx, by = fishing_rod:get_position()
 	
-	if direction == 0 then -- >
-	  final_bx = bx - math.random(5, 11)
-	  if by > y then
-	    final_by = by - math.random(8, 24)
-	  elseif by < y then
-	    final_by = by + math.random(8, 24)
+	local rand0 = math.random(5, 11)
+	local rand1 = math.random(8, 24)
+	local rand2 = math.random(-5, 5)
+	
+	if direction == 0 or direction == 2 then
+	  final_bx = direction == 0 and bx - rand0 or bx + rand0
+	  
+	  if by ~= y then
+	    final_by = by > y and by - rand1 or by + rand1
 	  else
-		final_by = by + math.random(-5, 5)
+	    final_by = by + rand2
 	  end
-	elseif direction == 1 then -- ^
-	  final_by = by + math.random(5, 11)
-	  if bx > x then
-		final_bx = bx - math.random(8, 24)
-	  elseif bx < x then
-		final_bx = bx + math.random(8, 24)
+
+	elseif direction == 1 or direction == 3 then
+	  final_by = direction == 1 and by + rand0 or by - rand0
+	  
+	  if bx ~= x then
+	    final_bx = bx > x and bx - rand1 or bx + rand1
 	  else
-		final_bx = bx + math.random(-5, 5)
-	  end
-	elseif direction == 2 then
-	  final_bx = bx + math.random(5, 11)
-	  if by > y then
-		final_by = by - math.random(8, 24)
-	  elseif by < y then
-		final_by = by + math.random(8, 24)
-	  else
-	    final_by = by + math.random(-5, 5)
-	  end
-	else
-	  final_by = by - math.random(5, 11)
-	  if bx > x then
-		final_bx = bx - math.random(8, 24)
-	  elseif bx < x then
-	    final_bx = bx + math.random(8, 24)
-	  else
-		final_bx = bx + math.random(-5, 5)
+	    final_bx = bx + rand2
 	  end
 	end
+	
   return final_bx, final_by
   end
   
-  for int, dir in ipairs(direction) do
-    print(int, dir)
-    if command == dir and self.item_landed then
-	  local fix_dir 
-	  
-	  if hero:get_direction() == 1 then
-	    fix_dir = 1
-	  elseif hero:get_direction() == 3 then
-	    fix_dir = 1
-	  else
-	    fix_dir = (hero:get_direction() + 1) % 4
-	  end
-	  
-	  if (int == (hero:get_direction()) % 4 or int == fix_dir) and self.can_control then  -- a side direction has been pressed
-
-	    if self:is_bait_trail_active() then self:stop_trail() end
-	    sol.timer.start(50, function() self:start_trail_on_bait() end)
-		self.can_control = false
-		
-		local t = sol.movement.create("target")
-	    t:set_target(shift_bait_by_direction_input())
-		t:set_speed(math.random(60, 70))
-		t:start(fishing_rod, function()
-		  sol.timer.start(50, function()
-		    self.can_control = true
-			if self:is_bait_trail_active() then self:stop_trail() end
-		  end)
-		end)
-		
-		if self.map:get_ground(fishing_rod:get_position()) == "deep_water" then
-		  sol.audio.play_sound("items/fishing_rod/move_bait_on_water")
-		end
-		
-		function t:on_obstacle_reached()
-		  fish_rod_controller.can_control = true
-		  if self:is_bait_trail_active() then self:stop_trail() end
-		end
-	  end
-	end
+  if command == "pause" then
+    return false
   end
   
-  if command == self.slot and not is_shot and not is_dowsing and not self.game:is_suspended() then
-    self.dowsed_distance = 50
-    avoid_return = true
-    is_dowsing = true
-	water_effect = nil
-	need_trail_update = false
-	has_finished_movement = false
+  if not suspended then
+    if command == self.slot and not is_shot and not is_dowsing then
+      self.dowsed_distance = 50
+      avoid_return, is_dowsing = true, true
+	  water_effect = nil
+	  need_trail_update, has_finished_movement = false, false
 	
-	self:dowse()
+	  self:dowse()
 	
-    hero:freeze()
-    hero:set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-	hero:set_animation("fishing_rod_casting_0", function()
-	  hero:get_sprite():set_frame(1)
-	  sol.timer.start(self, 200, function()
-	    hero:set_animation("fishing_rod_casting_1", function()
-		  is_dowsing = false
-		  self:create_fishing_rod() 
-		  self.camera:start_tracking(fishing_rod)
-		  is_shot = true
-	      hero:set_animation("fishing_rod_casting_2")
+      hero:freeze()
+	  
+	  hero:set_animation("fishing_rod_casting_0", function()
+	    hero:get_sprite():set_frame(1)
+	    sol.timer.start(self, 200, function()
+	      hero:set_animation("fishing_rod_casting_1", function()
+		    is_dowsing = false
+		    self:create_fishing_rod() 
+		    self.camera:start_tracking(fishing_rod)
+		    is_shot = true
+	        hero:set_animation("fishing_rod_casting_2")
+	      end)
 	    end)
 	  end)
-	end)
-	self.game:set_value("item_fishing_rod_state", 2)
-	avoid_return = false
+	  avoid_return = false
 	
-  elseif command == "pause" then
-    return false
-  
-  elseif command == self.opposite_slot and not self.game:is_suspended() then
-    if (self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "boomerang" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "bow" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "dominion_rod") and not is_shot then
-      is_halted_by_anything_else = true
-	  is_shot = false
-	  self.game.is_going_to_another_item = true
-	  self:stop_fishing_rod()
-	  hero:freeze()
-	  hero:set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-	  sol.timer.start(10, function()
-	    self.game:set_custom_command_effect("action", nil)
-	    self.game:get_item(self.game:get_value("_item_slot_"..self.opposite_slot_to_number)):on_using()
+    elseif command == "action" and self.item_landed and self.can_control then
+      local speed = game:is_command_pressed(directions[(1 - direction - 1) % 3]) and 60 or 40
+	  fishing_rod:set_direction((2 + direction) % 3)
+	  
+	  local t = sol.movement.create("target")
+	  t:set_target(align_bait_to_hero())
+	  t:set_speed(speed)
+	  t:set_ignore_obstacles(true)
+	  t:start(fishing_rod, function()
+	    if game:is_command_pressed("action") and self.item_landed then game:simulate_command_pressed("action") end
 	  end)
+	
+	  sol.audio.play_sound("items/fishing_rod/reel" .. speed)
     end
+  
+  
+    for int, dir in ipairs(directions) do
 	
-  elseif command == "attack" and not avoid_return and not is_shot and not self.game.is_going_to_another_item and not self.game:is_suspended() then
-    self.game:get_hero():freeze()
-    self:stop_fishing_rod()
+	  if command == dir and self.item_landed then
+	    local fix_dir = (direction == 0 or direction == 2) and direction or 1
+	    
+		print((int - 2) % 4)
+		-- directions[(direction - 1) % 4] The opposite direction
+		
+	    if (int == direction or int == fix_dir) and self.can_control then  -- a side direction has been pressed
+		  print("test")
+		end
+	  end
+	  
+	end
 	
-  elseif command == "action" and self.item_landed and self.can_control then
-    local speed = 40
-    if self.game:is_command_pressed(direction[1 + ((hero:get_direction() + 2) % 4)]) then speed = 60 end -- todo
-	fishing_rod:set_direction((self.game:get_hero():get_direction() + 2) % 4)
+	-- if command == dir and self.item_landed then 
+	  -- local fix_dir = 10
+	  
+	  -- if direction == 0 or direction == 2 then -- Left or right
+	    -- fix_dir = direction % 4
+	  -- end
+	  
+	  -- if (int == fix_dir % 4 or int == fix_dir) and self.can_control then
+	    -- if self:is_bait_trail_active() then self:stop_trail() end
+		-- sol.timer.start(50, function() self:start_trail_on_bait() end)
+		-- self.can_control = false
+		
+		-- local t = sol.movement.create("target")
+	    -- t:set_target(shift_bait_by_direction_input())
+		-- t:set_speed(math.random(60, 70))
+		-- t:start(fishing_rod, function()
+		  -- sol.timer.start(50, function()
+		    -- self.can_control = true
+			-- if self:is_bait_trail_active() then self:stop_trail() end
+		  -- end)
+		-- end)
+		
+		-- if self.map:get_ground(fishing_rod:get_position()) == "deep_water" then
+		  -- sol.audio.play_sound("items/fishing_rod/move_bait_on_water")
+		-- end
+		
+		-- function t:on_obstacle_reached()
+		  -- fish_rod_controller.can_control = true
+		  -- if self:is_bait_trail_active() then self:stop_trail() end
+		-- end
+		
+	  -- end
+	-- end
 	
-	local t = sol.movement.create("target")
-	t:set_target(align_bait_to_hero())
-	t:set_speed(speed)
-	t:set_ignore_obstacles(true)
-	t:start(fishing_rod, function()
-	  if self.game:is_command_pressed("action") and self.item_landed then self.game:simulate_command_pressed("action") end
-	end)
+    -- print(int, dir)
+    -- if command == dir and self.item_landed then
+	  -- local fix_dir 
+	  
+	  -- if hero:get_direction() == 1 then
+	    -- fix_dir = 1
+	  -- elseif hero:get_direction() == 3 then
+	    -- fix_dir = 1
+	  -- else
+	    -- fix_dir = (hero:get_direction() + 1) % 4
+	  -- end
+	  
+	  -- if (int == (hero:get_direction()) % 4 or int == fix_dir) and self.can_control then  -- a side direction has been pressed
+
+	end
+	  
+	  ----------------------------------------------
+	  
+	  
+	    -- if self:is_bait_trail_active() then self:stop_trail() end
+	    -- sol.timer.start(50, function() self:start_trail_on_bait() end)
+		-- self.can_control = false
+		
+		-- local t = sol.movement.create("target")
+	    -- t:set_target(shift_bait_by_direction_input())
+		-- t:set_speed(math.random(60, 70))
+		-- t:start(fishing_rod, function()
+		  -- sol.timer.start(50, function()
+		    -- self.can_control = true
+			-- if self:is_bait_trail_active() then self:stop_trail() end
+		  -- end)
+		-- end)
+		
+		-- if self.map:get_ground(fishing_rod:get_position()) == "deep_water" then
+		  -- sol.audio.play_sound("items/fishing_rod/move_bait_on_water")
+		-- end
+		
+		-- function t:on_obstacle_reached()
+		  -- fish_rod_controller.can_control = true
+		  -- if self:is_bait_trail_active() then self:stop_trail() end
+		-- end
+	  -- end
+	-- end
+  -- end
+  
+  -- if command == self.slot and not is_shot and not is_dowsing and not self.game:is_suspended() then
+    -- self.dowsed_distance = 50
+    -- avoid_return = true
+    -- is_dowsing = true
+	-- water_effect = nil
+	-- need_trail_update = false
+	-- has_finished_movement = false
 	
-	sol.audio.play_sound("items/fishing_rod/reel"..speed)
-  end
+	-- self:dowse()
+	
+    -- hero:freeze()
+    -- hero:set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
+	-- hero:set_animation("fishing_rod_casting_0", function()
+	  -- hero:get_sprite():set_frame(1)
+	  -- sol.timer.start(self, 200, function()
+	    -- hero:set_animation("fishing_rod_casting_1", function()
+		  -- is_dowsing = false
+		  -- self:create_fishing_rod() 
+		  -- self.camera:start_tracking(fishing_rod)
+		  -- is_shot = true
+	      -- hero:set_animation("fishing_rod_casting_2")
+	    -- end)
+	  -- end)
+	-- end)
+	-- self.game:set_value("item_fishing_rod_state", 2)
+	-- avoid_return = false
+	
+  -- elseif command == "pause" then
+    -- return false
+
+  -- elseif command == "action" and self.item_landed and self.can_control then
+    -- local speed = 40
+    -- if self.game:is_command_pressed(directions[1 + ((hero:get_direction() + 2) % 4)]) then speed = 60 end -- todo
+	-- fishing_rod:set_direction((self.game:get_hero():get_direction() + 2) % 4)
+	
+	-- local t = sol.movement.create("target")
+	-- t:set_target(align_bait_to_hero())
+	-- t:set_speed(speed)
+	-- t:set_ignore_obstacles(true)
+	-- t:start(fishing_rod, function()
+	  -- if self.game:is_command_pressed("action") and self.item_landed then self.game:simulate_command_pressed("action") end
+	-- end)
+	
+	-- sol.audio.play_sound("items/fishing_rod/reel"..speed)
+  -- end
   return true
 end
 
-function fish_rod_controller:stop_fishing_rod()
-  self.game:set_custom_command_effect("attack", nil)
-  self.game:set_custom_command_effect("action", nil)
-  self.game:set_value("item_fishing_rod_state", 0)
-  self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
+function fish_rod_controller:on_finished()
+  local game = self.game
+  local hero = self.hero
+
+  game:set_custom_command_effect("action", nil)
+  game:set_item_on_use(false)
+  
   avoid_return = false
   is_shot = false
   
-  if (not self.game:is_current_scene_cutscene() and not ended_by_pickable and not self.game.is_going_to_another_item) then self.game:show_cutscene_bars(false) end
-  
-  if not is_halted_by_anything_else then
-    if not from_teleporter then sol.audio.play_sound("common/item_show") end
-	from_teleporter = false
-	self.game:get_hero():freeze()
-	self.game:get_hero():set_animation("fishing_rod_intro", function()
-	  self.game:set_ability("shield", self.game:get_value("current_shield"))
-	  self.game:get_hero():unfreeze()
-	  self.game:set_item_on_use(false)
-	  self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_value("current_shield"))
-	  self.game:get_item("fishing_rod"):set_finished()
-	end) 
-  else
-    is_halted_by_anything_else = false
-	self.game:set_item_on_use(false)
-	if not self.game.is_going_to_another_item then
-	  if self.game:get_hero():get_state() == "falling" then
-	    sol.timer.start(800, function()
-	      self.game:set_ability("shield", self.game:get_value("current_shield"))
-	      self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
-		end)
-	  else
-	    self.game:set_ability("shield", self.game:get_value("current_shield"))
-	    self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
-	  end
-	end
-	self.game:get_item("fishing_rod"):set_finished()
-  end
+  sol.audio.play_sound("common/item_show")
   ended_by_pickable = false
-  sol.menu.stop(self)
+  
+  game:get_item("fishing_rod"):set_finished()
   sol.timer.stop_all(self)
 end
 

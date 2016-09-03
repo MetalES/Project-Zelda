@@ -8,12 +8,11 @@ function map_name:new(game)
   return object
 end
 
-function map_name:show_name(name, extra, paused)
+function map_name:show_name(name, extra)
   local horizontal_alignment = "center"
   local vertical_alignment = "middle"
   local font = "map_name"
   self.name = name
-  self.is_paused = paused
 
   -- dummy surface, will be resized later depending on the lengh of the text.
   self.map_name_surface = sol.surface.create(1,1) 
@@ -65,11 +64,11 @@ function map_name:show_name(name, extra, paused)
 	end
   end		
 		
-  self.timer = sol.timer.start(500, function()
+  self.timer = sol.timer.start(sol.main, 500, function()
 	self.map_name_surface:fade_in(40)
   end) 
   
-  self.timer0 = sol.timer.start(3500, function()
+  self.timer0 = sol.timer.start(sol.main, 3500, function()
 	self.map_name_surface:fade_out(40, function()
 	  self.map_name_surface:clear()
 	  self.name = nil

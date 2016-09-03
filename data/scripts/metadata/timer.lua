@@ -1,19 +1,18 @@
 local timer_meta = sol.main.get_metatable("timer")
 local timer, timer2, timer3, timer4
   
-function timer_meta:set_with_sound_effect(boolean)  
+function timer_meta:set_with_sound(boolean)  
   local game = sol.main.game
   if boolean then
-  
     if timer ~= nil then timer:stop() end 
 	if timer2 ~= nil then timer2:stop() end
 	if timer3 ~= nil then timer3:stop() end
 	if timer4 ~= nil then timer4:stop() end
 		
-	sol.audio.play_sound("timer")
+	sol.audio.play_sound("timer/sounds/timer")
 	timer = sol.timer.start(self, 1525, function()
 	  if self:get_remaining_time()  > 6100 and not game:is_paused() then
-	    sol.audio.play_sound("timer")
+	    sol.audio.play_sound("timer/sounds/timer")
 	  end
 	return true
 	end)
@@ -21,7 +20,7 @@ function timer_meta:set_with_sound_effect(boolean)
 	timer2 = sol.timer.start(self, 755, function()
 	  if self:get_remaining_time() <= 6100 and self:get_remaining_time() >= 3465 and not game:is_paused() then
 	    timer:stop()
-	    sol.audio.play_sound("timer_hurry")
+	    sol.audio.play_sound("timer/sounds/timer_hurry")
 	  end
 	return true
 	end)
@@ -29,7 +28,7 @@ function timer_meta:set_with_sound_effect(boolean)
 	timer3 = sol.timer.start(self, 380, function()
 	  if self:get_remaining_time() <= 3080 and not game:is_paused() then
 	    timer2:stop()
-	    sol.audio.play_sound("timer_almost_end")
+	    sol.audio.play_sound("timer/sounds/timer_almost_end")
 	  end
 	return true
 	end)

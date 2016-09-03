@@ -1,212 +1,240 @@
-local bow_controller = {}
+local bow_controller = {
+  slot = "item_1",
+  opposite_slot = "item_2",
+  state = 0,
+  item = nil
+}
 
-bow_controller.slot = "item_1"
-bow_controller.opposite_slot = "item_2"
-bow_controller.opposite_slot_to_number = 2
-bow_controller.bow_ammo_check = ""
-bow_controller.hero_armed_tunic = ""
-bow_controller.hero_free_tunic = "" 
-bow_controller.lx = 0
-bow_controller.ly = 0
-bow_controller.llayer = 0
-bow_controller.new_x = 0
-bow_controller.new_y = 0
-bow_controller.gx = 0
-bow_controller.gy = 0
+-- Set which build-in hero state can interrupt this item
+local state = {"swimming", "jumping", "falling", "stairs" , "hurt", "plunging", "treasure"}
+-- Set which item is compatible for the fast item switching feature
+local items = {"boomerang", "hookshot", "dominion rod"}
+-- Shoot the right arrow
+local arrows = {"arrow", "fire_arrow", "ice_arrow", "light_arrow", "explosive_arrow"}
 
-local is_halted_by_anything_else = false
-local avoid_return = false
-local from_teleporter = false
-local is_shot = false
+local force_stop, avoid_return, from_teleporter = false
+local previous_ammo
+
+local function set_aminations(hero, num, extra)
+  local prefix = {"bow_free_", "bow_armed_" .. extra .. "arrow_"}
+  hero:set_fixed_animations(prefix[num] .. "stopped", prefix[num] .. "walking")
+end
 
 function bow_controller:start_bow(game)
   self.game = game
+  self.hero = game:get_hero()
+  self.item = game:get_item("bow")
   
-  is_shot = true
-  self.game:set_item_on_use(true)
+  game:set_item_on_use(true)
   
-  self.game:get_hero():set_animation("bow_shoot", function()
-    self.game:get_hero():set_walking_speed(40)
-    self.game:get_hero():unfreeze()
-	self.game:get_hero():set_tunic_sprite_id(self.hero_free_tunic)
-	self.game:set_custom_command_effect("attack", "return") 
-	sol.menu.start(self.game:get_map(), self)
-	self.game.is_going_to_another_item = false
-	if self.game:get_value("item_bow_max_arrow_type") ~= nil then
-	  self.game:set_custom_command_effect("action", "change")
-	end
-	is_shot = false
-  end)
-    
-  for teleporter in self.game:get_map():get_entities("teleporter") do
-	teleporter.on_activated = function()
-	  avoid_return = true
-	  from_teleporter = true
-	  ended_by_pickable = false
-	  is_halted_by_anything_else = true
-	  self.game:set_value("item_bow_state", 0)
-	  self:stop_bow()
-	end
+  local hero = self.hero
+  
+  if hero.shield == nil then
+    hero.shield = game:get_ability("shield")
+    game:set_ability("shield", 0)
   end
-  
-  sol.audio.play_sound("common/item_show")
   
   if not self.game.is_going_to_another_item then 
-    self.game:set_value("current_shield", self.game:get_ability("shield"))
-    self.game:show_cutscene_bars(true) 
+    game:show_cutscene_bars(true) 
 	sol.audio.play_sound("common/bars_dungeon")
-	self.game:set_ability("shield", 0)
-	self.game:get_hero():set_shield_sprite_id("hero/shield_item")
   end
   
-  self:start_ground_check() 
+  hero:set_animation("bow_shoot", function()
+    self.state = 1
+    hero:set_walking_speed(40)
+	hero:set_fixed_direction(self.hero:get_direction())
+	set_aminations(hero, 1, "")
+	hero:unfreeze()
+	game:set_custom_command_effect("attack", "return") 
+	game.is_going_to_another_item = false
+	
+	if game:get_value("item_bow_max_arrow_type") ~= nil then
+	  game:set_custom_command_effect("action", "change")
+	end
+	sol.menu.start(game:get_map(), self)
+  end)
+  sol.audio.play_sound("common/item_show")
+  
+  self:check() 
 end
 
-function bow_controller:start_ground_check()
-  local hero = self.game:get_hero()
+function bow_controller:check()
+  local hero = self.hero
   
   local function end_by_collision() 
-    if hero:get_state() == "treasure" then ended_by_pickable = true end
-    hero:set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-    is_halted_by_anything_else = true
-	if hero:get_state() == "stairs" then hero:set_animation("walking") end
-	if hero:get_state() == "hurt" then hero:set_invincible(true, 1000) hero:set_blinking(true, 1000) end
-	bow_controller:stop_bow() 
+    local state = hero:get_state()
+    force_stop = true
+    if state == "treasure" then ended_by_pickable = true end
+	if state == "stairs" then
+	  hero:restore_state_stairs()
+	end
+	sol.menu.stop(bow_controller)
   end
 
-  sol.timer.start(self, 50, function()
-	self.lx, self.ly, self.llayer = self.game:get_hero():get_position()
+  sol.timer.start(self, 10, function()
+    local item_name = self.game:get_item_assigned(2) or nil
+    local item_opposite = item_name ~= nil and item_name:get_name() or nil
+    local item = item_opposite == "bow" or nil
 	
-	-- Todo : when hero:on_direction_changed() will be available, delete this, and replace the whole thing by input checking and values instead of direction checking
-	
-	if hero:get_direction() == 0 then self.new_x = -1; self.new_y = 0; self.gx = 1; self.gy = 0
-	elseif hero:get_direction() == 1 then self.new_x = 0; self.new_y = 1 ; self.gy = -1;  self.gx = 0
-	elseif hero:get_direction() == 2 then self.new_x = 1; self.new_y = 0 ; self.gy = 0;  self.gx = -1
-	elseif hero:get_direction() == 3 then self.new_x = 0; self.new_y = -1; self.gy = 1;  self.gx = 0
+    for _, state in ipairs(state) do
+	  if hero:get_state() == state then
+		hero:cancel_direction_fix()
+	    end_by_collision()
+        return		
+	  end
 	end
+	
+	-- Check if the item has changed
+	self.slot = item and "item_2" or "item_1"
+	self.opposite_slot = item and "item_1" or "item_2"
+	
+	if (self.item:get_amount() ~= previous_ammo and previous_ammo == 0) and self.state > 0 then
+	  self:restore_default_state()
+	end
+	previous_ammo = self.item:get_amount()
 
-	if hero:get_state() == "swimming" or (hero:get_state() == "jumping" and not is_shot) then hero:set_position(self.lx + self.new_x, self.ly + self.new_y); end_by_collision() end
-	if hero:get_state() == "falling" or hero:get_state() == "stairs" or hero:get_animation() == "swimming_stopped" or hero:get_state() == "hurt" or self.game:get_map():get_ground(self.lx + self.gx, self.ly + self.gy, self.llayer) == "lava" or hero:get_state() == "treasure" then end_by_collision() end
-		
-	self.hero_armed_tunic = "hero/item/bow/bow_moving_" .. self.bow_ammo_check .. "arrow_tunic" .. self.game:get_ability("tunic")
-    self.hero_free_tunic = "hero/item/bow/bow_moving_free_tunic" .. self.game:get_ability("tunic")
-  
-    if self.game:get_value("_item_slot_2") == "bow" then 
-      self.slot = "item_2" 
-   	  self.opposite_slot = "item_1"
-	  self.opposite_slot_to_number = 1 
-    else
-      self.slot = "item_1" 
-	  self.opposite_slot = "item_2"
-      self.opposite_slot_to_number = 2
-    end
-	
-	if self.game:get_item("bow"):get_amount() == 0 then
-      self.bow_ammo_check = ""
-	else
-	  self.bow_ammo_check = "with_"
-	end
-	
 	if not self.game:is_suspended() then
-	  if self.game:get_value("_item_slot_1") ~= "bow" and self.game:get_value("_item_slot_2") ~= "bow" then 
-	    self:stop_bow()
-      end
-	  if self.game:get_item("arrow").new_arrow and self.game:get_item("bow"):get_amount() >= 1 and hero:get_tunic_sprite_id() == "hero/item/bow/bow_moving_arrow_tunic" .. self.game:get_ability("tunic") then self.game:set_value("item_bow_state", 1) self.game:get_hero():set_tunic_sprite_id(self.hero_free_tunic)self.game:simulate_command_released(self.slot) self.game:get_item("arrow").new_arrow = false end
-	  if self.game.has_changed_tunic and self.game:is_command_pressed(self.slot) and hero:get_animation() ~= "bow_shoot" and not is_shot and (self.game:get_value("item_bow_state") == 1 or self.game:get_value("item_bow_state") == 2) then self.game.has_changed_tunic = false hero:set_tunic_sprite_id(self.hero_armed_tunic) end
-	  if self.game.has_changed_tunic and not self.game:is_command_pressed(self.slot) and not avoid_return then self.game.has_changed_tunic = false hero:set_tunic_sprite_id(self.hero_free_tunic) end
-	  if not self.game:is_command_pressed(self.slot) and self.game:get_value("item_bow_state") == 2 then self.game:simulate_command_released(self.slot) end
-	end
+	  local assigned_1 = self.game:get_item_assigned(1) ~= nil and self.game:get_item_assigned(1):get_name() or nil 
+	  local assigned_2 = self.game:get_item_assigned(2) ~= nil and self.game:get_item_assigned(2):get_name() or nil
 	
+	  if (assigned_1 == nil or assigned_1 ~= "bow") and (assigned_2 == nil or assigned_2 ~= "bow") then  
+	    sol.menu.stop(self)
+	    return
+	  end
+	  
+	  if not self.game:is_command_pressed(self.slot) and self.state == 2 then 
+	    self.game:simulate_command_released(self.slot)
+	  end
+	end
+		
   return true
   end)
+end
+
+function bow_controller:restore_default_state()
+  self.state = 1
+  set_aminations(self.hero, 1, "")
+  self.hero:unfreeze()
 end
 
 function bow_controller:create_arrow()
   local hero = self.game:get_hero()
   local x, y = hero:get_center_position()
   local _, _, layer = hero:get_position()
-  local ax, ay
+  local ax, ay = 0, 0
+  local arrow = arrows[self.game:get_value("item_bow_current_arrow_type") or 1]
 	  
-  if hero:get_direction() == 0 then ax = 0; ay = - 1
-  elseif hero:get_direction() == 1 then ax = - 3; ay = 0 
-  elseif hero:get_direction() == 2 then ax = 0; ay = - 1
-  else ax = 0; ay = 0 end
+  if hero:get_direction() == 0 then  ay = - 1
+  elseif hero:get_direction() == 1 then ax = - 3
+  elseif hero:get_direction() == 2 then ay = - 1
+  end
 	  
   local arrow = self.game:get_map():create_custom_entity({
     x = x + ax,
     y = y + ay,
     layer = layer,
+	width = 8,
+	height = 8,
     direction = hero:get_direction(),
-    model = "arrow",
+    model = "item/arrow/arrow",
   })
-  arrow:set_force(self.game:get_item("bow"):get_force())
-  arrow:set_sprite_id(self.game:get_item("bow"):get_arrow_sprite_id())
+  
+  arrow:set_force(self.item:get_force())
+  arrow:set_sprite_id(self.item:get_arrow_sprite_id())
   arrow:go()
 end
 
 function bow_controller:on_command_pressed(command)
-  local hero = self.game:get_hero()
-  if command == self.slot and not self.game.is_building_new_arrow and not is_shot and not self.game:is_suspended()  then
-    avoid_return = true
-	hero:freeze()
-	sol.audio.play_sound("items/bow/arming")
-	hero:set_animation("bow_arming_"..self.bow_ammo_check.."arrow")
-	sol.timer.start(self, 50, function()
-	  self.game:set_value("item_bow_state", 2)
-	  hero:set_animation("stopped")
-	  hero:set_tunic_sprite_id(self.hero_armed_tunic)
-	  hero:unfreeze()
-	  avoid_return = false
-	  hero:set_walking_speed(28)
-	  if not self.game:is_command_pressed(self.slot) then self.game:simulate_command_released(self.slot) end
-	end)
-  elseif command == "action" and not self.game.is_building_new_arrow and not is_shot and not self.game:is_suspended() then
-    self.game.next_arrow = true
-	self.game.is_building_new_arrow = true
-	avoid_return = false
-	self.game:get_hero():unfreeze()
-	self.game:set_value("item_bow_state", 1)
-	sol.timer.start(self, 50, function()
-	  self.game:get_hero():set_tunic_sprite_id(self.hero_free_tunic)
-	  self.game:simulate_command_released(self.slot)
-	end)
-  elseif command == "attack" and not avoid_return and not self.game.is_going_to_another_item  and not self.game:is_suspended()then
-    self:stop_bow()
-  -- if the opposite slot is the boomerang / hookshot / dominion rod, finish the bow and start the other item.
-  elseif command == self.opposite_slot and (self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "boomerang" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "hookshot" or self.game:get_value("_item_slot_"..self.opposite_slot_to_number) == "dominion_rod") and not self.game:is_suspended() then
-    self.game.is_going_to_another_item = true
-	is_shot = true
-	is_halted_by_anything_else = true
-	self.game:get_hero():freeze()
-	self:stop_bow()
-	self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-	sol.timer.start(10, function()
-	  self.game:get_item(self.game:get_value("_item_slot_"..self.opposite_slot_to_number)):on_using()
-	  self.game:set_custom_command_effect("action", nil)
-	end)
-  elseif command == "pause" then
+  local hero = self.hero
+  local game = self.game
+  local suspended = game:is_suspended()
+  local amount = self.item:get_amount()
+  
+  local another_item = game.is_going_to_another_item
+  local opposite = self.opposite_slot:sub(6, 7)
+  local item_name = game:get_item_assigned(opposite) or nil
+  local item_opposite = item_name ~= nil and item_name:get_name() or nil
+  
+  local has_arrow = amount == 0 and "" or "with_"
+  
+  -- Player can still pause.
+  if command == "pause" then
     return false
   end
+  
+  if not suspended then
+    if command == self.slot and not game.is_building_new_arrow then
+      sol.audio.play_sound("items/bow/arming")
+	  hero:freeze()
+	  hero:set_animation("bow_arming_".. has_arrow .."arrow")
+	  avoid_return = true
+	  sol.timer.start(self, 50, function()
+	    self.state = 2
+		set_aminations(hero, 2, has_arrow)
+	    hero:unfreeze() 
+	    hero:set_walking_speed(28)
+	    avoid_return = false
+	    if not game:is_command_pressed(self.slot) then self.game:simulate_command_released(self.slot) end
+	  end)
+	  
+    -- The player pressed Action, he can change the arrow type
+    elseif command == "action" and not game.is_building_new_arrow then
+	  avoid_return = true
+	  game:change_arrow_type()
+	  hero:unfreeze()
+	  self.state = 1
+	  sol.timer.start(self, 50, function()
+	    set_aminations(hero, 1, "")
+	    game:simulate_command_released(self.slot)
+	    avoid_return = false
+	  end)
+	  
+	-- The player pressed attack, decide if we can halt this item.
+    elseif command == "attack" and not avoid_return and not another_item then
+	  sol.audio.play_sound("common/item_show")
+      sol.menu.stop(self)
+	  
+	-- Analyse the opposite slot
+    elseif command == "item_" .. opposite and item_opposite ~= nil then
+      for _, item in ipairs(items) do
+	    if item_opposite == item then
+		  hero:freeze()
+	      game.is_going_to_another_item = true
+		  force_stop = true
+		  sol.menu.stop(self)
+		  
+		  game:get_item(item_opposite):set_state(0)
+	      game:get_item(item_opposite):on_using()
+	      game:set_custom_command_effect("action", nil)
+	    end
+	  end  
+    end
+  end
+
   return true
 end  
  
-
 function bow_controller:on_command_released(command)
-local hero = self.game:get_hero()
-  if command == self.slot and self.game:get_value("item_bow_state") == 2 and not self.game:is_suspended() then
+  local hero = self.hero
+  local game = self.game
+  local item = self.item
+  
+  if command == self.slot and self.state == 2 and not game:is_suspended() then
 	avoid_return = true
-	hero:set_tunic_sprite_id("hero/item/bow/bow_shoot_tunic"..self.game:get_ability("tunic"))
-	  if self.game:get_item("bow"):get_amount() > 0 then       
-		sol.audio.play_sound("items/bow/shoot")
-		self.game:get_item("bow"):remove_amount(1)
-		self:create_arrow()
-	  else
-	    sol.audio.play_sound("items/bow/no_arrows_shoot")
-	  end
+	if item:get_amount() > 0 then       
+	  item:remove_amount(1)
+	  self:create_arrow()
+	  sol.audio.play_sound("items/bow/shoot")
+	else
+	  sol.audio.play_sound("items/bow/no_arrows_shoot")
+	end
+	
 	hero:freeze()
-	self.game:set_value("item_bow_state", 1)
+	hero:set_animation("bow_shoot")
+	self.state = 1
+	
 	sol.timer.start(self, 60, function()
-      hero:set_tunic_sprite_id(self.hero_free_tunic)
+      set_aminations(hero, 1, "")
 	  hero:unfreeze()
 	  hero:set_walking_speed(40)
 	  avoid_return = false
@@ -215,54 +243,47 @@ local hero = self.game:get_hero()
   return true
 end
 
-function bow_controller:stop_bow()  
-  self.game:set_value("item_bow_state", 0)
-  self.game:get_hero():set_walking_speed(88)
-  self.game:set_custom_command_effect("attack", nil)
+function bow_controller:on_finished()  
+  local game = self.game
+  local hero = self.hero
+
+  game:set_ability("shield", hero.shield)
+  hero.shield = nil
   
-  if (not self.game:is_current_scene_cutscene() and not ended_by_pickable and not self.game.is_going_to_another_item) then self.game:show_cutscene_bars(false) end
+  game:set_item_on_use(false)
   
-  if not is_halted_by_anything_else then
-    if not from_teleporter then sol.audio.play_sound("common/item_show") end
-	from_teleporter = false
-	self.game:get_hero():freeze()
-	self.game:get_hero():set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-	self.game:get_hero():set_animation("bow_shoot")
-	sol.timer.start(120, function()
-	  self.game:set_ability("shield", self.game:get_value("current_shield"))
-	  if not self.game:is_current_scene_cutscene() then self.game:set_pause_allowed(true) self.game:get_hero():unfreeze() end
-	  self.game:set_item_on_use(false)
-	  if self.game.is_using_lantern then
-	    self.game:get_hero():set_tunic_sprite_id("hero/item/lantern.tunic"..self.game:get_ability("tunic"))
-	  end
-	  self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
-	  self.game:get_item("bow"):set_finished()
-	end)
-  else
-    is_halted_by_anything_else = false
-	self.game:set_item_on_use(false)
-	if not self.game.is_going_to_another_item then
-	  if self.game:get_hero():get_state() == "falling" then
-	    sol.timer.start(800, function()
-	      self.game:set_ability("shield", self.game:get_value("current_shield"))
-	      self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
-		end)
+  self.state = 0
+  game:set_custom_command_effect("attack", nil)
+  game:set_custom_command_effect("action", nil)
+  hero:set_walking_speed(88)
+  
+  if game:is_cutscene_bars_enabled() and not game:is_current_scene_cutscene() and not ended_by_pickable and not game.is_going_to_another_item then
+    game:show_cutscene_bars(false)
+  end
+  
+  if not force_stop then
+    hero:freeze()
+	hero:set_animation("bow_shoot", function()
+      if not game:is_current_scene_cutscene() then
+	    hero:unfreeze()
 	  else
-	    self.game:set_ability("shield", self.game:get_value("current_shield"))
-	    self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
-	  end
-	  if self.game.is_using_lantern then
-	    self.game:get_hero():set_tunic_sprite_id("hero/item/lantern.tunic"..self.game:get_ability("tunic"))
-	  end
-	end
-    self.game:get_item("bow"):set_finished()
+	    hero:unfreeze()
+	    hero:set_animation("stopped" .. (game:get_ability("shield") > 0 and "_with_shield" or ""))
+		hero:freeze()
+  	  end
+	end)
   end   
   
+  force_stop = false
   avoid_return = false
   ended_by_pickable = false
-  is_shot = false
   
-  sol.menu.stop(self)
+  hero:cancel_direction_fix()
+  
+  if game.is_using_lantern then
+    hero:set_fixed_animations("lantern_stopped", "lantern_walking")
+  end
+  
   sol.timer.stop_all(self)
 end
 

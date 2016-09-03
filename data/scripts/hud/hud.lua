@@ -1,21 +1,27 @@
 local game = ...
+
 local map_name_builder = require("scripts/hud/map_name")
+-- local current_arrow_builder = require("scripts/hud/bow_arrow_type")
+local minimap_dungeon_builder = require("scripts/hud/minimap")
+local plunging_bar_builder = require("scripts/hud/plunging_bar")
+local hints_builder = require("scripts/hud/hints")
+
 
 function game:initialize_hud()
 
   -- Set up the HUD.
   local bars_builder = require("scripts/hud/cutscene_bars")
-  local clock_builder = require("scripts/hud/day_night_clock")
+  local clock_builder = require("scripts/hud/clock")
   local floor_builder = require("scripts/hud/floor")
   local rupees_builder = require("scripts/hud/rupees")
   local hearts_builder = require("scripts/hud/hearts")
   local item_icon_builder = require("scripts/hud/item_icon")
   local magic_bar_builder = require("scripts/hud/magic_bar")
   local small_keys_builder = require("scripts/hud/small_keys")
-  local stamina_bar_builder = require("scripts/hud/stamina_bar")
   local attack_icon_builder = require("scripts/hud/attack_icon")
   local action_icon_builder = require("scripts/hud/action_icon")
   local boss_life_builder = require("scripts/hud/boss_life")
+  local horse_stamina = require("scripts/hud/horse_stamina")
   
   self.bars = {}
   self.clock = {}
@@ -27,7 +33,6 @@ function game:initialize_hud()
   }
   
   local clock_day_night = clock_builder:new(self)
-  clock_day_night:set_dst_position(116, 192)
   self.clock[#self.clock + 1] = clock_day_night
   
   local map_name = map_name_builder:new(self)
@@ -35,24 +40,34 @@ function game:initialize_hud()
   self.clock[#self.clock + 1] = map_name
 
   local bars = bars_builder:new(self)
-  bars:set_dst_position(186,30)
   self.bars[#self.bars + 1] = bars
+  
+  local hints = hints_builder:new(self)
+  self.bars[#self.bars + 1] = hints
   
   local menu = hearts_builder:new(self)
   menu:set_dst_position(15,12)
   self.hud[#self.hud + 1] = menu
+  
+  local menu = minimap_dungeon_builder:new(self)
+  self.hud[#self.hud + 1] = menu
 
   local menu = magic_bar_builder:new(self)
-  menu:set_dst_position(15,33)
+  menu:set_dst_position(15,31)
+  self.hud[#self.hud + 1] = menu
+  
+  local menu = plunging_bar_builder:new(self)
+  menu:set_dst_position(15,38)
   self.hud[#self.hud + 1] = menu
 
-  local menu = stamina_bar_builder:new(self)
-  menu:set_dst_position(15, 40)
-  self.hud[#self.hud + 1] = menu
 
   local menu = rupees_builder:new(self)
   menu:set_dst_position(15, -20)
   self.hud[#self.hud + 1] = menu
+  
+  -- local menu = horse_stamina:new(self)
+  -- menu:set_dst_position(15, -20)
+  -- self.hud[#self.hud + 1] = menu
 
   local menu = small_keys_builder:new(self)
   menu:set_dst_position(15, -33)
@@ -82,10 +97,15 @@ function game:initialize_hud()
   self.hud[#self.hud + 1] = menu
   self.hud.action_icon = menu
   
-  local menu = boss_life_builder:new(game)
+  local menu = boss_life_builder:new(self)
   menu:set_dst_position(110, 220)
   self.hud[#self.hud + 1] = menu
-  self.hud.boss_life = menu
+  self.hud.boss_life = menu  
+  
+  -- local menu = current_arrow_builder:new(self)
+  -- menu:set_dst_position(164, 11)
+  -- self.hud[#self.hud + 1] = menu
+  -- self.hud.current_arrow_builder = menu  
   
   for _, bars in ipairs(self.bars) do
     sol.menu.start(self, bars, false)
@@ -110,7 +130,7 @@ function game:check_hud()
   local map = self:get_map()
   if map ~= nil then
     -- If the hero is below the top-left icons, make them semi-transparent.
-    local hero = map:get_entity("hero")
+    local hero = self:get_hero()
     local hero_x, hero_y = hero:get_position()
     local camera_x, camera_y = map:get_camera_position()
     local x = hero_x - camera_x
@@ -143,7 +163,15 @@ function game:check_hud()
   end)
 end
 
-function game:hud_on_map_changed(map)
+function game:show_hint(key, seconds)
+  hints_builder:display_hint(key, seconds)
+end
+
+function game:set_dungeon_minimap_index(index)
+  minimap_dungeon_builder:set_dungeon_map(index)
+end
+
+function game:hud_on_map_changed(map)  
   if self:is_hud_enabled() then
     for _, menu in ipairs(self.hud) do
       if menu.on_map_changed ~= nil then
@@ -155,26 +183,23 @@ end
 
 -- Display Cutscene Bars
 function game:show_cutscene_bars(boolean)
-  local boolean = boolean or false
+  local script = self.bars[1]
+  local active = script:is_active()
+
   if boolean then
-    for _, bars in ipairs(self.bars) do
-	  if not bars:is_active() then
-        bars:show_bars()
-      end
+    if not active then
+      script:show_bars()
 	end
   else
-    for _, bars in ipairs(self.bars) do
-	  if bars:is_active() then
-        bars:hide_bars()
-      end
+    if active then
+	  script:hide_bars()
 	end
   end
 end
 
 function game:is_cutscene_bars_enabled()
-  for _, bars in ipairs(self.bars) do
-    return bars:is_active()
-  end
+  local active = self.bars[1]:is_active()
+  return active
 end
 
 function game:hud_on_paused()
@@ -254,13 +279,17 @@ function game:set_hud_enabled(hud_enabled)
   end
 end
 
-function game:show_map_name(map_name, display_extra, paused)
-  map_name_builder:show_name(map_name, display_extra or nil, paused or false)
+function game:show_map_name(map_name, display_extra)
+  map_name_builder:show_name(map_name, display_extra or nil)
 end
 
 function game:clear_map_name()
   map_name_builder:clear()
 end
+
+-- function game:change_arrow_type()
+  -- current_arrow_builder:select_next_arrow()
+-- end
 
 function game:get_custom_command_effect(command)
   return self.hud.custom_command_effects[command]

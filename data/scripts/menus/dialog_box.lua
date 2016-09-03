@@ -201,6 +201,7 @@ function dialog_box:on_started()
   if hero:get_state() ~= "treasure" and hero:get_state() ~= "grabbing" and not map.is_shopping and not game.using_ocarina and hero:get_animation() ~= "brandish_sword"  then
     hero:unfreeze()
   end
+  
   -- Set the coordinates of graphic objects.
   local x = camera_width / 2 - 140
   local y 

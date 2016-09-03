@@ -1,5 +1,6 @@
 local sensor_meta = sol.main.get_metatable("sensor")
 local ladder = require("scripts/gameplay/hero/skills/climbing_manager")
+local climbing = false
 
 function sensor_meta:on_activated()
   local game = self:get_game()
@@ -16,27 +17,16 @@ function sensor_meta:on_activated()
   elseif name:match("^layer_down_sensor") then
     local x, y, layer = hero:get_position()
     if layer > 0 then hero:set_position(x, y, layer - 1) end
-  elseif name:match("^layer_ladder_sensor") then
-	local dir = hero:get_direction()
-	local x, y, layer = hero:get_position()
-	if dir == 1 then
-	  if layer < 2 then 
-		map.ladder_event:set_position(x, y, layer + 1)
-		hero:set_position(x, y, layer + 1) 
-	  end
-	elseif dir == 3 then
-	  if layer > 0 then 
-		map.ladder_event:set_position(x, y, layer - 1)
-		hero:set_position(x, y, layer - 1) 
-	  end
-	end
   end
+  
+  local hero_direction = hero:get_direction()
 	
   -- Ladder System
-  if name:match("^ladder_(%d+)") and (hero:get_direction() == 1 or hero:get_direction() == 3) then
-    local name = self:get_name():match("^(.*)_[0-9]+$") or self:get_name()
-	local x, y, l = hero:get_position()
-	  
+  -- We activated the ladder, but we don't know it's state
+  if name:match("^ladder_(%d+)") and (hero_direction == 1 or hero_direction == 3) then
+    local type_of_ladder = string.sub(name, 8, 9)
+    local x, y, l = hero:get_position()
+	
 	local function move_hero(direction)
 	  local w = sol.movement.create("straight")
 	  w:set_max_distance(4) -- 16
@@ -49,21 +39,18 @@ function sensor_meta:on_activated()
 	    map.ladder_event:set_position(x, y, l)
 	  end
 	end
-	  
-	if (map.ladder_state == nil or map.ladder_state == 0) then
-	  -- for wall in map:get_entities("wall_item_on_use") do
-	    -- wall:set_enabled(false)
-	  -- end
-	  
-	  if game:is_using_item() or game:get_value("item_boomerang_state") > 0 then
-	    game:stop_all_items()
-	  
-	  end
+	
+	-- Unknown state, the hero isn't climbing, but he's going to.
+	if not climbing then
+	  climbing = true
+	
 	  hero:set_invincible(true)
 	  map.ladder_event = map:create_custom_entity({
 		x = x,
 		y = y,
 		layer = l,
+		width = 16,
+		height = 16,
 		direction = 0	  
 	  })
 	  map.ladder_event:set_modified_ground("traversable")
@@ -71,31 +58,28 @@ function sensor_meta:on_activated()
 	  hero:set_position(map.ladder_event:get_position())
 	  hero:freeze()
 	  move_hero(hero:get_direction())
+	  hero:set_fixed_animations("climbing_stopped", "climbing_walking")
 	
 	  hero:set_animation("climbing_start_up", function()
-		hero:unfreeze()
-		map.ladder_state = 1
+	    hero:unfreeze()
+	    hero:set_animation("climbing_stopped")
+		hero:set_walking_speed(25)
 		sol.menu.start(map, ladder)
-		ladder:climb(name, map.ladder_event)
+		ladder:climb(type_of_ladder, map.ladder_event)
 	  end)
-		
-	elseif map.ladder_state == 1 then
+	else -- We are climbing but the hero activated the arrival event.
+	  climbing = false
 	  hero:freeze()
+	  hero:set_fixed_animations(nil, nil)
 	  move_hero(hero:get_direction())
-	
-	  hero:set_tunic_sprite_id("hero/tunic" ..game:get_ability("tunic"))
+
 	  hero:set_animation("climbing_start_up", function()
 	    map.ladder_event:remove()
 		hero:unfreeze()
 		hero:set_walking_speed(88)
-		map.ladder_state = 0
 		sol.menu.stop(ladder)
 		hero:set_invincible(false)
-		
-		for wall in map:get_entities("wall_item_on_use") do
-		  wall:set_enabled(true)
-		end
-	  end)
+	  end) 
 	end
   end
 
@@ -103,6 +87,9 @@ function sensor_meta:on_activated()
   -- Optional treasure savegame value appended to end will play signal chime if value is false and hero has compass in inventory. "dungeon_room_N_bxxx"
   local room = name:match("^dungeon_room_(%d+)")
   local signal = name:match("(%U%d+)$")
+
+  game:set_room(tonumber(room))  
+  
   if room ~= nil then
     game:set_explored_dungeon_room(nil, nil, tonumber(room))
     if signal ~= nil and not game:get_value(signal) then

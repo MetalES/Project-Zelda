@@ -14,9 +14,9 @@ function shop_manager:start_shop(game)
   self.hero = game:get_hero()
   self.map = game:get_map()
   self:retrieve_shop_item_placement() -- Load item placement.
-  self.map.is_shopping = true
   self.interrupt_display = false
   
+  self.map.is_shopping = true
   game:show_cutscene_bars(true)
   game:set_clock_enabled(false)
 
@@ -52,7 +52,6 @@ function shop_manager:start_shop(game)
 	color = {102,255,102}
   }
 
-  self.menu_surface = sol.surface.create(320, 240)
   self.dialog_box_src = sol.surface.create("hud/dialog_box.png")
   self.cursor_sprite = sol.sprite.create("menus/shop_cursor")
   
@@ -63,61 +62,45 @@ function shop_manager:start_shop(game)
 end
 
 function shop_manager:set_cursor_position(position)
-  local item = item_name[position]
   self.cursor_position = position
-  self.game:set_custom_command_effect("action", "look")
   
-  if position == 0 then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 1 then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 2 and item ~= nil then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 3 and item ~= nil then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 4 and item ~= nil then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 5 and item ~= nil then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 6 and item ~= nil then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 7 and item ~= nil then
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
-  elseif position == 8 then
-    self.game:set_custom_command_effect("action", "speak")
-    self.cursor_x = item.x
-    self.cursor_y =	item.y
+  for i = 0, #item_name do
+    if position == i and item_name[i] ~= nil then
+	  self.cursor_x = item_name[i].x
+	  self.cursor_y = item_name[i].y
+	end
   end
+  
+  if position == 8 then
+    self.game:set_custom_command_effect("action", "speak")
+	return
+  end
+  
+  self.game:set_custom_command_effect("action", "look")
 end
 
 -- Get the information to display items dynamically, this is mostly for the cursor info.
 function shop_manager:retrieve_shop_item_placement()
   local map = self.map
-  for i, j in ipairs(map.shop) do
-    if j ~= nil and i <= 8 then
-	  item_name[i - 1] = map.shop[i - 1]
-	end
+  
+  for i = 0, #map.shop do 
+    item_name[i] = map.shop[i]
   end
-  item_name[8] = map.shop[8] -- shopkeeper
+  
   item_name[9] = map.shop[9] -- shop multiplier
   item_name[10] = map.shop[10] -- shop type( 1 = beetle)
 end
 
 function shop_manager:load_item_dialog_box()  
-  if self.cursor_position ~= 8 then
-    self.final_name = item_name[self.cursor_position]:get_name():match("^(.*)_[0-9]+$") or item_name[self.cursor_position]:get_name()
-    self.variant = item_name[self.cursor_position]:get_direction() + 1
-    self.price = item_name[self.cursor_position].shop_price[self.variant]
-    self.amount = item_name[self.cursor_position].shop_amount[self.variant]
-    self.final_price = math.floor(self.price * self.map.shop[9])
+  local item = item_name
+  local position = self.cursor_position
+  
+  if position ~= 8 then
+    self.final_name = item[position].shop_item
+    self.variant = item[position]:get_direction() + 1
+    self.price = item_name[position].shop_price[self.variant]
+    self.amount = item_name[position].shop_amount[self.variant]
+    self.final_price = math.floor(self.price * item[9])
   
     self.dialog_text_line0:set_text_key("shop.items."..self.final_name.."."..self.variant)
 	self.dialog_text_line0:set_color({255,102,102})
@@ -129,10 +112,10 @@ function shop_manager:load_item_dialog_box()
       self.dialog_text_line2:set_text_key("shop.items." .. self.final_name .. "." .. "item_desc_0")
     end
   else
-    self.dialog_text_line0:set_text_key("shop.shopkeeper."..self.map.shop[10]..".0")
+    self.dialog_text_line0:set_text_key("shop.shopkeeper.".. item[10] ..".0")
 	self.dialog_text_line0:set_color({255, 255, 255})
-    self.dialog_text_line1:set_text_key("shop.shopkeeper."..self.map.shop[10]..".1")
-    self.dialog_text_line2:set_text_key("shop.shopkeeper."..self.map.shop[10]..".2")
+    self.dialog_text_line1:set_text_key("shop.shopkeeper.".. item[10] ..".1")
+    self.dialog_text_line2:set_text_key("shop.shopkeeper.".. item[10] ..".2")
 	self.price_text:set_text("")
   end
 end 
@@ -151,6 +134,8 @@ function shop_manager:replace_slot_if_needed(index, save_in_savegame)
 	name = next_item_name,
     x = x,
 	y = y,
+	width = 8,
+	height = 8,
 	layer = layer,
     direction = next_item_direction,
 	sprite = "entities/items"
@@ -195,6 +180,7 @@ function shop_manager:choose_this_item(index)
     local item = item_name[index]
     local can_buy = item:can_buy_this_item()
     local x, y, layer = item:get_position()
+	local obtainable = self.game:get_item(tostring(self.final_name)):is_obtainable()
 	
     self.interrupt_display = true
 	item:get_sprite():set_animation("random")
@@ -203,14 +189,18 @@ function shop_manager:choose_this_item(index)
 	    x = x,
 	    y = y,
 	    layer = layer,
+		width = 8,
+		height = 8,
 	    direction = 0,
         sprite = "entities/items"
 	  })
+	  
 	  self.item_icon:get_sprite():set_animation(self.final_name)
 	  if self.item_icon:get_sprite():get_animation() == "heart" then
 	      self.item_icon:get_sprite():set_frame(24)
 	      self.item_icon:get_sprite():set_frame_delay(160)
 	  end
+	  
 	  self.item_icon:get_sprite():set_direction(self.variant - 1)
 	  self.item_icon:set_drawn_in_y_order(true)
 	  local sx, sy, sl = self.map:get_entity("shop"):get_position()
@@ -226,6 +216,8 @@ function shop_manager:choose_this_item(index)
 	    sol.audio.play_sound("menu/select")
 	    if self.game:get_money() < self.final_price then
 		  self.game:start_dialog("_shop.not_enough_money", function() return_item(index) self.game:set_custom_command_effect("action", "look") self.interrupt_display = false end)
+		elseif not obtainable then
+		  self.game:start_dialog("_shop.cant_buy_this_item_not_obtained", function() return_item(index) self.game:set_custom_command_effect("action", "look") self.interrupt_display = false end)
 		else
 		  if can_buy then
 		    self.item_icon:remove()
@@ -250,12 +242,12 @@ function shop_manager:choose_this_item(index)
 					"found_piece_of_heart.fourth"}
 				    local nb_pieces_of_heart = self.game:get_value("i1700") or 0
 					self.game:start_dialog(message_id[nb_pieces_of_heart + 1], function()
-						self.game:set_value("i1700", (nb_pieces_of_heart + 1) % 4)
-						if nb_pieces_of_heart == 3 then
-						  self.game:add_max_life(4)
-						end
-						self.game:add_life(self.game:get_max_life())
-						self:continue_shop()
+					  self.game:set_value("i1700", (nb_pieces_of_heart + 1) % 4)
+					  if nb_pieces_of_heart == 3 then
+						self.game:add_max_life(4)
+					  end
+					  self.game:add_life(self.game:get_max_life())
+					  self:continue_shop()
 					end)
 				 else
 				   self:continue_shop()

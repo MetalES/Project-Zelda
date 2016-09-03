@@ -42,8 +42,6 @@ function action_icon:initialize(game)
 end
 
 function action_icon:compute_icon_region_y()
-
-  local y
   if self.effect_displayed ~= nil then
     -- Create an icon with the name of the current effect.
     local effects_indexes = {
@@ -69,39 +67,43 @@ function action_icon:compute_icon_region_y()
   end
 end
 
-function action_icon:check()
-
-  local need_rebuild = false
-
-  if not self.flipping then
-    local effect = self.game.hud.custom_command_effects["action"] or self.game:get_command_effect("action")
-    if effect ~= self.effect_displayed then
-      if self.effect_displayed ~= nil then
-        if effect ~= nil then
-          self.icon_flip_sprite:set_animation("flip")
+  function action_icon:check()
+    local need_rebuild = false
+    local interaction_entity = self.game:get_hero():get_facing_entity()
+    local interaction_effect = interaction_entity and interaction_entity.action_effect
+    
+    if not self.flipping then
+      local effect = self.game.hud.custom_command_effects["action"] or self.game:get_command_effect("action")
+        or self.game:get_custom_command_effect("action")
+        or interaction_effect -- Show custom interaction effect.
+      if effect ~= self.effect_displayed then
+        if self.effect_displayed ~= nil then
+          if effect ~= nil then
+            self.icon_flip_sprite:set_animation("flip")
+          else
+            self.icon_flip_sprite:set_animation("disappearing")
+          end
         else
-          self.icon_flip_sprite:set_animation("disappearing")
+          self.icon_flip_sprite:set_animation("appearing")
         end
-      else
-        self.icon_flip_sprite:set_animation("appearing")
+        self.effect_displayed = effect
+        self.icon_region_y = nil
+        self.is_flipping = true
+        need_rebuild = true
       end
-      self.effect_displayed = effect
-      self.icon_region_y = nil
-      self.is_flipping = true
-      need_rebuild = true
     end
+
+    -- Redraw the surface only if something has changed.
+    if need_rebuild then
+      self:rebuild_surface()
+    end
+
+    -- Schedule the next check.
+    sol.timer.start(self.game, 50, function()
+      self:check()
+    end)
   end
 
-  -- Redraw the surface only if something has changed.
-  if need_rebuild then
-    self:rebuild_surface()
-  end
-
-  -- Schedule the next check.
-  sol.timer.start(self.game, 50, function()
-    self:check()
-  end)
-end
 
 function action_icon:rebuild_surface()
 

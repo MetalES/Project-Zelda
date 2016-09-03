@@ -1,134 +1,69 @@
 local map_metatable = sol.main.get_metatable("map")
-local heat_timer, swim_timer
 
--- Auto start the field BGM
-function map_metatable:start_field_bgm()
-  local audio = require("scripts/gameplay/audio/hyrule_field_audio_mgr")
-  sol.menu.start(self, audio)
-end
-
-function map_metatable:on_started()
-  local game = self:get_game()
-  	
-	-- de-comment this when day/night system would be finished, this is to avoid any corruption / error while making the script.
-
-    -- local function random_8(lower, upper)
-      -- math.randomseed(os.time() - os.clock() * 1000)
-      -- return math.random(math.ceil(lower/8), math.floor(upper/8))*8
-    -- end
-
-    -- Night time is more dangerous - add various enemies.
-    -- if game:get_map():get_world() == "outside_world" and
-    -- game:get_time_of_day() == "night" then
-      -- local keese_random = math.random()
-      -- if keese_random < 0.7 then
-	-- local ex = random_8(1,1120)
-	-- local ey = random_8(1,1120)
-	-- self:create_enemy({ breed="keese", x=ex, y=ey, layer=2, direction=1 })
-	-- sol.timer.start(self, 1100, function()
-	  -- local ex = random_8(1,1120)
-	  -- local ey = random_8(1,1120)
-	  -- self:create_enemy({ breed="keese", x=ex, y=ey, layer=2, direction=1 })
-	-- end)
-      -- elseif keese_random >= 0.7 then
-	-- local ex = random_8(1,1120)
-	-- local ey = random_8(1,1120)
-	-- self:create_enemy({ breed="keese", x=ex, y=ey, layer=2, direction=1 })
-	-- sol.timer.start(self, 1100, function()
-	  -- local ex = random_8(1,1120)
-	  -- local ey = random_8(1,1120)
-	  -- self:create_enemy({ breed="keese", x=ex, y=ey, layer=2, direction=1 })
-	-- end)
-	-- sol.timer.start(self, 1100, function()
-	  -- local ex = random_8(1,1120)
-	  -- local ey = random_8(1,1120)
-	  -- self:create_enemy({ breed="keese", x=ex, y=ey, layer=2, direction=1 })
-	-- end)
-      -- end
-      -- local poe_random = math.random()
-      -- if poe_random <= 0.5 then
-	-- local ex = random_8(1,1120)
-	-- local ey = random_8(1,1120)
-	-- self:create_enemy({ breed="poe", x=ex, y=ey, layer=2, direction=1 })
-      -- elseif keese_random <= 0.2 then
-	-- local ex = random_8(1,1120)
-	-- local ey = random_8(1,1120)
-	-- self:create_enemy({ breed="poe", x=ex, y=ey, layer=2, direction=1 })
-	-- sol.timer.start(self, 1100, function()
-	  -- local ex = random_8(1,1120)
-	  -- local ey = random_8(1,1120)
-	  -- self:create_enemy({ breed="poe", x=ex, y=ey, layer=2, direction=1 })
-	-- end)
-      -- end
-      -- local redead_random = math.random()
-      -- if poe_random <= 0.1 then
-	-- local ex = random_8(1,1120)
-	-- local ey = random_8(1,1120)
-	-- self:create_enemy({ breed="redead", x=ex, y=ey, layer=0, direction=1 })
-      -- end
-    -- end
-
-end
-
-function map_metatable:on_update()
-  -- if hero doesn't have red tunic, slowly remove stamina in Subrosia.
-  if self:get_game():get_map():get_world() == "outside_subrosia" and
-  self:get_game():get_item("tunic"):get_variant() < 2 then
-    if not heat_timer then
-      heat_timer = sol.timer.start(self:get_game():get_map(), 5000, function()
-        self:get_game():remove_stamina(5)
-        return true
-      end)
-    end
-  else
-    if heat_timer then
-      heat_timer:stop()
-      heat_timer = nil
-    end
+function map_metatable:create_collision(x, y, layer)
+  local collision = self:create_custom_entity({ 
+    x = x, 
+	y = y, 
+	layer = layer,
+	width = 8,
+	height = 8,
+	direction = 0
+  })
+  local collision_sprite = collision:create_sprite("entities/item_collision")
+  function collision_sprite:on_animation_finished()
+	collision:remove()
   end
-   -- Hero Clothes
-  if self:get_game():get_hero():get_state() == "swimming" then -- port this to hero
-   -- Fancy effect
-	if not swimming_trail and self:get_game():get_value("item_cloak_darkness_state") == 0 then
-  	  
-	end
-        -- Hero Clothes
-	if self:get_game():get_item("tunic"):get_variant() == 1 then
-	  if not swim_timer then
-		swim_timer = sol.timer.start(self:get_game():get_map(), 75, function()
-		  self:get_game():remove_stamina(4)
-		return true
-		end)
-	  end
-		
-	-- Goron Tunic (fire ability, so it make sense that link is more vulnerable in water)
-	elseif self:get_game():get_item("tunic"):get_variant() == 2 then
-	  if not swim_timer then
-		swim_timer = sol.timer.start(self:get_game():get_map(), 120, function()
-		  self:get_game():remove_stamina(6)
-		return true
-		end)
-	  end
-	-- Zora Tunic
-	elseif self:get_game():get_item("tunic"):get_variant() == 3 then
-	  if not swim_timer then
-		swim_timer = sol.timer.start(self:get_game():get_map(), 75, function()
-		  self:get_game():remove_stamina(2)
-		return true
-		end)
-	  end
-	end
-		
-  else	  
-    if swim_timer ~= nil then swim_timer:stop() swim_timer = nil end
-    if swimming_trail ~= nil then swimming_trail:stop() swimming_trail = nil end
-  end		
+  sol.audio.play_sound("items/item_metal_collision_wall")
 end
-  
+
+-- Move the camera
+function map_metatable:move_camera(x, y, speed, callback, delay_before, delay_after, suspend)
+  local camera = self:get_camera()
+  local game = self:get_game()
+  local hero = self:get_hero()
+
+  delay_before = delay_before or 1000
+  delay_after = delay_after or 1000
+
+  local back_x, back_y = camera:get_position_to_track(hero)
+  game:set_suspended(suspend or true)
+  camera:start_manual()
+
+  local movement = sol.movement.create("target")
+  movement:set_target(camera:get_position_to_track(x, y))
+  movement:set_ignore_obstacles(true)
+  movement:set_speed(speed)
+  movement:start(camera, function()
+    local timer_1 = sol.timer.start(self, delay_before, function()
+      callback()
+      local timer_2 = sol.timer.start(self, delay_after, function()
+        local movement = sol.movement.create("target")
+        movement:set_target(back_x, back_y)
+        movement:set_ignore_obstacles(true)
+        movement:set_speed(speed)
+        movement:start(camera, function()
+          game:set_suspended(false)
+          camera:start_tracking(hero)
+          if self.on_camera_back ~= nil then
+            self:on_camera_back()
+          end
+        end)
+      end)
+      timer_2:set_suspended_with_map(false)
+    end)
+    timer_1:set_suspended_with_map(false)
+  end)
+
+
+end
+
 function map_metatable:spawn_chest(entity, sound_to_play, switch, after_combat, music_if_fade)
   local x, y, layer = entity:get_position()
   local game = self:get_game()
-  self:get_hero():unfreeze()
+  local hero = self:get_hero()
+  
+  hero:unfreeze()
+  
   self:move_camera(x, y, 100, function()
     entity:get_sprite():set_ignore_suspend(true)
 	entity:set_drawn_in_y_order(false)
@@ -145,6 +80,8 @@ function map_metatable:spawn_chest(entity, sound_to_play, switch, after_combat, 
         x = x,
         y = y - 5,
         layer = layer,
+		width = 16,
+		height = 16,
         direction = 0,
         sprite = "entities/dungeon/gameplay_sequence_chest_appearing",
       })
@@ -178,7 +115,7 @@ function map_metatable:spawn_chest(entity, sound_to_play, switch, after_combat, 
         game:set_clock_enabled(true)
 	  end)
     end)
-  end,1, 7500)
+  end, 200, 7500, true)
 end
   
 function map_metatable:on_finished()

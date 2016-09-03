@@ -1,44 +1,25 @@
 local title_screen = {}
 local savegame_menu = require("scripts/menus/savegames")
+local game = sol.main.game
 
-local sparkle_position_x = {
-  [0] = 85,
-  [1] = 121,
-  [2] = 143,
-  [3] = 166,
-  [4] = 85,
-  [5] = 185,
-  [6] = 195,
-  [7] = 140,
-  [8] = 176,
-  [9] = 179,
-  [10] = 84,
-  [11] = 184,
-  [12] = 200,
-  [13] = 203,
-  [14] = 198,
-  [15] = 122,
+local sparkle_position = {
+  {85, 45},
+  {121, 77},
+  {143, 47},
+  {166, 65},
+  {85, 45},
+  {185, 40}, 
+  {195, 75},
+  {140, 55},
+  {176, 50},
+  {179, 75},
+  {84, 90},
+  {184, 72},
+  {200, 35},
+  {203, 60},
+  {198, 78},
+  {122, 36}
 }
-
-local sparkle_position_y = {
-  [0] = 45,
-  [1] = 77,
-  [2] = 47,
-  [3] = 65,
-  [4] = 45,
-  [5] = 40,
-  [6] = 75,
-  [7] = 55,
-  [8] = 50,
-  [9] = 75,
-  [10] = 90,
-  [11] = 72,
-  [12] = 35,
-  [13] = 60,
-  [14] = 78,
-  [15] = 36,
-}
-
 
 function title_screen:on_started()
   local number
@@ -50,14 +31,14 @@ function title_screen:on_started()
   self.title_screen_logo_img = sol.surface.create("menus/title_screen/title_logo.png")
   
   local function generate_random()
-    number = math.random(0, 14)
+    number = math.random(1, 16)
   end
   generate_random()
   
   self.surface = sol.surface.create(320, 240)
   self.surface:fill_color({0, 0, 0})
   self.surface:fade_out(80, function() self.can_press_key = true end)
-  self.sprite_sparkle:set_xy(sparkle_position_x[number], sparkle_position_y[number])
+  self.sprite_sparkle:set_xy(sparkle_position[number][1], sparkle_position[number][2])
   
   self.draw_title_name = false
   self.draw_press_space = false
@@ -74,24 +55,34 @@ function title_screen:on_started()
     text_key = "title_screen.website",
     horizontal_alignment = "center"
   }
-
+  
   self.press_space_img = sol.text_surface.create{
     font = "lttp",
     font_size = 14,
-    text_key = "title_screen.press_space",
+    text = sol.language.get_string("title_screen.press") .. " " .. game:get_command_keyboard_binding("pause") .. ", " .. game:get_command_keyboard_binding("action") .. ", " .. game:get_command_joypad_binding("action") .. " " .. sol.language.get_string("title_screen.or") .. " " .. game:get_command_joypad_binding("pause"),
     horizontal_alignment = "center",
 	color = {255, 50, 50}
   }
-  
   self.sprite_sword:set_xy(149, -128)
   
   function title_screen.sprite_sparkle:on_animation_finished()
     if sol.menu.is_started(title_screen) then
       generate_random()
-      self:set_xy(sparkle_position_x[number], sparkle_position_y[number])
-	  self:set_animation("0")
+      self:set_xy(sparkle_position[number][1], sparkle_position[number][2])
+	    self:set_animation("0")
+	  return
 	end
   end
+end
+
+function title_screen:on_finished()
+  self.sprite_sparkle = nil
+  self.sprite_sword = nil
+  self.title_border = nil
+  self.game_name = nil
+  self.game_name_effect = nil
+  self.title_screen_logo_img = nil
+  self.surface = nil
 end
 
 function title_screen:move_sword()
@@ -104,21 +95,23 @@ function title_screen:move_sword()
 end
 
 function title_screen:on_command_pressed(command)
-  if command == "action" then
+  if command == "pause" or command == "action" then
     if self.state == 0 and self.can_press_key then
      self:draw_parts(command_pressed)
     elseif self.state == 1 and self.can_press_key then
 	 self.state = 2
      sol.audio.play_sound("scene/title/press_start_2")
-     sol.main.game:fade_audio(0, 10)
+     game:fade_audio(0, 10)
 	 sol.main.game:set_item_on_use(true)
      self.surface:fade_in(40, function()
-	   sol.main.game:set_pause_allowed(false)
-	   sol.main.game.building_file_select = true
-       sol.menu.start(sol.main, savegame_menu)
-       sol.audio.set_music_volume(90)
+       game:stop_tone_system()
+       game:clear_fog()
+	   game:set_pause_allowed(false)
+	   game.building_file_select = true
+       sol.menu.start(game, savegame_menu)
+       sol.audio.set_music_volume(game:get_value("old_volume") or 70)
+	   sol.timer.stop_all(self)
 	   sol.menu.stop(self)
-       sol.timer.stop_all(self)
      end)
     end
   end 
@@ -193,11 +186,11 @@ function title_screen:draw_parts(typeof)
 end
 
 function title_screen:on_draw(dst_surface)
-  self.title_border:draw(dst_surface, 0, 0)
+  self.title_border:draw(dst_surface)
   if self.draw_title_name then
-    self.sprite_sword:draw(dst_surface, 0, 0)
+    self.sprite_sword:draw(dst_surface)
     self.title_screen_logo_img:draw(dst_surface, 88, 30)
-    self.sprite_sparkle:draw(dst_surface, 0, 0)
+    self.sprite_sparkle:draw(dst_surface)
     if self.draw_copyright then
       self.website_img:draw(dst_surface, 160, 226) 
     end
@@ -211,7 +204,7 @@ function title_screen:on_draw(dst_surface)
 	  self.game_name:draw(dst_surface, 124, 89)
 	end
   end
-  self.surface:draw(dst_surface, 0, 0)
+  self.surface:draw(dst_surface)
 end
 
 return title_screen

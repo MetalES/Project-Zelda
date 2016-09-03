@@ -32,27 +32,6 @@ function condition_manager:initialize(game)
   end
 
   function game:on_command_pressed(command)
-
-     if game:get_max_stamina() > 0 then
-     if game:get_stamina() == 0 then 
-	 game:start_game_over()
-     elseif game:get_stamina() < (game:get_max_stamina()/6) then -- if stamina too low, play heavy breathing
-	game:remove_stamina(1)
-	--[[if not breathing_timer then
-	  breathing_timer = sol.timer.start(8000, function()
-	    sol.audio.play_sound("breathing")
-	    return true
-	  end)
-	end]]
-	return false
-        else
-	game:remove_stamina(1)
-	if game:get_value("stamina_gone") then game:set_value("stamina_gone", false) end
-	if breathing_timer ~= nil then breathing_timer:stop() end
-	return false
-        end --game:get_stamina() == 0
-      end --game:get_max_stamina() > 0
-
     if not hero:is_condition_active('confusion') or in_command_pressed or game:is_paused() then
       return false
     end

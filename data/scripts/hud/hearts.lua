@@ -16,7 +16,7 @@ end
 function hearts:initialize(game)
 
   self.game = game
-  self.surface = sol.surface.create(99, 18) --90 109
+  self.surface = sol.surface.create(89, 18) 
   self.dst_x = 0
   self.dst_y = 0
   self.empty_heart_sprite = sol.sprite.create("hud/empty_heart")
@@ -67,7 +67,7 @@ function hearts:check()
       self.nb_current_hearts_displayed = self.nb_current_hearts_displayed + 1
       if self.game:is_started()
           and self.nb_current_hearts_displayed % 4 == 0 then
-        sol.audio.play_sound("heart")
+        sol.audio.play_sound("objects/heart/heart")
       end
     end
   end
@@ -130,7 +130,7 @@ function hearts:rebuild_surface()
 
   -- Display the hearts.
   for i = 0, self.nb_max_hearts_displayed - 1 do
-    local x, y = (i % 11) * 9, math.floor(i / 11) * 9 -- i/12
+    local x, y = (i % 11) * 8, math.floor(i / 11) * 9
     self.empty_heart_sprite:draw(self.surface, x, y)
     if i < math.floor(self.nb_current_hearts_displayed / 4) then
       -- This heart is full.
@@ -142,7 +142,7 @@ function hearts:rebuild_surface()
   local i = math.floor(self.nb_current_hearts_displayed / 4)
   local remaining_fraction = self.nb_current_hearts_displayed % 4
   if remaining_fraction ~= 0 then
-    local x, y = (i % 11) * 9, math.floor(i / 11) * 9  -- i/10
+    local x, y = (i % 11) * 8, math.floor(i / 11) * 9
     self.all_hearts_img:draw_region((remaining_fraction - 1) * 9, 0, 9, 9, self.surface, x, y)
   end
 end
@@ -153,7 +153,6 @@ function hearts:set_dst_position(x, y)
 end
 
 function hearts:on_draw(dst_surface)
-
   local x, y = self.dst_x, self.dst_y
   local width, height = dst_surface:get_size()
   if x < 0 then

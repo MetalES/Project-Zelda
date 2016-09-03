@@ -1,5 +1,4 @@
 -- Base class of each submenu.
-
 local submenu = {}
 
 function submenu:new(game)
@@ -10,11 +9,19 @@ function submenu:new(game)
 end
 
 function submenu:on_started()  
-  self.background_color = sol.surface.create("pause_background.png", true)
-  self.background_color:set_opacity(216)
-  
   self.background_surfaces = sol.surface.create("pause_submenus.png", true)
-   
+  
+  -- Create common objects for all menus
+  self.extra_surface = sol.surface.create(320, 240)
+  self.cursor_sprite = sol.sprite.create("menus/pause_cursor")
+  self.item = sol.sprite.create("entities/items")
+  
+  -- Quest Status
+  self.sage_sprite = {}
+  for i = 4, 12 do
+	self.sage_sprite[i] = sol.sprite.create("npc/sage/" .. i)
+  end
+ 
   self.save_dialog_sprite = sol.sprite.create("menus/pause_save_dialog")
   self.save_dialog_state = 0
 
@@ -108,19 +115,17 @@ function submenu:draw_caption(dst_surface)
 end
 
 function submenu:next_submenu()
-
   sol.audio.play_sound("/menu/dir_right")
   sol.menu.stop(self)
   local submenus = self.game.pause_submenus
   local submenu_index = self.game:get_value("pause_last_submenu")
- -- implementing a condition, we don't want the mail menu or the bomber notebook menu to be a part of the default menu, so to avoid to declare the menu in game_manager, we declared it here.
+
   if submenu_index > 4 then submenu_index = 1 else submenu_index = (submenu_index % #submenus) + 1 end
   self.game:set_value("pause_last_submenu", submenu_index)
   sol.menu.start(self.game, submenus[submenu_index], false)
 end
 
 function submenu:previous_submenu()
-
   sol.audio.play_sound("/menu/dir_left")
   sol.menu.stop(self)
   local submenus = self.game.pause_submenus
@@ -141,7 +146,7 @@ function submenu:on_command_pressed(command)
 
   if self.save_dialog_state == 0 then
     -- The save dialog is not shown
-    if command == "attack" and not sol.menu.is_started(self.game.pause_submenus[6]) and not self.avoid_can_save_from_qsmenu and not self.displaying_scroll then
+    if command == "attack" and not self.avoid_can_save_from_qsmenu and not self.displaying_scroll then
       sol.audio.play_sound("/common/dialog/message_end")
       self.save_dialog_state = 1
       self.save_dialog_choice = 0
@@ -176,7 +181,8 @@ function submenu:on_command_pressed(command)
         -- After "Do you want to save?".
         self.save_dialog_state = 2
         if self.save_dialog_choice == 0 then
-          self.game:save()
+          sol.main:parse_titlescreen_data("write", self.game)
+		  self.game:save()
           sol.audio.play_sound("/common/dialog/done") --heartpiece
         else
           sol.audio.play_sound("danger")
@@ -205,13 +211,11 @@ function submenu:draw_background(dst_surface)
   local submenu_index = self.game:get_value("pause_last_submenu")
   local width, height = dst_surface:get_size()
 
-    self.background_color:draw_region(
-      320 * (submenu_index - 1), 0, 320, 240,
-      dst_surface, (width - 320) / 2, (height - 240) / 2)
+    -- self.background_color:draw_region(
+      -- 320 * (submenu_index - 1), 0, 320, 240,
+      -- dst_surface, (width - 320) / 2, (height - 240) / 2)
 	  
-    self.background_surfaces:draw_region(
-      320 * (submenu_index - 1), 0, 320, 240,
-      dst_surface, (width - 320) / 2, (height - 240) / 2)	 
+    self.background_surfaces:draw_region(320 * (submenu_index - 1), 0, 320, 240,dst_surface) 
 end
 
 function submenu:draw_save_dialog_if_any(dst_surface)

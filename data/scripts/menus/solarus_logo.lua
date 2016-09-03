@@ -7,19 +7,10 @@ local solarus_logo_menu = {}
 
 -- Main surface of the menu.
 local surface = sol.surface.create(201, 48)
-local propulsed_by = sol.surface.create(96, 48)
-local flash = sol.surface.create(320, 240)
-flash:fill_color{255, 255, 255}
-local flopc = 255
-flash:set_opacity(flopc)
 
 -- Solarus title sprite.
 local title = sol.sprite.create("menus/solarus_logo")
 title:set_animation("title")
-
--- Propulsed by sprite.
-local prop = sol.sprite.create("menus/solarus_logo")
-prop:set_animation("propulsed_by")
 
 -- Solarus subtitle sprite.
 local subtitle = sol.sprite.create("menus/solarus_logo")
@@ -51,10 +42,6 @@ local function rebuild_surface()
   -- Clean the surface.
   surface:clear()
 
-  if animation_step == 0 then
-    prop:draw(propulsed_by)
-  end
-
   -- Draw the title (after step 1).
   if animation_step >= 1 then
     title:draw(surface)
@@ -71,33 +58,18 @@ local function rebuild_surface()
 
   -- Draw the subtitle (after step 2).
   if animation_step >= 2 then
-sol.timer.start(solarus_logo_menu, 500, function()
     subtitle:draw(surface)
-end)
-
   end
 end
-
-local function flash_update()
-flopc = flopc - 3
-flash:set_opacity(flopc)
-
-if flopc > 0 then 
-  sol.timer.start(10, flash_update)
-end
-end
-
 
 -------------------------------------------------------------------------------
 
 -- Starting the menu.
 function solarus_logo_menu:on_started()
-
   -- Initialize or reinitialize the animation.
   animation_step = 0
   timer = nil
   surface:set_opacity(255)
-  flash:set_opacity(0)
   sun:set_direction(0)
   sun:set_xy(0, 0)
   sword:set_xy(0, 0)
@@ -119,16 +91,10 @@ function solarus_logo_menu:step1()
   sword:stop_movement()
   sword:set_xy(-48, 48)
   -- Play the sword sound.
-
-  --flash:set_opacity(255)
-  flash_update()
-
-  sol.audio.play_sound("/scene/title/propulsed_by")
-
+  sol.audio.play_sound("scene/title/solarus_logo")
   -- Update the surface.
   rebuild_surface()
 end
-
 
 -- Animation step 2.
 function solarus_logo_menu:step2()
@@ -137,19 +103,18 @@ function solarus_logo_menu:step2()
   -- Update the surface.
   rebuild_surface()
   -- Start the final timer.
-  sol.timer.start(solarus_logo_menu, 1000, function() --500
-    surface:fade_out()
-    prop:fade_out()
-    sol.timer.start(solarus_logo_menu, 1200, function() --700
-      sol.menu.stop(solarus_logo_menu)
-    end)
+  sol.timer.start(solarus_logo_menu, 500, function()
+    surface:fade_out(20, function()
+	  surface:clear()
+	  sol.timer.start(self, 700, function()
+	    sol.menu.stop(solarus_logo_menu)
+	  end)
+	end)
   end)
 end
 
 -- Run the logo animation.
 function solarus_logo_menu:start_animation()
-
- 
 
   -- Move the sun.
   local sun_movement = sol.movement.create("target")
@@ -206,8 +171,6 @@ function solarus_logo_menu:on_draw(screen)
 
   -- Center the surface in the screen.
   surface:draw(screen, width / 2 - 100, height / 2 - 24)
-  prop:draw(screen, width / 2, height / 2 - 32)
-  flash:draw(screen, width / 2 - 160, height / 2 - 120)
 end
 
 -- Called when a keyboard key is pressed.

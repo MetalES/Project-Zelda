@@ -26,15 +26,16 @@ function floor_view:on_map_changed(map)
 
   local need_rebuild = false
   local floor = map:get_floor()
-  if floor == self.floor
-      or (floor == nil and self.game:get_dungeon() == nil) then
+  
+  if floor == self.floor or (floor == nil and self.game:get_dungeon() == nil) then
     -- No floor or unchanged floor.
     self.visible = false
   else
     -- Show the floor view for 3 seconds.
     self.visible = true
+	self.surface:fade_in()
     local timer = sol.timer.start(3000, function()
-      self.visible = false
+	  self.surface:fade_out(20, function() self.visible = false end)
     end)
     timer:set_suspended_with_map(false)
     need_rebuild = true

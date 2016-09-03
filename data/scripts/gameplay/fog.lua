@@ -14,9 +14,8 @@ function game:display_fog(fog, speed, angle, opacity)
   fog_menu.fog_speed = speed
   fog_menu.fog_angle = angle
   fog_menu.fog_opacity = opacity
-  fog_menu.fog_has_been_drawn = false
 
-  sol.menu.start(self:get_map(), fog_menu, true)
+  sol.menu.start(self:get_map(), fog_menu, false)
 end
 
 function game:clear_fog()
@@ -26,7 +25,6 @@ function game:clear_fog()
   fog_menu.fog_speed = nil
   fog_menu.fog_angle = nil
   fog_menu.fog_opacity = nil
-  fog_menu.fog_has_been_drawn = false
   if fog_menu.movement ~= nil then fog_menu.movement:stop() end
   fog_menu.fog_sfc = nil
 end
@@ -58,7 +56,6 @@ function fog_menu:display_fog()
 	restart_overlay_movement()
   end
 end
-
 
 function fog_menu:on_draw(dst_surface)
   local scr_x, scr_y = dst_surface:get_size()

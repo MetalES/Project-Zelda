@@ -126,6 +126,7 @@ end
 
 function mail_submenu:on_draw(dst_surface)
   -- Text.
+  dst_surface:fill_color({0, 0, 0, 150})
   self.mail_name_surface:draw_region(0, self.mail_visible_y + 32, 320, 160, dst_surface, 0, 53)
   -- Arrows.
   if self.game:get_value("unread_mail_amount") > 5 then
@@ -149,102 +150,89 @@ function mail_submenu:on_draw(dst_surface)
 end
 
 function mail_submenu:on_command_pressed(command)
-  local handled = submenu.on_command_pressed(self, command)
 
-  if not handled then
-    if command == "left" then 
-	  if self.is_reading then
-	    if self.current_page > 0 then
-		  self.current_page = self.current_page - 1
-		  self.page_number:set_text(sol.language.get_string("page") ..  ": " .. self.current_page .. "/" .. self.max_page)
-		  self:parse_text()
+  if command == "left" then 
+	if self.is_reading then
+	  if self.current_page > 0 then
+	    self.current_page = self.current_page - 1
+		self.page_number:set_text(sol.language.get_string("page") ..  ": " .. self.current_page .. "/" .. self.max_page)
+		self:parse_text()
+	  end
+ 	elseif self.cursor_position - 5 >= 1 then
+	  sol.audio.play_sound("menu/cursor")
+	  self:set_cursor_position(self.cursor_position - 5)
+	end
+	  
+  elseif command == "right" then	
+	if self.is_reading then 
+	  if self.current_page < self.max_page then
+	    self.current_page = self.current_page + 1
+		self.page_number:set_text(sol.language.get_string("page") ..  ": " .. self.current_page .. "/" .. self.max_page)
+		self:parse_text()
+	  end
+	elseif self.cursor_position + 5 <= self.game:get_value("unread_mail_amount") then
+	  sol.audio.play_sound("menu/cursor")
+	  self:set_cursor_position(self.cursor_position + 10) -- + 5
+	  self:set_cursor_position(self.cursor_position - 5)
+	end
+	  
+  elseif command == "up" then
+	if not self.is_reading then
+	  if self.game:get_value("unread_mail_amount") > 1 then
+	    sol.audio.play_sound("menu/cursor")
+		if self.cursor_position == 1 then
+		  self:set_cursor_position(self.game:get_value("unread_mail_amount"))
+		else
+		  self:set_cursor_position(self.cursor_position - 1)
 		end
- 	  elseif self.cursor_position - 5 >= 1 then
-		sol.audio.play_sound("menu/cursor")
-		self:set_cursor_position(self.cursor_position - 5)
 	  end
-      handled = true
+	end
 	  
-    elseif command == "right" then	
-	  if self.is_reading then 
-	    if self.current_page < self.max_page then
-		  self.current_page = self.current_page + 1
-		  self.page_number:set_text(sol.language.get_string("page") ..  ": " .. self.current_page .. "/" .. self.max_page)
-		  self:parse_text()
+  elseif command == "down" then
+	if not self.is_reading then
+	  if self.game:get_value("unread_mail_amount") > 1 then
+	    sol.audio.play_sound("menu/cursor")
+		if self.cursor_position >= self.game:get_value("unread_mail_amount") then
+		  self:set_cursor_position(1)
+		else
+		  self:set_cursor_position(self.cursor_position + 1)
 		end
-	  elseif self.cursor_position + 5 <= self.game:get_value("unread_mail_amount") then
-		sol.audio.play_sound("menu/cursor")
-		self:set_cursor_position(self.cursor_position + 5)
-		self:set_cursor_position(self.cursor_position + 5)
-		self:set_cursor_position(self.cursor_position - 5)
 	  end
-      handled = true
+	end
 	  
-    elseif command == "up" then
-	  if not self.is_reading then
-	    if self.game:get_value("unread_mail_amount") > 1 then
-	   	  sol.audio.play_sound("menu/cursor")
-		  if self.cursor_position == 1 then
-		    self:set_cursor_position(self.game:get_value("unread_mail_amount"))
-		  else
-		    self:set_cursor_position(self.cursor_position - 1)
-		  end
-	    end
-	  end
-      handled = true
-	  
-    elseif command == "down" then
-	  if not self.is_reading then
-	    if self.game:get_value("unread_mail_amount") > 1 then
-	   	  sol.audio.play_sound("menu/cursor")
-		  if self.cursor_position >= self.game:get_value("unread_mail_amount") then
-		    self:set_cursor_position(1)
-		  else
-		    self:set_cursor_position(self.cursor_position + 1)
-		  end
-	    end
-	  end
-      handled = true
-	  
-	elseif command == "pause" then
-	  if not self.is_reading then
-	    submenu.avoid_can_save_from_qsmenu = false
-	    self.is_reading = false
-	    sol.menu.stop(self)
-	  end
-	  handled = true
+  elseif command == "pause" or self.game:is_dialog_enabled()then
+	if not self.is_reading then
+	  submenu.avoid_can_save_from_qsmenu = false
+	  self.is_reading = false
+	  sol.menu.stop(self)
+	  return false
+	end
 	
-    elseif command == "action" then
-	  if self.is_reading then
-	    self:start_treasure_if_reward()
-	    self:display_mail(nil)
-		self.is_reading = false
-	  else 
-	    self:display_mail(self.cursor_position)
-	    self.is_reading = true
-		if not self.game:get_value("mail_" .. self.cursor_position .. "_opened") then
-		  self.game:set_value("mail_" .. self.cursor_position .. "_opened", true)
-		  self.mail_reward = self.text["reward"]
-		end
+  elseif command == "action" then
+	if self.is_reading then
+	  self:start_treasure_if_reward()
+	  self:display_mail(nil)
+	  self.is_reading = false
+	else 
+	  self:display_mail(self.cursor_position)
+	  self.is_reading = true
+	  if not self.game:get_value("mail_" .. self.cursor_position .. "_opened") then
+		self.game:set_value("mail_" .. self.cursor_position .. "_opened", true)
+		self.mail_reward = self.text["reward"]
 	  end
-      sol.audio.play_sound("danger")
-	  handled = true
-	  
-    elseif command == "attack" then
-	  if not self.is_reading then
-	    self.game:set_custom_command_effect("action", "open")
-        self.game:set_custom_command_effect("attack", "save")
-	    submenu.secondary_menu_started = false
-        sol.timer.start(1, function()
-	      submenu.avoid_can_save_from_qsmenu = false
-	    end)
-	    sol.menu.stop(self)
-	  else
-	    self.is_reading = false
-		self:start_treasure_if_reward()
-	  end
-      handled = true
-    end
+	end
+    sol.audio.play_sound("danger")
+  
+  elseif command == "attack" then
+    if not self.is_reading then
+	  self.game:set_custom_command_effect("action", "open")
+      self.game:set_custom_command_effect("attack", "save")
+	  submenu.secondary_menu_started = false
+	  sol.menu.stop(self)
+	else
+	  self.is_reading = false
+	  self:start_treasure_if_reward()
+	end
   end
   
   if not self.game:get_value("mail_" .. self.cursor_position .. "_highlighted") then
@@ -252,7 +240,7 @@ function mail_submenu:on_command_pressed(command)
   end
   
   self:load_extra()
-  return handled
+  return true
 end
 
 function mail_submenu:start_treasure_if_reward()
@@ -295,20 +283,14 @@ function mail_submenu:display_mail(index)
 end
 
 function mail_submenu:parse_text()
-  local line = 0
-  local texts = self.text[self.current_page]
-
   self.text_mail:clear()
   self.mail_content:set_text(nil)
   
-  -- $ = pass line
-  for text in texts:gmatch("[^$]+") do
-    line = line + 1
-	self.mail_content:set_text(text)
-    self.mail_content:draw(self.text_mail, 0, 0 + ((line - 1) * 13))
+  for i = 1, #self.text[self.current_page] do
+    local texts = self.text[self.current_page][i]
+	self.mail_content:set_text(texts)
+    self.mail_content:draw(self.text_mail, 0, 0 + ((i - 1) * 13))
   end
-  
-  
 end
 
 return mail_submenu

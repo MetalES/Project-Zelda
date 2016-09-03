@@ -4,11 +4,19 @@ local map_submenu = submenu:new()
 local outside_world_size = { width = 8000, height = 13452 } --Hyrule
 local outside_world_minimap_size = { width = 225, height = 388 }
 local map_shown = false
+local chest_loader = require("scripts/gameplay/screen/chest_loader")
+
 
 function map_submenu:on_started()
 
   submenu.on_started(self)
-  -- only in dungeons
+  --check if we are in hero mode
+  local hero_mode = self.game:get_value("hero_mode")
+  local final_path = "normal/"
+
+  if hero_mode then
+    final_path = "mirror/"
+  end
   
   -- Common to dungeons and outside dungeons.
   self.hero_head_sprite = sol.sprite.create("menus/hero_head")
@@ -19,16 +27,6 @@ function map_submenu:on_started()
   self.down_arrow_sprite = sol.sprite.create("menus/arrow")
   self.down_arrow_sprite:set_animation("blink")
   self.down_arrow_sprite:set_direction(3)
-  
-  --check if we are in hero mode
-  local hero_mode = self.game:get_value("hero_mode") or false
-  local final_path
-
-  if hero_mode then
-    final_path = "mirror/"
-  else
-    final_path = "normal/"
-  end
 
   self.dungeon = self.game:get_dungeon()
   if self.dungeon == nil then
@@ -107,9 +105,17 @@ function map_submenu:on_started()
 
     -- Minimap.
     self.dungeon_map_img = sol.surface.create(123, 119)
-    self.dungeon_map_spr = sol.sprite.create(
-      "menus/dungeon_maps/".. final_path .. "map" .. self.dungeon_index)
+    self.dungeon_map_spr = sol.sprite.create("menus/dungeon_maps/".. final_path .. "map" .. self.dungeon_index)
+    self.dummy_dungeon_map_spr = sol.sprite.create("menus/dungeon_maps/".. final_path .. "map" .. self.dungeon_index)
+	
+	local function fade_room(self)
+	  self.dummy_dungeon_map_spr:fade_in(30, function()
+	    self.dummy_dungeon_map_spr:fade_out(30, function() fade_room(self) end)
+	  end)
+	end
+	
     self:load_dungeon_map_image()
+	fade_room(self)
   end
 
 end
@@ -185,7 +191,6 @@ function map_submenu:on_command_pressed(command)
           and new_selected_floor <= self.dungeon.highest_floor then
         -- The new floor is valid.
         sol.audio.play_sound("cursor")
-        --self.hero_head_sprite:set_frame(0)
         self.selected_floor = new_selected_floor
         self:load_dungeon_map_image()
         if self.selected_floor <= self.highest_floor_displayed - 7 then
@@ -255,6 +260,7 @@ function map_submenu:draw_dungeon_map(dst_surface)
       and self.selected_floor == self.hero_floor then
     self.hero_point_sprite:draw(self.dungeon_map_img, self.hero_x, self.hero_y)
   end
+  self:load_dungeon(dst_surface)
   self.dungeon_map_img:draw(dst_surface, 143, 66)
 end
 
@@ -315,8 +321,8 @@ function map_submenu:draw_dungeon_floors(dst_surface)
         self.dungeon_map_icons_img:draw_region(78, 0, 8, 8, dst_surface, 113, dst_y)
       end
 	  if self.boss_floor_stair ~= nil and self.boss_floor_stair <= self.highest_floor_displayed and self.boss_floor_stair >= lowest_floor_displayed then
-           dst_y = old_dst_y + (self.highest_floor_displayed - self.boss_floor_stair) * 12 + 1
-	       self.boss_map_sprite:draw(dst_surface, 61 + 51, dst_y)
+         dst_y = old_dst_y + (self.highest_floor_displayed - self.boss_floor_stair) * 12 + 1
+	     self.boss_map_sprite:draw(dst_surface, 61 + 51, dst_y)
 	  end
   end
 
@@ -335,11 +341,9 @@ end
 -- Converts x,y relative to the real floor into coordinates relative
 -- to the dungeon minimap.
 function map_submenu:to_dungeon_minimap_coordinates(x, y)
-
-  local minimap_x = 0
-  local minimap_y = 0
-  local minimap_width = 123
-  local minimap_height = 119
+  local minimap_x, minimap_y = 0, 0
+  local minimap_width, minimap_height = 123, 119
+  
   if (self.dungeon.floor_width * 119) / (self.dungeon.floor_height * 123) > 1 then
     -- The floor height does not use the entire vertical space.
     minimap_height = self.dungeon.floor_height * 123 / self.dungeon.floor_width
@@ -355,9 +359,17 @@ function map_submenu:to_dungeon_minimap_coordinates(x, y)
   return x, y
 end
 
+function map_submenu:load_dungeon(dst_surface)
+  self.dummy_dungeon_map_spr:set_animation(self.selected_floor)
+
+  if self.game:has_dungeon_map() and self.hero_floor == self.selected_floor then
+    self.dummy_dungeon_map_spr:set_direction(self.game:get_dungeon_room())
+    self.dummy_dungeon_map_spr:draw(dst_surface, 143, 66)
+  end
+end
+
 -- Rebuilds the minimap of the current floor of the dungeon.
 function map_submenu:load_dungeon_map_image()
-
   self.dungeon_map_img:clear()
 
   local floor_animation = tostring(self.selected_floor)
@@ -372,12 +384,13 @@ function map_submenu:load_dungeon_map_image()
   -- For each rooms:
   for i = 1, self.dungeon_map_spr:get_num_directions(floor_animation) - 1 do
     -- If the room is explored.
-    if self.game:has_explored_dungeon_room(
-      self.dungeon_index, self.selected_floor, i
-    ) then
-      -- Load the image of the room.
-      self.dungeon_map_spr:set_direction(i)
-      self.dungeon_map_spr:draw(self.dungeon_map_img)
+	local skip = i == self.game:get_dungeon_room() and self.game:has_dungeon_map() and self.hero_floor == self.selected_floor
+    if self.game:has_explored_dungeon_room(self.dungeon_index, self.selected_floor, i) then
+	  ---todo check if map obtained and then if true dont draw the current room
+	  if not skip then
+        self.dungeon_map_spr:set_direction(i)
+        self.dungeon_map_spr:draw(self.dungeon_map_img)
+	  end
     end
   end
 
@@ -390,8 +403,7 @@ function map_submenu:load_dungeon_map_image()
     hero_absolute_x = hero_absolute_x + hero_map_x
     hero_absolute_y = hero_absolute_y + hero_map_y
 
-    self.hero_x, self.hero_y = self:to_dungeon_minimap_coordinates(
-        hero_absolute_x, hero_absolute_y)
+    self.hero_x, self.hero_y = self:to_dungeon_minimap_coordinates(hero_absolute_x, hero_absolute_y)
     self.hero_x = self.hero_x - 1
 
     -- Boss.
@@ -404,8 +416,7 @@ function map_submenu:load_dungeon_map_image()
       local dst_x, dst_y = self:to_dungeon_minimap_coordinates(boss.x, boss.y)
       dst_x = dst_x - 4
       dst_y = dst_y - 4
-      self.dungeon_map_icons_img:draw_region(78, 0, 8, 8,
-          self.dungeon_map_img, dst_x, dst_y)
+      self.dungeon_map_icons_img:draw_region(78, 0, 8, 8,self.dungeon_map_img, dst_x, dst_y)
     end
 
     -- Chests.
@@ -413,8 +424,8 @@ function map_submenu:load_dungeon_map_image()
       -- Lazily load the chest information.
       self:load_chests()
     end
+	
     for _, chest in ipairs(self.dungeon.chests) do
-
       if chest.floor == self.selected_floor
           and chest.savegame_variable ~= nil
           and not self.game:get_value(chest.savegame_variable) then
@@ -423,11 +434,11 @@ function map_submenu:load_dungeon_map_image()
         dst_y = dst_y - 1
         if chest.big then
           dst_x = dst_x - 3
-          self.dungeon_map_icons_img:draw_region(78, 12, 6, 4,
+		  self.dungeon_map_icons_img:draw_region(78, 11, 5, 4,
           self.dungeon_map_img, dst_x, dst_y)
         else
           dst_x = dst_x - 2
-          self.dungeon_map_icons_img:draw_region(78, 8, 4, 4,
+          self.dungeon_map_icons_img:draw_region(78, 8, 3, 3,
           self.dungeon_map_img, dst_x, dst_y)
         end
       end
@@ -437,57 +448,11 @@ end
 
 -- Parses all map data files of the current dungeon in order to determine the
 -- position of its chests.
-function map_submenu:load_chests()
-
-  local dungeon = self.dungeon
-  dungeon.chests = {}
-  local current_floor, current_map_x, current_map_y
-
-  -- Here is the magic: set up a special environment to load map data files.
-  local environment = {
-
-    properties = function(map_properties)
-      -- Remember the floor and the map location
-      -- to be used for subsequent chests.
-      current_floor = map_properties.floor
-      current_map_x = map_properties.x
-      current_map_y = map_properties.y
-    end,
-
-    chest = function(chest_properties)
-      -- Get the info about this chest and store it into the dungeon table.
-      if current_floor ~= nil then
-        dungeon.chests[#dungeon.chests + 1] = {
-          floor = current_floor,
-          x = current_map_x + chest_properties.x,
-          y = current_map_y + chest_properties.y,
-          big = (chest_properties.sprite == "entities/big_chest"),
-          savegame_variable = chest_properties.treasure_savegame_variable,
-        }
-      end
-    end,
-  }
-
-  -- Make any other function a no-op (tile(), enemy(), block(), etc.).
-  setmetatable(environment, {
-    __index = function()
-      return function() end
-    end
-  })
-
-  for _, map_id in ipairs(self.dungeon.maps) do
-
-    -- Load the map data file as Lua.
-    local chunk = sol.main.load_file("maps/" .. map_id .. ".dat")
-
-    -- Apply our special environment (with functions properties() and chest()).
-    setfenv(chunk, environment)
-
-    -- Run it.
-    chunk()
-  end
-
-  -- Cleanup temporary value.
+function map_submenu:load_chests()  
+  self.dungeon.chests = {}
+  self.dungeon.chests = chest_loader:load_chests(self.dungeon.maps)
+  
+  print(#self.dungeon.chests)
 end
 
 return map_submenu

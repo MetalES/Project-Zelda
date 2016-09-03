@@ -1,8 +1,10 @@
-local roc_cape_controller = {}
+local roc_cape_controller = {
+  slot = "item_1",
+  opposite_slot = "item_2",
+  opposite_slot_to_number = 2,
+  
+}
 
-roc_cape_controller.slot = "item_1"
-roc_cape_controller.opposite_slot = "item_2"
-roc_cape_controller.opposite_slot_to_number = 2
 roc_cape_controller.direction = {[0]="right",[1]="up",[2]="left",[3]="down"}
 roc_cape_controller.max_speed = 100
 roc_cape_controller.max_height = 48
@@ -11,12 +13,12 @@ roc_cape_controller.sound_jump_0 = "jump"
 roc_cape_controller.sound_jump_1 = "items/roc_cape/fly"
 roc_cape_controller.sound_jump_2 = "characters/link/voice/roc_cape_down_thrust_charging"
 roc_cape_controller.sound_jump_3 = "characters/link/voice/roc_cape_down_thrust"
-roc_cape_controller.current_tunic = ""
-roc_cape_controller.hero_flying_tunic = ""
-roc_cape_controller.hero_flying_tunic_roc = ""
+
 roc_cape_controller.hero_down_thrust_tunic = ""
 
 local current_height, ticks = 0, 0
+
+-- these need to go away
 local sprite
 local tile
 local hero_new_sprite
@@ -45,6 +47,10 @@ function roc_cape_controller:start_roc_cape(game)
   self.hero_x, self.hero_y, self.hero_layer = self.hero:get_position()
   self.hero:unfreeze()
   self.game:set_item_on_use(true)
+  
+  --Direction Fix the hero
+  self.hero:set_fixed_direction(self.hero_direction)
+  self.hero:set_fixed_animations("roc_cape_stopped", "roc_cape_walking")
   
   self.current_tunic = self.game:get_ability("tunic")
   self.hero_flying_tunic = "hero/tunic"..self.current_tunic
@@ -103,10 +109,12 @@ function roc_cape_controller:start_roc_cape(game)
   for teleporters in self.game:get_map():get_entities("teleporter") do
     teleporters:set_enabled(false)
   end
+  
   -- disable walkable switch during the jump
   for walkable_switch in self.game:get_map():get_entities("walk_switch") do
     walkable_switch:set_locked(true)
   end
+  
   -- disable teleporters during the jump
   for custom_teleporters in self.game:get_map():get_entities("custom_teleporters") do
     custom_teleporters:set_enabled(false)
@@ -215,7 +223,7 @@ function roc_cape_controller:on_command_pressed(commands)
 	    sol.timer.start(self, 25, function()
 		  hero_speed = hero_speed + 4
 		  hero:set_walking_speed(hero_speed)
-		return self.game:is_command_pressed(str_dir) and hero_speed ~= 100 
+		  return self.game:is_command_pressed(str_dir) and hero_speed ~= 100 
 		end)
 	  end		  
 	end
@@ -224,6 +232,7 @@ function roc_cape_controller:on_command_pressed(commands)
   if commands == "attack" and can_down_thrust and not self.game.is_down_thrusting and self.game:is_skill_learned(6) then
 	self:start_down_thrust()  -- Down thrust only if the skill is learned
   end
+  
  return true
 end
 
@@ -271,7 +280,7 @@ function roc_cape_controller:start_down_thrust()
 	return true
   end)
   
-  self:can_move(false)
+  self.hero:freeze()
   sol.audio.play_sound(self.sound_jump_2)
   
   -- reload the sprite animation : delete everything and remade it
@@ -313,7 +322,7 @@ function roc_cape_controller:down_thrust_finish()
 	if current_height <= 6 then
 	  current_height = 6
 	  tickss = tickss + 1
-	   if (get_ground == "traversable" or get_ground == "low_wall" or get_ground == "wall_top_right" or get_ground == "wall_top_left" or get_ground == "wall_bottom_left" or get_ground == "wall_bottom_right" or get_ground == "shallow_water" or get_ground == "ice") or tickss >= 45 then
+	   if (is_solid_ground(get_ground)) or tickss >= 45 then
 		  self:attack()
 		  tickss = 0
 		  return false
@@ -321,7 +330,7 @@ function roc_cape_controller:down_thrust_finish()
 		  self.game.is_down_thrusting = false
 		  self:has_landed()
 		  sword_entity:remove()
-		  self:can_move(true)
+		  self.hero:unfreeze()
 		  tickss = 0
 		  return false
 	    end
@@ -348,55 +357,21 @@ function roc_cape_controller:attack()
      tile:remove()
      sword_entity:remove()
 	 self:has_landed()
-	 self:can_move(true)
+	 self.hero:unfreeze()
 	 self:has_landed()
    end)
 end
  
-function roc_cape_controller:can_move(boolean)
- -- disable movement
-  if not boolean then 
-   kb_up = self.game:get_command_keyboard_binding("up")
-   kb_down = self.game:get_command_keyboard_binding("down")
-   kb_left = self.game:get_command_keyboard_binding("left")
-   kb_right = self.game:get_command_keyboard_binding("right")
-   jp_up = self.game:get_command_joypad_binding("up")
-   jp_left = self.game:get_command_joypad_binding("left")
-   jp_right = self.game:get_command_joypad_binding("right")
-   jp_down = self.game:get_command_joypad_binding("down")
-  
-   self.game:simulate_command_released("up")
-   self.game:simulate_command_released("down")
-   self.game:simulate_command_released("left")
-   self.game:simulate_command_released("right")
-   self.game:set_command_keyboard_binding("up", nil)
-   self.game:set_command_keyboard_binding("down", nil)
-   self.game:set_command_keyboard_binding("left", nil)
-   self.game:set_command_keyboard_binding("right", nil)
-   self.game:set_command_joypad_binding("up", nil)
-   self.game:set_command_joypad_binding("down", nil)
-   self.game:set_command_joypad_binding("left", nil)
-   self.game:set_command_joypad_binding("right", nil)
-  else
-   self.game:set_command_keyboard_binding("up", kb_up)
-   self.game:set_command_keyboard_binding("down", kb_down)
-   self.game:set_command_keyboard_binding("left", kb_left)
-   self.game:set_command_keyboard_binding("right", kb_right)
-   self.game:set_command_joypad_binding("up", jp_up)
-   self.game:set_command_joypad_binding("down", jp_down)
-   self.game:set_command_joypad_binding("left", jp_left)
-   self.game:set_command_joypad_binding("right", jp_right)
-  end
-end
-   
    
 function roc_cape_controller:on_finished()
-   self.game:get_hero():set_invincible(false)
-   self.game:get_hero():set_visible(true)
+   self.hero:set_invincible(false)
+   self.hero:set_visible(true)
    self.game:set_custom_command_effect("action", nil)
    
    current_height, ticks = 0, 0
    can_down_thrust = false
+   
+   self.hero:cancel_direction_fix()
    
    for teleporters in self.game:get_map():get_entities("teleporter") do
    teleporters:set_enabled(true)

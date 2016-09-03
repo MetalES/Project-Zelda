@@ -14,12 +14,6 @@ function cutscene_bars_builder:initialize(game)
   self.bar0, self.bar1 = sol.surface.create(320, 26), sol.surface.create(320, 27)
 end
 
--- Reset bars positionning, in case of a reset
-function cutscene_bars_builder:on_started()
-  self.bar0:set_xy(0, 0)
-  self.bar1:set_xy(0, 0)
-end 
-
 function cutscene_bars_builder:show_bars()
   self:move_surface(1, self.bar1)
   self:move_surface(3, self.bar0)
@@ -43,13 +37,13 @@ end
 
 -- Hide the bars.
 function cutscene_bars_builder:hide_bars()
-  self:move_surface(1, self.bar0, function()
+  self:move_surface(1, self.bar0)
+  self:move_surface(3, self.bar1, function() 
     self.bar0:set_xy(0, 0)
 	self.bar1:set_xy(0, 0)
 	self.bar0:clear()
     self.bar1:clear()
   end)
-  self:move_surface(3, self.bar1)
 end
 
 function cutscene_bars_builder:on_paused()
@@ -58,11 +52,6 @@ end
 
 function cutscene_bars_builder:on_unpaused()
   self.avoid_draw = false
-end
-
-function cutscene_bars_builder:set_dst_position(x, y)
-  self.dst_x = x
-  self.dst_y = y
 end
 
 function cutscene_bars_builder:on_draw(dst_surface)

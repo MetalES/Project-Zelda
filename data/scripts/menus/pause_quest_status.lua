@@ -1,51 +1,27 @@
 local submenu = require("scripts/menus/pause_submenu")
 local quest_status_submenu = submenu:new()
-local secondary_menu_started = false
-local secondary_menu_closed = true
 
 function quest_status_submenu:on_started()
   submenu.on_started(self)
-  self.quest_items_surface = sol.surface.create(320, 240)
-  self.color_layer_surface = sol.surface.create(320, 240)
   
-  self.cursor_sprite = sol.sprite.create("menus/pause_cursor")
+  self.scroll = sol.surface.create(182, 48)
+  self.scroll_img = sol.surface.create("/menus/quest_status_scroll_misc.png")
+  
   self.cursor_sprite_x = 0
   self.cursor_sprite_y = 0
   self.cursor_position = nil
-  self.song_surface = nil
-  self.scroll_img = nil
   self.caption_text_keys = {}
 
-  local item_sprite = sol.sprite.create("entities/items")
-  self.sage_sprite = {
-    [4] = sol.sprite.create("npc/sage/4"),
-    [5] = sol.sprite.create("npc/sage/5"),
-    [6] = sol.sprite.create("npc/sage/6"), 
-    [7] = sol.sprite.create("npc/sage/7"),
-    [8] = sol.sprite.create("npc/sage/8"),
-    [9] = sol.sprite.create("npc/sage/9"),
-    [10] = sol.sprite.create("npc/sage/10"),
-    [11] = sol.sprite.create("npc/sage/11"),  
-  }
-
+  local item_sprite = self.item
+   
   -- Draw the items on a surface.
-  self.quest_items_surface:clear()
-  self.color_layer_surface:clear()
-  self.color_layer_surface:fill_color({0,0,0})
-  self.color_layer_surface:set_opacity(200)
+  self.extra_surface:clear()
   
   local dialog_font, dialog_font_size = sol.language.get_dialog_font()
   local menu_font, menu_font_size = sol.language.get_menu_font()
   
   local amount = self.game:get_item("gold_skulltula"):get_amount()
   local maximum = self.game:get_item("gold_skulltula"):get_max_amount()
-
-  self.gold_skulltula_counter = sol.text_surface.create{
-    horizontal_alignment = "center",
-    vertical_alignment = "top",
-    text = self.game:get_value("amount_of_skulltulas"),
-    font = (amount == maximum) and "green_digits" or "white_digits",
-  }
 
   self.scroll_title = sol.text_surface.create{
     horizontal_alignment = "left",
@@ -55,23 +31,7 @@ function quest_status_submenu:on_started()
     font_size = dialog_font_size,
   }
   
-  self.scroll_line_1 = sol.text_surface.create{
-    horizontal_alignment = "left",
-    vertical_alignment = "middle",
-    color = {0, 0, 0},
-    font = dialog_font,
-    font_size = dialog_font_size,
-  }
-  
-  self.scroll_line_2 = sol.text_surface.create{
-    horizontal_alignment = "left",
-    vertical_alignment = "middle",
-    color = {0, 0, 0},
-    font = dialog_font,
-    font_size = dialog_font_size,
-  }
-  
-  self.scroll_line_3 = sol.text_surface.create{
+  self.scroll_lines = sol.text_surface.create{
     horizontal_alignment = "left",
     vertical_alignment = "middle",
     color = {0, 0, 0},
@@ -90,8 +50,8 @@ function quest_status_submenu:on_started()
   if self.game:has_item("mail_bag") then
     item_sprite:set_animation("mail_bag")
     item_sprite:set_direction(0)
-    item_sprite:draw(self.quest_items_surface, 63, 81)
-	self.mailbag_counter:draw(self.quest_items_surface, 69, 80)
+    item_sprite:draw(self.extra_surface, 63, 81)
+	self.mailbag_counter:draw(self.extra_surface, 69, 80)
     self.caption_text_keys[0] = "quest_status.caption.mail_bag"
   end
 
@@ -99,7 +59,7 @@ function quest_status_submenu:on_started()
   if self.game:has_item("bomber_notebook") then
     item_sprite:set_animation("bomber_notebook")
     item_sprite:set_direction(0)
-    item_sprite:draw(self.quest_items_surface, 92, 81)
+    item_sprite:draw(self.extra_surface, 92, 81)
     self.caption_text_keys[2] = "quest_status.caption.bomber_notebook"
   end
   
@@ -107,8 +67,14 @@ function quest_status_submenu:on_started()
   if self.game:has_item("gold_skulltula") then
     item_sprite:set_animation("gold_skulltula")
     item_sprite:set_direction(0)
-    item_sprite:draw(self.quest_items_surface, 92, 109)
-  	self.gold_skulltula_counter:draw(self.quest_items_surface, 98, 108)
+    item_sprite:draw(self.extra_surface, 92, 109)
+	self.gold_skulltula_counter = sol.text_surface.create{
+      horizontal_alignment = "center",
+      vertical_alignment = "top",
+      text = self.game:get_value("amount_of_skulltulas"),
+      font = (amount == maximum) and "green_digits" or "white_digits",
+    }
+  	self.gold_skulltula_counter:draw(self.extra_surface, 98, 108)
     self.caption_text_keys[3] = "quest_status.caption.gold_skulltula"
   end
   
@@ -116,7 +82,7 @@ function quest_status_submenu:on_started()
   if self.game:has_item("gerudo_membership_card") then
     item_sprite:set_animation("gerudo_membership_card")
     item_sprite:set_direction(0)
-    item_sprite:draw(self.quest_items_surface, 157, 137)
+    item_sprite:draw(self.extra_surface, 157, 137)
     self.caption_text_keys[41] = "quest_status.caption.gerudo_membership_card"
   end
 
@@ -124,61 +90,35 @@ function quest_status_submenu:on_started()
   if self.game:has_item("aria_amulet") then
     item_sprite:set_animation("aria_amulet")
     item_sprite:set_direction(0)
-    item_sprite:draw(self.quest_items_surface, 160, 181)
+    item_sprite:draw(self.extra_surface, 160, 181)
     self.caption_text_keys[42] = "quest_status.caption.aria_amulet"
   end
 
   -- Pieces of heart.
   local pieces_of_heart_img = sol.surface.create("menus/quest_status_pieces_of_heart.png")
   local x = 39 * (self.game:get_value("i1700") or 0)
-  pieces_of_heart_img:draw_region(x, 0, 39, 50, self.quest_items_surface, 105, 72)
+  pieces_of_heart_img:draw_region(x, 0, 39, 50, self.extra_surface, 105, 72)
   self.caption_text_keys[4] = "quest_status.caption.pieces_of_heart"
   
   local misc_img = sol.surface.create("menus/quest_status_misc.png") -- used for skill disp, dungeon disp
-  -- Sword Skills
-  local skill_position = {
-  { 70, 118},
-  { 80, 118},
-  { 90, 118},
-  { 100, 118},
-  { 110, 118},
-  { 120, 118},
-  { 130, 118},
-  }
   
-  for s, skill_position in ipairs(skill_position) do
-    if self.game:is_skill_learned(s) then
-	  self.scroll_img = sol.surface.create("/menus/quest_status_scroll_misc.png")
-	  misc_img:draw_region(8 * (s - 1), 20, 8, 21, self.quest_items_surface, skill_position[1], skill_position[2])
-	  self.caption_text_keys[s + 15] = "quest_status.caption.skill_" .. s
-    end
-  end
-   
-  -- Ocarina Songs
-  local song_position = {
-  { 68, 140},
-  { 77, 140},
-  { 86, 140},
-  { 95, 140},
-  { 104, 140},
-  { 113, 140},
-  { 122, 140},
-  { 131, 140},
-  { 68, 150},
-  { 77, 150},
-  { 86, 150},
-  { 95, 150},
-  { 104, 150},
-  { 113, 150},
-  { 122, 150},
-  { 131, 150},
-  }
-  
-  for k, song_position in ipairs(song_position) do
-    if self.game:is_ocarina_song_learned(k) then
-		misc_img:draw_region(56 + (8 * (k - 1)), 20, 8, 9, self.quest_items_surface, song_position[1], song_position[2])
-		self.caption_text_keys[k + 22] = "quest_status.caption.ocarina_song_" .. k
-    end
+  for i = 1, 16 do 
+    -- Skills 
+    if i < 8 then
+	  if self.game:is_skill_learned(i) then
+	    misc_img:draw_region(8 * (i - 1), 20, 8, 21, self.extra_surface, 60 + (10 * i), 118)
+	    self.caption_text_keys[i + 15] = "quest_status.caption.skill_" .. i
+	  end
+	end
+	
+	-- Songs
+    if self.game:is_ocarina_song_learned(i) then
+	  local x = i > 8 and 59 + (9 * (i - 8)) or 59 + (9 * i)
+	  local y = i > 8 and 150 or 140
+	  
+	  misc_img:draw_region(56 + (8 * (i - 1)), 20, 8, 9, self.extra_surface, x, y)
+	  self.caption_text_keys[i + 22] = "quest_status.caption.ocarina_song_" .. i
+	end
   end
 
   -- Dungeons finished
@@ -195,10 +135,11 @@ function quest_status_submenu:on_started()
     { 209, 131 }, -- water 10 
     { 186, 123 }, -- spirit  11
   }
+  
   for i, dst_position in ipairs(self.dst_positions) do
     if self.game:is_dungeon_finished(i) then
-	  misc_img:draw_region(20 * (i - 1), 0, 20, 20, self.quest_items_surface, dst_position[1], dst_position[2]) 
-	  if i >= 4 then
+	  misc_img:draw_region(20 * (i - 1), 0, 20, 20, self.extra_surface, dst_position[1], dst_position[2]) 
+	  if i > 3 then
 		self:shift_target(i)
 	  end
 	  self.caption_text_keys[i + 4] = "quest_status.caption.medalions_" .. i
@@ -230,20 +171,7 @@ end
 
 function quest_status_submenu:on_finished()
   sol.timer.stop_all(self)
-  submenu.displaying_scroll = false
-  self.color_layer_surface:clear()
-  
-  self.quest_items_surface = nil
-  self.color_layer_surface = nil
-  
-  self.cursor_sprite = nil
-  self.cursor_sprite_x = nil
-  self.cursor_sprite_y = nil
-  self.cursor_position = nil
-  self.song_surface = nil
-  self.scroll_img = nil
-  self.caption_text_keys = nil
-  self.sage_sprite = nil
+  self.displaying_scroll = false 
   
   if submenu.on_finished then
     submenu.on_finished(self)
@@ -312,12 +240,12 @@ function quest_status_submenu:set_cursor_position(position)
 	  self.cursor_sprite_y = 177
     end
 	
-    if self.cursor_position >= 16 and self.cursor_position <= 22 then
+    if position >= 16 and position <= 22 then
 	  self.cursor_sprite:set_animation("skill")
-    elseif self.cursor_position >= 23 and self.cursor_position <= 30 or self.cursor_position >= 31 and self.cursor_position <= 38 then
+    elseif position >= 23 and position <= 30 or position >= 31 and position <= 38 then
 	  self.cursor_sprite:set_animation("ocarina")
-	  self.song_surface = sol.surface.create("menus/ocarina_song/"..(self.cursor_position - 22)..".png")
-    elseif self.cursor_position== 42 then
+	  self.song_surface = sol.surface.create("menus/ocarina_song/".. position - 22 ..".png")
+    elseif position == 42 then
   	  self.cursor_sprite:set_animation("42")
     else
 	  self.cursor_sprite:set_animation("normal")
@@ -327,7 +255,7 @@ function quest_status_submenu:set_cursor_position(position)
       self.game:set_custom_command_effect("action", "open")
     elseif position >= 23 and position <= 38 and self.caption_text_keys[position] ~= nil then
       self.game:set_custom_command_effect("action", "play")
-    elseif self.caption_text_keys[position] == nil then -- everything that don't have caption don't need any hud notifications)
+    elseif self.caption_text_keys[position] == nil then
       self.game:set_custom_command_effect("action", nil)
     else
       self.game:set_custom_command_effect("action", "info")
@@ -338,194 +266,203 @@ function quest_status_submenu:set_cursor_position(position)
   end
 end
 
-function quest_status_submenu:on_update()
-  if (sol.menu.is_started(self.game.pause_submenus[6]) or sol.menu.is_started(self.game.pause_submenus[7])) and secondary_menu_closed then
-    secondary_menu_started = true
-    self.cursor_sprite:set_animation("skill_dsp")
-  elseif not (sol.menu.is_started(self.game.pause_submenus[6]) or sol.menu.is_started(self.game.pause_submenus[7])) and not secondary_menu_closed then
-    secondary_menu_started = false
-    self.cursor_sprite:set_animation("normal")
-  end
-  secondary_menu_closed = not secondary_menu_started
-  submenu.other_menu_started = secondary_menu_started
-end
-
 function quest_status_submenu:on_command_pressed(command)
   local handled = submenu.on_command_pressed(self, command)
+  local cursor = self.cursor_position
   
-  if command == "action" and submenu.displaying_scroll then
+  if command == "action" and self.displaying_scroll then
 	self.game:set_custom_command_effect("action", "open")
     self.game:set_custom_command_effect("attack", "save")
+	
+	self.scroll:clear()
+	self.scroll_lines:set_text(nil)
 
 	self.cursor_sprite:set_animation("skill")
 	sol.audio.play_sound("menu/scroll_close")
-	submenu.displaying_scroll = false
-	handled = true
+	self.displaying_scroll = false
+	return true
   end
   
   if self.playing_song then
-	handled = true
+    self.avoid_can_save_from_qsmenu = true
+	return true
   end
 
   if not handled then
-    if command == "left" and not submenu.displaying_scroll and not secondary_menu_started then
-      if self.cursor_position <= 1 or self.cursor_position == 16 or self.cursor_position == 23 or self.cursor_position == 31 then
+    if command == "left" then
+      if cursor <= 1 or cursor == 16 or cursor == 23 or cursor == 31 then
         self:previous_submenu()
       else
         sol.audio.play_sound("/menu/cursor")
-        if self.cursor_position == 12 then
-          self:set_cursor_position(self.cursor_position - 4)
-        elseif self.cursor_position == 5 then
+        if cursor == 12 then
+          self:set_cursor_position(cursor - 4)
+        elseif cursor == 5 then
           self:set_cursor_position(42)
-		elseif self.cursor_position <= 11 and self.cursor_position > 9 or self.cursor_position >= 5 and self.cursor_position <= 7 or self.cursor_position >= 16 and self.cursor_position <= 22 or self.cursor_position >= 23 and self.cursor_position <= 30 or self.cursor_position >= 31 and self.cursor_position <= 38 then
-		  self:set_cursor_position(self.cursor_position - 1)
-	    elseif self.cursor_position >= 2 and self.cursor_position <= 4 then
-		  self:set_cursor_position(self.cursor_position - 2)
-		elseif self.cursor_position == 8 then
+		elseif cursor <= 11 and cursor > 9 or cursor >= 5 and cursor <= 7 or cursor >= 16 and cursor <= 22 or cursor >= 23 and cursor <= 30 or cursor >= 31 and cursor <= 38 then
+		  self:set_cursor_position(cursor - 1)
+	    elseif cursor >= 2 and cursor <= 4 then
+		  self:set_cursor_position(cursor - 2)
+		elseif cursor == 8 then
 		  self:set_cursor_position(40)
-		elseif self.cursor_position == 9 then
+		elseif cursor == 9 then
 		   self:set_cursor_position(39)
-		elseif self.cursor_position == 15 then
+		elseif cursor == 15 then
 		   self:set_cursor_position(41)
-		elseif self.cursor_position >= 13 and self.cursor_position <= 15 then 
-		  self:set_cursor_position(self.cursor_position + 1)
-		elseif self.cursor_position == 39 or self.cursor_position == 40 then
+		elseif cursor >= 13 and cursor <= 15 then 
+		  self:set_cursor_position(cursor + 1)
+		elseif cursor == 39 or cursor == 40 then
 		  self:set_cursor_position(4)
-		elseif self.cursor_position == 41 then
+		elseif cursor == 41 then
 		  self:set_cursor_position(22)
-		elseif self.cursor_position == 42 then
+		elseif cursor == 42 then
 		  self:set_cursor_position(38)
         end
       end
       handled = true
 
-    elseif command == "right" and not submenu.displaying_scroll and not secondary_menu_started then
-      if self.cursor_position == 7 or self.cursor_position == 11 or self.cursor_position == 12 or self.cursor_position == 13 then
+    elseif command == "right" then
+      if cursor == 7 or cursor == 11 or cursor == 12 or cursor == 13 then
         self:next_submenu()
       else
         sol.audio.play_sound("/menu/cursor")
-        if self.cursor_position <= 2 then
-          self:set_cursor_position(self.cursor_position + 2)
-		elseif self.cursor_position == 22 or self.cursor_position == 30 then
+        if cursor <= 2 then
+          self:set_cursor_position(cursor + 2)
+		elseif cursor == 22 or cursor == 30 then
 		  self:set_cursor_position(41)
-		elseif self.cursor_position == 38 or self.cursor_position == 42 then
+		elseif cursor == 38 or cursor == 42 then
 		  self:set_cursor_position(5)
-		elseif self.cursor_position == 2 or self.cursor_position == 3 then
+		elseif cursor == 2 or cursor == 3 then
 		  self:set_cursor_position(4)
-		elseif self.cursor_position == 0 then
+		elseif cursor == 0 then
 		  self:set_cursor_position(2)
-		elseif self.cursor_position == 4 then
+		elseif cursor == 4 then
 		  self:set_cursor_position(39)
-        elseif self.cursor_position == 39 then
+        elseif cursor == 39 then
 		  self:set_cursor_position(9)
-		elseif self.cursor_position == 40 then
+		elseif cursor == 40 then
 		  self:set_cursor_position(8)
-		elseif self.cursor_position == 41 then
+		elseif cursor == 41 then
 		  self:set_cursor_position(15)
-		elseif self.cursor_position == 8 then 
-		  self:set_cursor_position(self.cursor_position + 4)
-		elseif self.cursor_position >= 9 and self.cursor_position < 11 or self.cursor_position >= 5 and self.cursor_position <= 7 or self.cursor_position >= 16 and self.cursor_position <= 22 or self.cursor_position >= 23 and self.cursor_position <= 30 or self.cursor_position >= 31 and self.cursor_position <= 38 then -- air, light & forest -- stones --
-		  self:set_cursor_position(self.cursor_position + 1)
-		elseif self.cursor_position <= 15 and self.cursor_position > 13 then
-		  self:set_cursor_position(self.cursor_position - 1)	
+		elseif cursor == 8 then 
+		  self:set_cursor_position(cursor + 4)
+		elseif cursor >= 9 and cursor < 11 or cursor >= 5 and cursor <= 7 or cursor >= 16 and cursor <= 22 or cursor >= 23 and cursor <= 30 or cursor >= 31 and cursor <= 38 then -- air, light & forest -- stones --
+		  self:set_cursor_position(cursor + 1)
+		elseif cursor <= 15 and cursor > 13 then
+		  self:set_cursor_position(cursor - 1)	
         end
       end
       handled = true
 
-    elseif command == "down" and not submenu.displaying_scroll and not secondary_menu_started then
+    elseif command == "down" then
       sol.audio.play_sound("/menu/cursor")
-	  if self.cursor_position == 15 then
+	  if cursor == 15 then
 	    self:set_cursor_position(5)
-	  elseif self.cursor_position == 9 then
+	  elseif cursor == 9 then
 	    self:set_cursor_position(8)
-	  elseif self.cursor_position == 1 then
+	  elseif cursor == 1 then
 	    self:set_cursor_position(16)
-	  elseif self.cursor_position == 42 then 
+	  elseif cursor == 42 then 
 	    self:set_cursor_position(39)
-	  elseif self.cursor_position == 13 then
+	  elseif cursor == 13 then
 		self:set_cursor_position(7)
-	  elseif self.cursor_position == 14 then
+	  elseif cursor == 14 then
 		self:set_cursor_position(6)
-	  elseif self.cursor_position >= 23 and self.cursor_position <= 30 or self.cursor_position >= 20 and self.cursor_position <= 22 then
-	    self:set_cursor_position(self.cursor_position + 8)
-	  elseif self.cursor_position == 4 then
+	  elseif cursor >= 23 and cursor <= 30 or cursor >= 20 and cursor <= 22 then
+	    self:set_cursor_position(cursor + 8)
+	  elseif cursor == 4 then
 		self:set_cursor_position(21)
-	  elseif self.cursor_position >= 16 and self.cursor_position <= 19 or self.cursor_position == 8 or self.cursor_position == 16 then
-		self:set_cursor_position(self.cursor_position + 7)
-	  elseif self.cursor_position == 31 then
+	  elseif cursor >= 16 and cursor <= 19 or cursor == 8 or cursor == 16 then
+		self:set_cursor_position(cursor + 7)
+	  elseif cursor == 31 then
 		self:set_cursor_position(0) 
-	  elseif self.cursor_position == 3 then
+	  elseif cursor == 3 then
 		self:set_cursor_position(18)
-	  elseif self.cursor_position >= 32 and self.cursor_position <= 35 then
+	  elseif cursor >= 32 and cursor <= 35 then
 		self:set_cursor_position(2)
-	  elseif self.cursor_position >= 36 and self.cursor_position <= 38 then
+	  elseif cursor >= 36 and cursor <= 38 then
 		self:set_cursor_position(4)
-	  elseif self.cursor_position == 5 or self.cursor_position == 6 or self.cursor_position == 7 or self.cursor_position == 10 then
-		self:set_cursor_position(self.cursor_position + 4)
-	  elseif self.cursor_position >= 11 and self.cursor_position < 13 or self.cursor_position == 0 and self.cursor_position <= 1 or self.cursor_position == 2 or self.cursor_position >= 39 and self.cursor_position <= 42 then 
-		self:set_cursor_position(self.cursor_position + 1)	
+	  elseif cursor == 5 or cursor == 6 or cursor == 7 or cursor == 10 then
+		self:set_cursor_position(cursor + 4)
+	  elseif cursor >= 11 and cursor < 13 or cursor == 0 and cursor <= 1 or cursor == 2 or cursor >= 39 and cursor <= 42 then 
+		self:set_cursor_position(cursor + 1)	
 	  end
       handled = true
 
-    elseif command == "up" and not submenu.displaying_scroll and not secondary_menu_started then
+    elseif command == "up" then
       sol.audio.play_sound("/menu/cursor")
-      if self.cursor_position == 0 then
+      if cursor == 0 then
 	    self:set_cursor_position(31)
-	  elseif self.cursor_position == 5 then 
+	  elseif cursor == 5 then 
 	    self:set_cursor_position(15)
-	  elseif self.cursor_position == 6 then 
+	  elseif cursor == 6 then 
 		self:set_cursor_position(14)
-	  elseif self.cursor_position == 7 then 
+	  elseif cursor == 7 then 
 		self:set_cursor_position(13)
-	  elseif self.cursor_position == 15 then 
+	  elseif cursor == 15 then 
 		self:set_cursor_position(8)
-	  elseif self.cursor_position == 2 then 
+	  elseif cursor == 2 then 
 		self:set_cursor_position(33)
-	  elseif self.cursor_position == 4 then 
+	  elseif cursor == 4 then 
 		self:set_cursor_position(37)
-	  elseif self.cursor_position >= 17 and self.cursor_position <= 18 then
+	  elseif cursor >= 17 and cursor <= 18 then
 		self:set_cursor_position(3)
-	  elseif self.cursor_position == 8 then 
+	  elseif cursor == 8 then 
 		self:set_cursor_position(9)
-	  elseif self.cursor_position >= 19 and self.cursor_position <= 22 then
+	  elseif cursor >= 19 and cursor <= 22 then
    		self:set_cursor_position(4)
-	  elseif self.cursor_position == 16 then
+	  elseif cursor == 16 then
 		self:set_cursor_position(1)
-	  elseif self.cursor_position == 39 then
+	  elseif cursor == 39 then
 		self:set_cursor_position(42)
-	  elseif self.cursor_position == 9 or self.cursor_position == 10 or self.cursor_position == 11 or self.cursor_position == 14 then 
-		self:set_cursor_position(self.cursor_position - 4)
-	  elseif self.cursor_position >= 0 and self.cursor_position <= 1 or self.cursor_position <= 13 and self.cursor_position > 11 or self.cursor_position == 3 or self.cursor_position >= 39 and self.cursor_position <= 42 then
-		self:set_cursor_position(self.cursor_position - 1)
-	  elseif self.cursor_position >= 31 and self.cursor_position <= 38 or self.cursor_position >= 28 and self.cursor_position <= 30 then
-		self:set_cursor_position(self.cursor_position - 8)
-	  elseif self.cursor_position >= 23 and self.cursor_position <= 27 then
-		self:set_cursor_position(self.cursor_position - 7)
+	  elseif cursor == 9 or cursor == 10 or cursor == 11 or cursor == 14 then 
+		self:set_cursor_position(cursor - 4)
+	  elseif cursor >= 0 and cursor <= 1 or cursor <= 13 and cursor > 11 or cursor == 3 or cursor >= 39 and cursor <= 42 then
+		self:set_cursor_position(cursor - 1)
+	  elseif cursor >= 31 and cursor <= 38 or cursor >= 28 and cursor <= 30 then
+		self:set_cursor_position(cursor - 8)
+	  elseif cursor >= 23 and cursor <= 27 then
+		self:set_cursor_position(cursor - 7)
 	  end
     handled = true
   
-    elseif command == "action" and not submenu.displaying_scroll and not secondary_menu_started then
-      if self.game:get_command_effect("action") == nil and self.game:get_custom_command_effect("action") == "info" then
+    elseif command == "action" then
+	  local c_action = self.game:get_custom_command_effect("action")
+      if c_action == "info" then
         self:show_info_message()
         
-	  elseif self.game:get_command_effect("action") == nil and self.game:get_custom_command_effect("action") == "play" and self.caption_text_keys[self.cursor_position] ~= nil then
+	  elseif c_action == "play" then
         self:play_song()
         
-	  elseif self.game:get_command_effect("action") == nil and self.game:get_custom_command_effect("action") == "open" then
-	    if self.cursor_position == 0 or self.cursor_position == 2 then
-		  self:start_quest_status_secondary_menu(self.cursor_position)
+	  elseif c_action == "open" then
+	    if cursor == 0 or cursor == 2 then
+		  self:start_quest_status_secondary_menu(cursor)
 		  submenu.avoid_can_save_from_qsmenu = true
 
-	    elseif self.cursor_position >= 15 and self.cursor_position <= 22 then
-		  submenu.displaying_scroll = true
+	    elseif cursor >= 15 and cursor <= 22 then
+		  self.displaying_scroll = true
 		  --draw the text_surface
+		  self.game:set_custom_command_effect("action", "return")
+          self.game:set_custom_command_effect("attack", nil)
+		  
 		  sol.audio.play_sound("menu/scroll_select_open")
 		  sol.audio.play_sound("menu/scroll_open")
-		  self.scroll_title:set_text_key("quest_status.caption.skill_display_title_"..(self.cursor_position - 15))
-		  self.scroll_line_1:set_text_key("quest_status.caption.skill_display_"..(self.cursor_position - 15).."_line_1")
-		  self.scroll_line_2:set_text_key("quest_status.caption.skill_display_"..(self.cursor_position - 15).."_line_2")
-		  self.scroll_line_3:set_text_key("quest_status.caption.skill_display_"..(self.cursor_position - 15).."_line_3" or nil)
 		  
+		  -- Display the Text
+		  local line = 0
+		  local text = sol.language.get_string("quest_status.caption.skill_display_" .. (cursor - 15))
+		  local tx = 26
+
+		  self.scroll_title:set_text_key("quest_status.caption.skill_display_title_"..(cursor - 15))
+		  self.scroll_lines:set_text(nil)
+
+		  for text in text:gmatch("[^$]+") do
+			line = line + 1
+			if line ~= 1 then
+			  tx = 0
+			end
+			self.scroll_lines:set_text(text)
+			self.scroll_lines:draw(self.scroll, 6 + tx, 10 + ((line - 1) * 16))
+		  end
 		  self.cursor_sprite:set_animation("skill_dsp")
 		  handled = true
 		end
@@ -536,16 +473,13 @@ function quest_status_submenu:on_command_pressed(command)
 end
    
 function quest_status_submenu:on_draw(dst_surface)
-  local width, height = dst_surface:get_size()
-  local x = width / 2 - 160
-  local y = height / 2 - 120
   self:draw_background(dst_surface)
   self:draw_caption(dst_surface)
-  self.quest_items_surface:draw(dst_surface, x, y)
+  self.extra_surface:draw(dst_surface)
 
   if self.cursor_position > 22 and self.cursor_position <= 38 then
     if self.game:is_ocarina_song_learned(self.cursor_position - 22) then
-      self.song_surface:draw(dst_surface, 62,163)
+      self.song_surface:draw(dst_surface, 62, 163)
     end
   end
   
@@ -557,24 +491,24 @@ function quest_status_submenu:on_draw(dst_surface)
     end
   end
   
-  if submenu.other_menu_started then 
-    self.color_layer_surface:draw(dst_surface, x, y)
+  if sol.menu.is_started(self.game.pause_submenus[6]) or sol.menu.is_started(self.game.pause_submenus[7]) or self.displaying_scroll then
+    dst_surface:fill_color({0, 0, 0, 150})
+  else
+    dst_surface:fill_color({0, 0, 0, 0})
   end
   
-  if submenu.displaying_scroll then 
-    self.game:set_custom_command_effect("action", "return")
-    self.game:set_custom_command_effect("attack", nil)
-	
-	self.color_layer_surface:draw(dst_surface, x, y)
+  
+  if self.displaying_scroll then 
 	self.scroll_img:draw_region(0, 98 * ((self.cursor_position - 15) - 1), 226, 98, dst_surface, 47, 71)
-	--draw the text above the scroll gfx
 	self.scroll_title:draw(dst_surface, 105, 97)
-	self.scroll_line_1:draw(dst_surface, 100, 116)
-	self.scroll_line_2:draw(dst_surface, 77, 132)
-	self.scroll_line_3:draw(dst_surface, 77, 148)
+	self.scroll:draw(dst_surface, 69, 105)
   end
   
-  self.cursor_sprite:draw(dst_surface, x + self.cursor_sprite_x, y + self.cursor_sprite_y)
+  if not sol.menu.is_started(self.game.pause_submenus[6]) and not sol.menu.is_started(self.game.pause_submenus[7]) then
+    self.cursor_sprite:draw(dst_surface, self.cursor_sprite_x, self.cursor_sprite_y)
+  end
+  
+
   self:draw_save_dialog_if_any(dst_surface)
   end
   
@@ -604,19 +538,19 @@ function quest_status_submenu:play_song()
   sol.audio.play_sound(song)
   sol.audio.set_music_volume(sol.audio.get_music_volume() / 4)
   self.playing_song = true
+  self.avoid_can_save_from_qsmenu = true
   sol.timer.start(5000, function()
     self.playing_song = false
+	self.avoid_can_save_from_qsmenu = false
     sol.audio.set_music_volume(sol.audio.get_music_volume() * 4)
   end)
 end
 
 function quest_status_submenu:start_quest_status_secondary_menu(menu)
   if menu == 0 then
-    sol.menu.start(self.game, self.game.pause_submenus[6], true)
-	secondary_menu_started = true
+    sol.menu.start(self, self.game.pause_submenus[6], false)
   elseif menu == 2 then
-    sol.menu.start(self.game, self.game.pause_submenus[7], true)
-	secondary_menu_started = true
+    sol.menu.start(self, self.game.pause_submenus[7], false)
   end
 end
 

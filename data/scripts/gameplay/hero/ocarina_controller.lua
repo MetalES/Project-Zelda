@@ -1,41 +1,33 @@
 local ocarina_manager = {}
 
-local input_array = {[0]="right",[1]="up",[2]="left",[3]="down", [4]="action"}
+--// Don't touch these
+local input_array = {[0] = "right",[1] = "up",[2] = "left",[3] = "down", [4] = "action"}
 local played_note = {}
--- Used for learning
+
+--// Learning flags
 local note_to_memorize = {}
+local note_greyscale = sol.surface.create("hud/ocarina/input.png")
+
+--// Playing flags
 local time_between_note = {}
-local y_position = {[0]=185 ,[1]=173,[2]=181,[3]=189, [4]=197}
-local color = {[0]=0 ,[1]=0,[2]=0}
+local y_position = {[0] = 185 ,[1] = 173, [2] = 181, [3] = 189, [4] = 197}
+local color = {[0]= 0 ,[1]= 0,[2]= 0}
 
-local button = {[0] = sol.surface.create("hud/ocarina/input.png"), [1] = sol.surface.create("hud/ocarina/input.png"), 
-[2] = sol.surface.create("hud/ocarina/input.png"), [3] = sol.surface.create("hud/ocarina/input.png"), 
-[4] = sol.surface.create("hud/ocarina/input.png"), [5] = sol.surface.create("hud/ocarina/input.png"), 
-[6] = sol.surface.create("hud/ocarina/input.png"), [7] = sol.surface.create("hud/ocarina/input.png")}
 
-local time_played =  0
+--//Create graphics for the buttons.
+local button = {}
+for i = 0, 7 do
+  button[i] = sol.surface.create("hud/ocarina/input.png")
+end
+
+local time_played, sfont_delay, delay, song_time, note, learning_greyscale_note_correct, success = 0, 0, 0, 0, 0, 0, 0
 local delay_new = 800
-local sfont_delay = 0
-local song_delay
-local song_name_type
-local learning_song_delay
+local song_delay, song_name_type, learning_song_delay, song_played, sustain, dest_map
 local text_x = 154
 
---todo : Text_x
-         --dialog refresh
-
--- Misc
-local song_played
-local success = 0
-local sustain -- used to maintain a note if the player still press it. Similar to OOT when you press an ocarina note, it will be played unless you release it's input
-
+--// sound effects
 local good = "common/secret_discover_minor0"
 local song_error =  "items/ocarina/error"
-
-local delay = 0
-local song_time = 0
-local note = 0
-local learning_greyscale_note_correct = 0
 
 function ocarina_manager:stop_ocarina()
   sol.menu.stop(self)
@@ -58,11 +50,8 @@ function ocarina_manager:on_started()
   self.ocarina_soundfont = self.ocarina_soundfont or "ocarina"
   
   self.ocarina_box = sol.surface.create("hud/ocarina/bar.png")
-  self.width = self.ocarina_box:get_size()
-  self.greyscale_button_input = sol.sprite.create("hud/ocarina/note")
   
-  self.error_img = sol.surface.create("hud/ocarina/error.png")
-  
+  self.error_img = sol.surface.create("hud/ocarina/error.png")  
   self.can_play = true
   
   self.ocarina_se1 = sol.text_surface.create{
@@ -93,7 +82,9 @@ end
 -- If a song has been played, no mater what position in the array, play the song
 function ocarina_manager:check_session()
   local p = played_note
+
   for t, n  in ipairs(played_note) do
+
     if p[t] == 2 and p[t + 1] == 1 and p[t + 2] == 0 and p[t + 3] == 2 and p[t + 4] == 1 and p[t + 5] == 0 and self:is_learned(1) then
 	  song_played = 0
 	elseif p[t] == 4 and p[t + 1] == 3 and p[t + 2] == 0 and p[t + 3] == 1 and p[t + 4] == 0 and p[t + 5] == 2 and self:is_learned(2) then
@@ -116,6 +107,7 @@ function ocarina_manager:check_session()
 	  song_played = 9
 	elseif p[t] == 4 and p[t + 1] == 0 and p[t + 2] == 4 and p[t + 3] == 3 and p[t + 4] == 4 and p[t + 5] == 0 and p[t + 6] == 1 and p[t + 7] == 3 and self:is_learned(11) then
 	  song_played = 10
+	  dest_map = "s_exit"
 	elseif p[t] == 4 and p[t + 1] == 3 and p[t + 2] == 0 and p[t + 3] == 0 and p[t + 4] == 2 and self:is_learned(12) then
 	  song_played = 11
 	  dest_map = "LostWoods/out/LostPath"
@@ -130,24 +122,25 @@ function ocarina_manager:check_session()
 	  song_played = 15
 	end
   end
+  
   if song_played ~= nil then
-   self.playing_ocarina = true
+    self.playing_ocarina = true
     sol.timer.start(self, 1, function()
-	  if sustain ~= nil then sustain:stop() end
 	  self:retrieve_song_to_learn(song_played)
 	  sol.audio.play_sound(good)
 	  self:play_song(song_played)
 	  self.song_played = true
 	  sol.timer.start(self, 550, function()
+	    if sustain ~= nil then sustain:stop() end
 	    sol.audio.set_music_volume(0)
-	    sol.audio.play_sound("items/ocarina/song/"..song_played)
+	    sol.audio.play_sound("items/ocarina/song/" .. song_played)
 	  end)
-	end)
+    end)
   end	
 end
 
 function ocarina_manager:check_learning_session()
-  for t, n  in ipairs(played_note) do
+  for t, n in ipairs(played_note) do
       if played_note[t] ~= note_to_memorize[t - 1] then
 	   success = -1
 	   learning_greyscale_note_correct = 0
@@ -210,7 +203,7 @@ function ocarina_manager:play_song(index)
 	  end
 	end)
   end)
-delay, time_between_note[0] = 1, 1
+  delay, time_between_note[0] = 1, 1
 end
 
 function ocarina_manager:clear_all()
@@ -241,85 +234,133 @@ function ocarina_manager:retrieve_song_to_learn(index)
     if index == 0 then
       n[0], n[1], n[2], n[3], n[4], n[5] = 2,1,0,2,1,0
 	  t[0], t[1], t[2], t[3],t[4], t[5] = 650, 820, 540, 1500, 820, 540
-	  song_delay = 5980; song_name_type = 1; c[0] = 255; c[1] = 0; c[2] = 255; learning_song_delay = 9620
+	  song_delay = 5980
+	  song_name_type = 1
+	  c[0] = 255; c[1] = 0; c[2] = 255
+	  learning_song_delay = 9620
 	elseif index == 1 then -- Soaring
 	  n[0], n[1], n[2], n[3], n[4], n[5] = 4,3,0,1,0,2
 	  t[0], t[1], t[2], t[3],t[4], t[5] = 120, 120, 120, 120, 140, 120
-	  song_delay = 2500; song_name_type = 0; c[0] = 255; c[1] = 255; c[2] = 255; learning_song_delay = 3750
+	  song_delay = 2500
+	  song_name_type = 0
+	  c[0] = 255; c[1] = 255; c[2] = 255
+	  learning_song_delay = 3750
 	elseif index == 2 then -- Epona
 	  n[0], n[1], n[2], n[3], n[4], n[5] = 1,2,0,1,2,0
-	  t[0], t[1], t[2], t[3],t[4], t[5] = 300, 300, 300, 1500, 300, 300
-	  song_delay = 4540; song_name_type = 0; c[0] = 255; c[1] = 255; c[2] = 255; learning_song_delay = 7050
+	  t[0], t[1], t[2], t[3],t[4], t[5] = 300, 300, 300, 1300, 300, 300
+	  song_delay = 4540
+	  song_name_type = 0
+	  c[0] = 255; c[1] = 255; c[2] = 255
+	  learning_song_delay = 7050
 	elseif index == 3 then -- Sun Song
 	  n[0], n[1], n[2], n[3], n[4], n[5] = 0,3,1,0,3,1
 	  t[0], t[1], t[2], t[3],t[4], t[5] = 200, 200, 200, 800, 200, 200
-	  song_delay = 3500; song_name_type = 0; c[0] = 255; c[1] = 255; c[2] = 0; learning_song_delay = 4850
+	  song_delay = 3500
+	  song_name_type = 0
+	  c[0] = 255; c[1] = 255; c[2] = 0
+	  learning_song_delay = 4850
 	elseif index == 4 then -- Storm
 	  n[0], n[1], n[2], n[3], n[4], n[5] = 4,3,1,4,3,1
 	  t[0], t[1], t[2], t[3],t[4], t[5] = 200, 200, 200, 800, 200, 200
-	  song_delay = 3500; song_name_type = 0; c[0] = 0; c[1] = 0; c[2] = 255; learning_song_delay = 4800
+	  song_delay = 3500
+	  song_name_type = 0
+	  c[0] = 0; c[1] = 0; c[2] = 255
+	  learning_song_delay = 4800
 	elseif index == 5 then -- Apaisement
 	 n[0], n[1], n[2], n[3], n[4], n[5] = 2,0,3,2,0,3
 	 t[0], t[1], t[2], t[3],t[4], t[5] = 600, 600, 600, 700, 600, 600
-	 song_delay = 4250; song_name_type = 0; c[0] = 255; c[1] = 0; c[2] = 255; learning_song_delay = 6850
+	 song_delay = 4250
+	 song_name_type = 0
+	 c[0] = 255; c[1] = 0; c[2] = 2557
+	 learning_song_delay = 6850
 	elseif index == 6 then -- Ode of Byrna
 	 n[0], n[1], n[2], n[3], n[4], n[5] = 4,3,1,2,1,2
 	 t[0], t[1], t[2], t[3],t[4], t[5] = 400, 400, 400, 600, 300, 300
-	 song_delay = 3500; song_name_type = 2; c[0] = 255; c[1] = 255; c[2] = 255; learning_song_delay = 6000
+	 song_delay = 3500
+	 song_name_type = 2
+	 c[0] = 255; c[1] = 255; c[2] = 255
+	 learning_song_delay = 6000
 	elseif index == 7 then -- Song on Time
 	 n[0], n[1], n[2], n[3], n[4], n[5] = 0,4,3,0,4,3
 	 t[0], t[1], t[2], t[3],t[4], t[5] = 400, 600, 1200, 600, 600, 1200 
-	 song_delay = 5000; song_name_type = 0; c[0] = 0; c[1] = 0; c[2] = 255; learning_song_delay = 10500
+	 song_delay = 5000
+	 song_name_type = 0
+	 c[0] = 0; c[1] = 0; c[2] = 255
+	 learning_song_delay = 10500
 	elseif index == 8 then -- Wood
   	 n[0], n[1], n[2], n[3], n[4], n[5] = 4,1,2,0,2,0
 	 t[0], t[1], t[2], t[3],t[4], t[5] = 300, 300, 300, 1600, 300, 300 
-	 song_delay = 5000; song_name_type = 0; c[0] = 0; c[1] = 255; c[2] = 0; learning_song_delay = 15700
+	 song_delay = 5000
+	 song_name_type = 0
+	 c[0] = 0; c[1] = 255; c[2] = 0
+	 learning_song_delay = 15700
 	elseif index == 9 then -- Fire
 	 n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7] = 3,4,3,4,0,3,0,3
 	 t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7] = 250, 250, 250, 250, 250, 250, 250, 250
-	 song_delay = 5000; song_name_type = 0; c[0] = 255; c[1] = 0; c[2] = 0; learning_song_delay = 18500
+	 song_delay = 5000
+	 song_name_type = 0
+	 c[0] = 255; c[1] = 0; c[2] = 0
+	 learning_song_delay = 18500
 	elseif index == 10 then -- Earth
 	 n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7] = 4,0,4,3,4,0,1,3
 	 t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7] = 1000, 1000, 600, 1000, 600, 600, 600, 600
-     song_delay = 7000; song_name_type = 0; c[0] = 139; c[1] = 69; c[2] = 19; learning_song_delay = 24700
+     song_delay = 7000
+	 song_name_type = 0
+	 c[0] = 139; c[1] = 69; c[2] = 19
+	 learning_song_delay = 24700
 	elseif index == 11 then -- Water
 	 n[0], n[1], n[2], n[3], n[4] = 4,3,0,0,2
 	 t[0], t[1], t[2], t[3], t[4] = 600, 600, 600, 600, 600
-	  song_delay = 4500; song_name_type = 1; c[0] = 0; c[1] = 0; c[2] = 255; learning_song_delay = 17450
+	 song_delay = 4500
+	 song_name_type = 1
+	 c[0] = 0; c[1] = 0; c[2] = 255
+	 learning_song_delay = 17450
 	elseif index == 12 then -- Spirit
 	 n[0], n[1], n[2], n[3], n[4], n[5] = 4,3,4,0,3,4
 	 t[0], t[1], t[2], t[3], t[4], t[5] = 800, 800, 400, 350, 775, 800
-	 song_delay = 6000; song_name_type = 0; c[0] = 255; c[1] = 165; c[2] = 0; learning_song_delay = 22000
+	 song_delay = 6000
+	 song_name_type = 0
+	 c[0] = 255; c[1] = 165; c[2] = 0
+	 learning_song_delay = 22000
 	elseif index == 13 then -- Shadow
 	 n[0], n[1], n[2], n[3], n[4], n[5], n[6] = 2,0,0,4,2,0,3
 	 t[0], t[1], t[2], t[3], t[4], t[5], t[6] = 500, 600, 600, 300, 300, 300, 300
-     song_delay = 6500; song_name_type = 0; c[0] = 255; c[1] = 0; c[2] = 255; learning_song_delay = 20200
+     song_delay = 6500
+	 song_name_type = 0
+	 c[0] = 255; c[1] = 0; c[2] = 255
+	 learning_song_delay = 20200
 	elseif index == 14 then -- Air
 	 n[0], n[1], n[2], n[3], n[4], n[5], n[6], n[7] = 4,3,0,4,3,0,1,0
 	 t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7] = 200, 200, 200, 1000, 200, 200, 200, 1000
-	 song_delay = 5000; song_name_type = 1; c[0] = 0; c[1] = 255; c[2] = 255; learning_song_delay = 21000
+	 song_delay = 5000
+	 song_name_type = 1
+	 c[0] = 0; c[1] = 255; c[2] = 255
+	 learning_song_delay = 21000
 	elseif index == 15 then -- Light
 	 n[0], n[1], n[2], n[3], n[4], n[5] = 1,0,1,0,2,1
 	 t[0], t[1], t[2], t[3],t[4], t[5] = 225, 225, 800, 225, 250, 225 
-	 song_delay = 5000; song_name_type = 0; c[0] = 255; c[1] = 255; c[2] = 0; learning_song_delay = 16400
+	 song_delay = 5000
+	 song_name_type = 0
+	 c[0] = 255; c[1] = 255; c[2] = 0
+	 learning_song_delay = 16400
 	end 
-self:start_learn_song()
+  self:start_learn_song()
 end
 
 function ocarina_manager:start_learn_song(index)
   note = 0
   if not self.song_played and self.learning_new_song then
     if self.indexed_song_to_learn >= 0 and self.indexed_song_to_learn <= 7 then
-	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this."..self.indexed_song_to_learn) 
+	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this." .. self.indexed_song_to_learn) 
 	  self.can_draw_text = true
 	  text_x = 220
 	else
-	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this.type."..song_name_type)
-	  self.ocarina_se2:set_text_key("quest_status.caption.ocarina_song_"..self.indexed_song_to_learn + 1)
+	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this.type." .. song_name_type)
+	  self.ocarina_se2:set_text_key("quest_status.caption.ocarina_song_" .. self.indexed_song_to_learn + 1)
 	  self.can_draw_text = true
 	end
   end
-  
+    
   for i = 0, #note_to_memorize do
     button[i]:set_opacity(0)
   end
@@ -364,7 +405,7 @@ function ocarina_manager:repeat_if_not_done()
 	  text_x = 274
 		--Restore the default soundfont to ocarina because we are controlling the hero
 	  self.ocarina_soundfont = "ocarina"
-		self:clear_note_played_if_error()
+	  self:clear_note_played_if_error()
 	end)
   end
 end
@@ -374,16 +415,21 @@ function ocarina_manager:start_song_effect(index)
   local m = g:get_map()
   local h = m:get_hero()
   
-  if index == 0 then -- Zelda's Lullaby
-  	if not m:has_entity("ocarina_zelda") then
-		self:return_no_effect()
-	else
-      for entities in m:get_entities("ocarina_zelda") do
-	    if entities.on_zelda_lullaby_interaction ~= nil then entities:on_zelda_lullaby_interaction() end
-	  end
-	end
+  if index == 0 then
+	for e in m:get_entities("ocarina_zelda") do
+      if h:overlaps(e) then
+	    g:set_current_scene_cutscene(true)
+		self:stop_ocarina()
+        e:on_zelda_lullaby_played()
+        return
+      end
+    end
+    self:return_no_effect()
+
   elseif index == 1 then -- Song of Soaring
+    self:stop_ocarina()
     g:start_soaring_menu()
+	
   elseif index == 2 then -- Epona's song
     if g:get_value("got_epona") then -- If we have the horse
 	  local hero_x, hero_y, hero_layer = h:get_position()
@@ -401,11 +447,13 @@ function ocarina_manager:start_song_effect(index)
 		    spawn_point_x, spawn_point_y = math.random(0,320), -300
 		end
 	  if not m:has_entity("epona") and not g.no_horse_possible then -- if we are in a valid place
-	    local epona = game:get_map():create_custom_entity({
+	    local epona = m:create_custom_entity({
 		model = "object/horse/epona",
 		x = hero_x + spawn_point_x,
 		y = hero_y + spawn_point_y,
 		layer = hero_layer,
+		width = 8,
+		height = 8,
 		direction = direction
 		})
 	  self:stop_ocarina()
@@ -423,7 +471,7 @@ function ocarina_manager:start_song_effect(index)
 	  self:return_no_effect()
 	else
 	  if not g.has_played_sun_song then
-	    g:set_time_flow(20)
+	    g:set_time_flow(15) --20
 	    g.has_played_sun_song = true
 	  end
 	  self:stop_ocarina()
@@ -432,54 +480,49 @@ function ocarina_manager:start_song_effect(index)
     if m:get_world() ~= "outside" then
       self:return_no_effect()
 	else
+	  sol.menu.stop(self)
 	  -- game:start_storm(song_of_storm)
 	end
   elseif index == 5 then -- healing
-	if m:has_entity("ocarina_healing") then
-		for heal in m:get_entities("ocarina_healing") do
-	      local distance = h:get_distance(heal)
-	      if distance <= 32 then
-	        heal:on_song_of_heal_interaction()
-	      else
-	        self:return_no_effect()
-	      end
-	    end
-	else
-	  self:return_no_effect()
-	end
+	for e in m:get_entities("ocarina_heal") do
+      local distance = h:get_distance(e)
+	  if distance <= 64 then
+	    g:set_current_scene_cutscene(true)
+	    self:stop_ocarina()
+        e:on_song_of_healing_played()
+        return
+      end
+    end
+    self:return_no_effect()
   
-  elseif index == 6 then -- Byrna, TODO
-	if m:has_entity("ocarina_byrna") then
-		for heal in m:get_entities("ocarina_byrna") do
-	      local distance = h:get_distance(heal)
-	      if distance <= 32 then
-	        heal:on_song_of_heal_interaction()
-	      else
-	        self:return_no_effect()
-	      end
-	    end
-	else
-	  self:return_no_effect()
-	end
+  elseif index == 6 then -- Byrna, TODO	
+    for e in m:get_entities("ocarina_byrna") do
+      local distance = h:get_distance(e)
+	  if distance <= 64 then
+	    g:set_current_scene_cutscene(true)
+	    self:stop_ocarina()
+        e:on_byrna_lullaby_played()
+        return
+      end
+    end
+    self:return_no_effect()
 	  
   elseif index == 7 then -- Song of Time
-    if m:has_entity("block_of_time") then
-		for block in m:get_entities("ocarina_song_of_time") do
-	      local distance = h:get_distance(block)
-	      if distance <= 32 then
-	        block:on_song_of_time_interaction()
-	      else
-	        self:return_no_effect()
-	      end
-	    end
-	else
-	  self:return_no_effect()
-	end
+    for e in m:get_entities("ocarina_song_time") do
+      local distance = h:get_distance(e)
+	  if distance <= 64 then
+	    g:set_current_scene_cutscene(true)
+	    self:stop_ocarina()
+        e:on_song_of_time_played()
+        return
+      end
+    end
+    self:return_no_effect()
+	
   elseif index >= 8 and index <= 15 then
      g:start_dialog("_ocarina."..index..".played", function(answer)
 	    if answer == 1 then
 		  self:warp_from_ocarina("out")
-		  --start the animation and warp
 		else
 		  self:stop_ocarina()
 		end
@@ -510,6 +553,8 @@ function ocarina_manager:create_warp_sprite_entity(time_to_create_trail, tr)
 	x = x,
 	y = y,
 	layer = layer + 1,
+	width = 8,
+	height = 8,
 	direction = 0,
 	sprite = "effects/hero/warp_effect"
   })
@@ -522,36 +567,31 @@ function ocarina_manager:create_warp_sprite_entity(time_to_create_trail, tr)
 	    x = ax,
 	    y = ay,
 	    layer = al,
+		width = 8,
+	    height = 8,
 	    direction = 0,
 	    sprite = "effects/hero/warp_effect"
 	  })
-		
-	  local warp_trail_2 = map:create_custom_entity({
-	    x = ax + math.random(0, 8),
-	    y = ay + math.random(-2, 2),
-	    layer = al,
-	    direction = 0,
-		sprite = "effects/hero/warp_effect"
-	  })
-		
-	  local warp_trail_3 = map:create_custom_entity({
-        x = ax - math.random(0, 8),
-        y = ay + math.random(-2, 2),
-        layer = al,
-        direction = 0,
-	    sprite = "effects/hero/warp_effect"
-      })
-		
-	  warp_trail:get_sprite():set_animation(song_played - 8)
-	  warp_trail_2:get_sprite():set_animation(song_played - 8)
-	  warp_trail_3:get_sprite():set_animation(song_played - 8)
-	  warp_trail_2:get_sprite():set_frame(math.random(0, 2))
-	  warp_trail_3:get_sprite():set_frame(math.random(0, 2))
+	  
+	  local animation = song_played - 8
+	  warp_trail:get_sprite():set_animation(animation)
+	  
+	  warp_trail:create_sprite("effects/hero/warp_effect", "warp_trail_2")
+	  local warp_trail_2 = warp_trail:get_sprite("warp_trail_2")
+	  warp_trail_2:set_xy(math.random(0, 8), math.random(-2, 2))
+	  warp_trail_2:set_animation(animation)
+	  warp_trail_2:set_frame(math.random(0, 2))
+	  
+	  warp_trail:create_sprite("effects/hero/warp_effect", "warp_trail_3")
+	  local warp_trail_3 = warp_trail:get_sprite("warp_trail_3")
+	  warp_trail_3:set_xy(math.random(0, 8), math.random(-2, 2))
+	  warp_trail_3:set_animation(animation)
+	  warp_trail_3:set_frame(math.random(0, 2))
 	  
 	  sol.timer.start(300, function()
+	    warp_trail:remove_sprite(warp_trail_2)
+	    warp_trail:remove_sprite(warp_trail_3)
 	    warp_trail:remove()
-	    warp_trail_2:remove()
-	    warp_trail_3:remove()
 	  end)
 		
 	if self.warp_movement_done then 
@@ -574,9 +614,11 @@ function ocarina_manager:warp_from_ocarina(tr)
 	
   local x, y, layer	
 	
-  sol.audio.play_sound("characters/link/effect/warp_"..tr)
+  sol.audio.play_sound("characters/link/effect/warp_" .. tr)
 	
   if tr == "out" then
+    hero:set_animation("stopped")
+    hero:set_direction(3)
     sol.audio.play_music(nil)
     x, y, layer = hero:get_position()
     self:create_warp_sprite_entity(1250, tr)
@@ -598,21 +640,23 @@ function ocarina_manager:warp_from_ocarina(tr)
       s:set_angle(math.pi / 2)
       s:set_speed(60)
       s:set_max_distance(16)
+	  s:set_ignore_obstacles(true)
       s:start(self.warp_sprite, function()
-        local c = sol.movement.create("circle")
-   	    c:set_initial_angle(math.pi / 2)
-		c:set_center(hero, 0, -8)
-		c:set_clockwise(false)
-		c:set_max_rotations(2)
-		c:set_radius(16)
-		c:set_radius_speed(32)
-		c:set_duration(600)
-	    c:start(self.warp_sprite, function()
-		  local t = sol.movement.create("target")
-		  t:set_target(map_x, map_y - map_y)
-		  t:set_ignore_obstacles(true)
-		  t:set_speed(250)
-		  t:start(self.warp_sprite, function()
+        local s = sol.movement.create("circle")
+   	    s:set_initial_angle(math.pi / 2)
+		s:set_center(hero, 0, -8)
+		s:set_clockwise(false)
+		s:set_max_rotations(2)
+		s:set_radius(16)
+		s:set_radius_speed(32)
+		s:set_duration(600)
+		s:set_ignore_obstacles(true)
+	    s:start(self.warp_sprite, function()
+		  local s = sol.movement.create("target")
+		  s:set_target(map_x, map_y - map_y)
+		  s:set_ignore_obstacles(true)
+		  s:set_speed(250)
+		  s:start(self.warp_sprite, function()
 		    self.warp_movement_done = true
 		    sol.timer.start(100, function()
 			  self.warp_movement_done = false
@@ -668,20 +712,26 @@ end
 
 function ocarina_manager:on_command_pressed(command)
   local game = self.game
+  
+  local function do_sustain(input)
+    if sustain ~= nil then sustain:stop() end
+    sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
+	
+    sustain = sol.timer.start(183, function()
+	  if game:is_command_pressed(input) and not game:is_command_pressed("attack") or self.song_played then
+	    sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
+		return true
+	  else
+		return false
+	  end
+	end)
+  end
+  
   if self.can_play then
     if not self.learning_new_song and song_played == nil then
-	  for k, input in pairs(input_array) do
+	  for k, input in pairs(input_array) do		
 		if command == input then
-		  if sustain ~= nil then sustain:stop() end
-		  sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
-		  sustain = sol.timer.start(183, function()
-		    if game:is_command_pressed(input) and not game:is_command_pressed("attack") then
-			  sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
-			  return true
-			else
-			 return false
-			end
-		  end)
+		  do_sustain(input)
 		  played_note[#played_note + 1] = k
 		  self:check_session()
 		elseif command == "attack" then
@@ -699,19 +749,9 @@ function ocarina_manager:on_command_pressed(command)
 	-- Learning a song, you can't cancel the phase
 		for k, input in pairs(input_array) do
 		  if command == input then
-			if sustain ~= nil then sustain:stop() end
-			sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
-			sustain = sol.timer.start(183, function()
-			  if game:is_command_pressed(input) or self.song_played then
-				sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
-			    return true
-			  else 
-			    return false
-			  end
-			end)
+			do_sustain(input)
 			played_note[#played_note + 1] = k
 			button[#button + 1] = k
-
 			learning_greyscale_note_correct = learning_greyscale_note_correct + 1
 			button[learning_greyscale_note_correct - 1]:fade_in(15)
 			self:check_learning_session()
@@ -754,18 +794,27 @@ function ocarina_manager:on_finished()
     time_between_note[i] = nil 
   end
   
-  self.can_play = false; self.song_played = false; self.learning_new_song = false; self.game.using_ocarina = false; self.disable_input = false; self.playing_ocarina = false; self.can_draw_text = false
-  self.indexed_song_to_learn = nil; self.ocarina_soundfont = nil; song_played = nil
+  self.can_play = false
+  self.song_played = false
+  self.learning_new_song = false
+  self.game.using_ocarina = false
+  self.disable_input = false
+  self.playing_ocarina = false
+  self.can_draw_text = false
+  self.indexed_song_to_learn = nil
+  self.ocarina_soundfont = nil
+  song_played = nil
   
   song_delay, note = 0, 0
   
-  if not game:is_current_scene_cutscene() then game:show_cutscene_bars(false) end
+  if not game:is_current_scene_cutscene() then game:show_cutscene_bars(false) game:get_hero():unfreeze() end
   game:set_hud_enabled(true)
   game:get_item("ocarina"):set_finished()
   game:set_suspended(false)
-  if self.from_movement then game:fade_audio(game:get_value("old_volume"), 10) self.from_movement = false end
+  game:fade_audio(game:get_value("old_volume"), 10)
+  self.from_movement = false
   game:get_hero():set_shield_sprite_id("hero/shield"..game:get_value("current_shield"))
-  game:get_hero():unfreeze()
+  
   game:set_ability("shield", game:get_value("current_shield"))
   game:set_pause_allowed(true)
 end
@@ -793,8 +842,7 @@ function ocarina_manager:on_draw(dst_surface)
   for i = 0, #note_to_memorize do
     if note_to_memorize[i] ~= nil then
 	  if self.can_control then
-	    self.greyscale_button_input:set_direction(note_to_memorize[i])
-	    self.greyscale_button_input:draw(dst_surface, 63 + (i * 26), y_position[note_to_memorize[i]])
+		note_greyscale:draw_region(17 * note_to_memorize[i], 17, 17, 17, dst_surface, 63 + (i * 26), y_position[note_to_memorize[i]])
 	    if self.disable_input then
 	      self.error_img:draw(dst_surface, 74, 169)
 	    end
