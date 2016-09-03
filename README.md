@@ -2,8 +2,9 @@ Repo hasn't been updates, in fact, I have a crappy internet connexion so everyth
 
 A huge update will occur soon, waiting for issue 27 to be closed
 
+Started to update the GIT, this is incomplete, as the project is transitionning to 0.3, I wanna be sure that everything is ready and bug-free.
+
 #Current GIT Build : Unplayable.
-0.30 is coming
 
 /!\ <DISCLAIMER> /!\
 
@@ -22,13 +23,22 @@ Repo Update rate : each version update.
 
 This game is being made using the Solarus engine*
 Current GIT version : 0.225b
-Current Test version : 0.29.140.alpha (major, minor, test, state)
+Current Test version : 0.3.0.alpha (major, minor, test, state)
 
 Development version progression : 0.29 -> 0.3 (14%)
-Global Progress : 24%
+Global Progress : 25%
+Engine Progress : 80%
 Current public release version : Unknown
 
 #Version updates (advancement tracking) :
+
+#0.3 Alpha -September, 3rd 2016
+ - Enhanced performances
+ - Items: Massive rework
+ - Music: added loop points (incomplete)
+ - main.lua -> Manage Title Screen save (Previous: handled by a menu)
+ - Tileset: WIP
+ - Hero database: cleaned and re-organised
 
 #0.29 - July, 28th 2016
 - Clean code
