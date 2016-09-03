@@ -19,18 +19,15 @@ Don't ask me to fix the git if the file you downloaded provide errors in your qu
 
 /!\ </DISCLAIMER> /!\
 
-Repo Update rate : each version update.
-
 This game is being made using the Solarus engine*
-Current GIT version : 0.225b
+Current GIT version : 0.3 Alpha
 Current Test version : 0.3.0.alpha (major, minor, test, state)
 
-Development version progression : 0.29 -> 0.3 (14%)
 Global Progress : 25%
 Engine Progress : 80%
 Current public release version : Unknown
 
-#Version updates (advancement tracking) :
+#Latest version:
 
 #0.3 Alpha -September, 3rd 2016
  - Enhanced performances
@@ -39,33 +36,6 @@ Current public release version : Unknown
  - main.lua -> Manage Title Screen save (Previous: handled by a menu)
  - Tileset: WIP
  - Hero database: cleaned and re-organised
-
-#0.29 - July, 28th 2016
-- Clean code
-- Simplified Hero database
-- All sounds declared
-- Implemented side quests trading system
-- Spoils Bag + entities
-
-#0.225b - April 7th 2016
-- Reworked Time System (Minute indicator, Day/Night, corected trajectory)(The clock hour indicator still have a weird trajectore at 6.PM, don't know how and what cause this. Maybe the bitmap font itself.)
-- Mail System overhauled and functionnal
-- OOT shop system implemented and functionnal
-- Quest_manager got deleted (replaced by individual object files.
-- Improved stability
-- Reworking Game Over
-- Removed check timers on hud elements (Cutscene Bars & Map Name)
-- Removed check timer on Fog script
-- Fog Script don't need a savegame value anymore
-- Hyrule Field BGM has it's own script rather then being a game manager function.
-- Fading audio implemented
-- Ported from 1.4.5 to 1.5 dev.
-- Title Screen is now on map
-- File Select : Corrected drawn object
-- Appearing chest is now a map function (see scripts/metadata/map)
-
-#0.22 - Feb 12th 2016
-- See Issues tracking. It is time to debug this thing.
 
 #Planned
 - Shaders (Heat effect, clouds, etc)
