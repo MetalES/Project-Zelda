@@ -8,6 +8,14 @@ function hints:new(game)
   setmetatable(object, self)
   self.__index = self
   
+  self.game = game
+  
+  -- Display a hints
+  function game:show_hint(key, seconds)
+    sol.menu.start(self, hints, false)
+    hints:display_hint(key, seconds)
+  end
+  
   return object
 end
 
@@ -58,24 +66,24 @@ function hints:display_hint(hint, seconds)
   end)
 end
 
-function hints:on_paused()
-  if self.text ~= nil then
-    if self.text:get_text() ~= nil then
-      self.was_displaying_hint = self.show_hints
-      self.show_hints = false 
-	end
-  end
-end
+-- function hints:on_paused()
+  -- if self.text ~= nil then
+    -- if self.text:get_text() ~= nil then
+      -- self.was_displaying_hint = self.show_hints
+      -- self.show_hints = false 
+	-- end
+  -- end
+-- end
 
-function hints:on_unpaused()
-  if self.was_displaying_hint then
-    self.was_displaying_hint = false
-    self.show_hints = true
-  end
-end
+-- function hints:on_unpaused()
+  -- if self.was_displaying_hint then
+    -- self.was_displaying_hint = false
+    -- self.show_hints = true
+  -- end
+-- end
 
 function hints:on_draw(dst)
-  if self.show_hints then
+  if not self.game:is_paused() then
     self.surface:draw(dst, 210, 75)
   end
 end

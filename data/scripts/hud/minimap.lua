@@ -10,48 +10,52 @@ local minimap = {
   sprite = nil -- The minimap sprite, representing the map
 }
 
-local chest_loader = require("scripts/gameplay/screen/chest_loader")
+local chest_loader = require("scripts/loader/chest")
 
 function minimap:new(game)
   local object = {}
   setmetatable(object, self)
   self.__index = self
-
-  object:initialize(game)
+  
+  self:initialize(game)
 
   return object
 end
 
 function minimap:initialize(game)
+  -- Set a new Dungeon Map
+  function game:set_dungeon_minimap_index(index)
+    minimap:set_dungeon_map(index)
+  end
+  
+  -- Reload the minimap
+  function game:reload_minimap()
+    minimap:load_map()
+  end
+  
+  self.hero_position = sol.surface.create("hud/minimap_hero.png")
+  self.special_draw = sol.surface.create("hud/minimap_feature.png")
+ 
   self.game = game
   self.hero = game:get_hero()
 end
 
-function minimap:on_started()
-  self.hero_position = sol.surface.create("hud/minimap_hero.png")
-  self.special_draw = sol.surface.create("hud/minimap_feature.png")
-end
-
-function minimap:on_room_changed(room)
-  self:load_map()
-end
 
 function minimap:load_map()
-  -- Are we in Hero Mode ? If true, then the map is mirrored, and need the other sprite.
-  local folder = "normal" 
-  if self.game:get_value("hero_mode") then
-    folder = "mirror"
-  end
-  
+  -- Are we in Hero Mode ? If true, then the map is mirrored, and need the other sprite. 
+  local hero_mode = has_value("hero_mode") and "mirror" or "normal"
+
   local map = self.game:get_map()
   local map_id = map:get_id()
+  
+  self.room_width, self.room_height = map:get_size()
   self.sprite = nil
   
   self:reload()
   
   -- We are in a dungeon, so maps exist
   if self.game:is_in_dungeon() then
-    self.sprite = sol.sprite.create("menus/dungeon_maps/" .. folder .. "/minimap" .. self.game:get_dungeon_index())
+    self.sprite = sol.sprite.create("menus/dungeon_maps/" .. hero_mode .. "/minimap" .. self.game:get_dungeon_index())
 	self.sprite:set_animation(map:get_floor())
 	self.sprite:set_direction(self.game:get_dungeon_room() - 1)
 	self.sprite_x, self.sprite_y = self.sprite:get_origin()
@@ -89,7 +93,8 @@ function minimap:reload()
     return
   end
   
-  self.chests = chest_loader:load_chests(dungeon.maps)
+  local id = {self.game:get_map():get_id()}
+  self.chests = chest_loader:load_chests(id, "minimap")
 end
 
 function minimap:draw_chest()
@@ -151,9 +156,7 @@ function minimap:on_joypad_button_pressed(button)
 end
 
 function minimap:on_map_changed(map)
-  local x, y = self.hero:get_position()
-  self.room_width, self.room_height = map:get_size()
-  
+  local x, y = self.hero:get_position()  
   self:draw_spawn_point(x, y, self.hero:get_direction())
   self:load_map()
 end

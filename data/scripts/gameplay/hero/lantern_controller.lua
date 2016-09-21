@@ -6,8 +6,8 @@ local lantern_controller = {
 local allowed_state = {"initialize", "active", "using_item", "ending", "inactive"}
 local can_cancel = false
 local ended_by_pickable = false
-local is_halted_by_anything_else = false
-local timer, timer0, oil_timer
+local force_stop = false
+local oil_timer
 
 local function set_state(state)
   self.state = state
@@ -22,13 +22,17 @@ end
 function lantern_controller:start_lantern(game)
   self.game = game
   self.map = game:get_map()
-  self.hero = self.game:get_hero()
-  game:set_ability("shield", 0)
+  self.hero = game:get_hero()
+  self.item = game:get_item("lamp")
   
-  self.game:set_value("item_lamp_state", 1)
+  game:set_ability("shield", 0)
   game.is_using_lantern = true
   
   self.state = "initialize"
+  
+  if game:get_magic() > 0 then
+	self.item:set_light_animation("active") 
+  end
   
   sol.audio.play_sound("/items/lamp/on")
   self.hero:set_fixed_animations("lantern_stopped", "lantern_walking")
@@ -64,7 +68,8 @@ function lantern_controller:start_lantern(game)
   function fire:on_animation_finished()
     fire_burst:remove_sprite(self)
 	fire_burst:remove()
-	print("done")
+	
+	lantern_controller.state = "active"
   end	
 
   -- particle_timer = sol.timer.start(self, 100, function()
@@ -113,71 +118,55 @@ function lantern_controller:start_lantern(game)
   oil_timer:set_suspended_with_map(true)
     
   sol.menu.start(self.map, self)
-  self:start_ground_check() 
+  self:check() 
 end
 
-function lantern_controller:start_ground_check()
+function lantern_controller:check()
+  local hero = self.hero
+  local game = self.game
   local ticks = 0
+  
   local function end_by_collision() 
-    if self.hero:get_state() == "treasure" then ended_by_pickable = true end
+    if hero:get_state() == "treasure" then ended_by_pickable = true end
     self.hero:set_tunic_sprite_id("hero/tunic"..self.game:get_ability("tunic"))
-    is_halted_by_anything_else = true
+    force_stop = true
 	lantern_controller:stop_lantern() 
   end
 
-  timer = sol.timer.start(self, 50, function()
-	self.lx, self.ly, self.llayer = self.hero:get_position()
-	
-	-- Todo : when hero:on_direction_changed() will be available, delete this, and replace the whole thing by input checking and values instead of direction checking
-	
-	if self.hero:get_direction() == 0 then self.new_x = -1; self.new_y = 0; self.gx = 1; self.gy = 0
-	elseif self.hero:get_direction() == 1 then self.new_x = 0; self.new_y = 1 ; self.gy = -1;  self.gx = 0
-	elseif self.hero:get_direction() == 2 then self.new_x = 1; self.new_y = 0 ; self.gy = 0;  self.gx = -1
-	elseif self.hero:get_direction() == 3 then self.new_x = 0; self.new_y = -1; self.gy = 1;  self.gx = 0
-	end
-
-	if self.hero:get_state() == "swimming" then self.hero:set_position(self.lx + self.new_x, self.ly + self.new_y); end_by_collision() end
-	if self.hero:get_animation() == "swimming_stopped" then end_by_collision() end
-	
-	if self.game:get_value("_item_slot_2") == "lamp" then 
-      self.slot = "item_2" 
-	  self.opposite_slot = "item_1"
-	elseif self.game:get_value("_item_slot_1") == "lamp" then 
-      self.slot = "item_1" 
-	  self.opposite_slot = "item_2"
-	else
-	  self.slot = "" 
-	  self.opposite_slot = "item_1"
-	  self.opposite_slot_0 = "item_2"
-    end
-	
-	if self.game:is_command_pressed("item_1") then
-	  self.opposite_slot_to_number = 1
-	elseif self.game:is_command_pressed("item_2") then
-	  self.opposite_slot_to_number = 2
-	end
-	
-	if self.hero:get_animation() == "stopped" and not self.game:is_using_item() and self.game:get_value("item_boomerang_state") == 0 then
+  self.timer = sol.timer.start(self, 50, function()
+    local item_name = self.game:get_item_assigned(2) or nil
+    local item_opposite = item_name ~= nil and item_name:get_name() or nil
+    local item = item_opposite == "lamp" or nil
+  
+    -- Check if the item has changed
+	self.slot = item and "item_2" or "item_1"
+  
+	if hero:get_animation() == "stopped" and not game:is_using_item() and game:get_item("boomerang"):get_state() == 0 then
 	  ticks = ticks + 1
 	  if ticks == 10 then
 	    ticks = 10
-		self.game:set_custom_command_effect("action", "return")
+		game:set_custom_command_effect("action", "return")
 		can_cancel = true
 	  end
 	else
 	  ticks = 0
-	  self.game:set_custom_command_effect("action", nil)
+	  game:set_custom_command_effect("action", nil)
 	  can_cancel = false
 	end
-  return sol.menu.is_started(self)
+	
+    return sol.menu.is_started(self)
   end) 
-  timer:set_suspended_with_map(true) 
+  self.timer:set_suspended_with_map(true) 
 end
 
 function lantern_controller:on_command_pressed(command)
   local suspended = self.game:is_suspended()
   local game = self.game
   local hero = self.hero
+  
+  local opposite = self.slot == "item_1" and 1 or 2
+  local item_name = game:get_item_assigned(opposite) or nil
+  local item_opposite = item_name ~= nil and item_name:get_name() or nil
   
   if command == "pause" or command == "attack" then
     return false
@@ -189,38 +178,49 @@ function lantern_controller:on_command_pressed(command)
       hero:set_animation("lantern_swing", function()
 	    hero:unfreeze()
 	  end)
+	  
+	  sol.timer.start(self, 400, function()
+	    local entity = hero:get_facing_entity()
+	    if entity.on_lantern_interaction ~= nil and game:get_magic() > 0 then
+		  entity:on_lantern_interaction()
+		end
+	  end)
+	  
+	elseif command == "item_" .. opposite then
+	  game:get_item(game:get_value("_item_slot_" .. opposite)):on_using()
+	  
 	elseif command == "action" and can_cancel then
 	  self:stop_lantern()
+	  
 	else
 	  return false
 	end
   end
-  
-  -- if command == "action" and can_cancel  then
-   
-
-  -- elseif command == (self.opposite_slot or (self.opposite_slot_0 or nil))  then
-	-- self.game:get_item(self.game:get_value("_item_slot_"..self.opposite_slot_to_number)):on_using()
-
-  -- end
   return true
 end
 
 function lantern_controller:stop_lantern()
-  sol.timer.stop_all(self)
-  sol.menu.stop(self)
+  local game = self.game
+  local hero = self.hero
+
+  game:set_ability("shield", hero.shield)
+  hero.shield = nil
+  
+  self.state = "inactive"
+  game:set_light_animation(self.state)
+  
   sol.audio.play_sound("/items/lamp/off")
   sol.audio.play_sound("common/item_show")
+  
   can_cancel = false
-  self.game.is_using_lantern = false
+  game.is_using_lantern = false
   
-  self.game:set_custom_command_effect("action", nil)
-  self.game:set_value("item_lamp_state", 0)
-  
-  self.game:set_ability("shield", self.game:get_value("current_shield"))
-  self.game:get_hero():set_shield_sprite_id("hero/shield"..self.game:get_ability("shield"))
-  
+  game:set_custom_command_effect("action", nil)
+
   self.hero:cancel_direction_fix()
+  
+  sol.timer.stop_all(self)
+  sol.menu.stop(self)
 end
 
 return lantern_controller

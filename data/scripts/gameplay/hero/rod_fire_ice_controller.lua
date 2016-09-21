@@ -16,18 +16,25 @@ function rod_controller:start_rod(game, rod_type)
   self.rod_type = rod_type
   self.hero = game:get_hero()
   game:set_item_on_use(true)
+  
+  local hero = self.hero
+  
+  if hero.shield == nil then
+    hero.shield = game:get_ability("shield")
+    game:set_ability("shield", 0)
+  end
 
   self.slot = "item_1"
-  if game:get_value("_item_slot_2") == rod_type .. "_rod_case" then 
+  if game:get_value("_item_slot_2") == rod_type .. "_rod" then 
     self.slot = "item_2"
   end  
   
   --shield
 
-  local x, y, layer = self.hero:get_position()
-  local direction = self.hero:get_direction()
+  local x, y, layer = hero:get_position()
+  local direction = hero:get_direction()
  
-  rod = self.game:get_map():create_custom_entity({
+  rod = game:get_map():create_custom_entity({
     x = x,
     y = y,
     layer = layer,
@@ -39,28 +46,28 @@ function rod_controller:start_rod(game, rod_type)
   
   -- check if the input is pressed, if not, abort.
   starting_timer = sol.timer.start(self, 300, function()
-    if self.game:is_command_pressed(self.slot) then 
+    if game:is_command_pressed(self.slot) then 
 	  self:start_ground_check()
 	  self.state = 1
 	  game:simulate_command_pressed(self.slot)
 	  
-	  self.hero:set_fixed_animations("rod_stopped", "rod_walking")
-	  self.hero:set_fixed_direction(self.hero:get_direction())
+	  hero:set_fixed_animations("rod_stopped", "rod_walking")
+	  hero:set_fixed_direction(hero:get_direction())
 	  
-      self.hero:unfreeze()
-	  self.hero:set_walking_speed(55)	
+      hero:unfreeze()
+	  hero:set_walking_speed(55)	
 	else 
-	  self.game:simulate_command_released(self.slot)
+	  game:simulate_command_released(self.slot)
 	end
   end)
   starting_timer:set_suspended_with_map(true)
   
   self.hero.on_custom_position_changed = function()
     local x, y, layer = self.hero:get_position()
-    rod:set_position(x, y - rod_controller.shift[self.hero:get_sprite("tunic"):get_frame()], layer) 
+    rod:set_position(x, y - rod_controller.shift[hero:get_sprite("tunic"):get_frame()], layer) 
   end
   
-  sol.menu.start(self.game:get_map(), self)
+  sol.menu.start(game:get_map(), self)
 end
 
 function rod_controller:start_ground_check()
@@ -71,7 +78,7 @@ function rod_controller:start_ground_check()
     is_halted_by_anything_else = true
     if state == "treasure" then ended_by_pickable = true end
 	if state == "stairs" then hero:set_animation("walking") end
-	rod_controller:stop_rod() 
+	sol.menu.stop(rod_controller)
   end
 
   timer0 = sol.timer.start(self, 10, function()
@@ -152,26 +159,27 @@ end
 
 function rod_controller:on_command_released(command)
   if command == self.slot and not self.game:is_suspended() then
-	self:stop_rod()
+	sol.menu.stop(self)
 	sol.audio.play_sound("common/item_show") 
   end
   return true
 end
 
-function rod_controller:stop_rod() 
+function rod_controller:on_finished() 
   local game = self.game
   local hero = self.hero
   
+  game:set_ability("shield", hero.shield)
+  hero.shield = nil
+  
   hero.on_custom_position_changed = nil
   
+  self.state = 0
   tick = 0
   rod:remove()
-  game:set_ability("shield", game:get_value("current_shield"))
-  hero:set_shield_sprite_id("hero/shield" .. game:get_value("current_shield"))
   hero:set_walking_speed(88)
-  game:set_value("item_"..self.rod_type.."rod_state", 0)
-  game:set_item_on_use(false)
   
+  game:set_item_on_use(false)
   hero:cancel_direction_fix()
   
   if not is_halted_by_anything_else then
@@ -179,12 +187,9 @@ function rod_controller:stop_rod()
     hero:set_animation("stopped" .. (game:get_ability("shield") > 0 and "_with_shield") or "")
   end
   
-  hero:set_shield_sprite_id("hero/shield" .. game:get_value("current_shield"))
   is_halted_by_anything_else = false
   
   game:get_item(self.rod_type.."_rod"):set_finished()
- 
-  sol.menu.stop(self)  
   sol.timer.stop_all(self)
 end
 

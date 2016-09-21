@@ -13,7 +13,6 @@ local time_between_note = {}
 local y_position = {[0] = 185 ,[1] = 173, [2] = 181, [3] = 189, [4] = 197}
 local color = {[0]= 0 ,[1]= 0,[2]= 0}
 
-
 --//Create graphics for the buttons.
 local button = {}
 for i = 0, 7 do
@@ -36,7 +35,7 @@ end
 
 function ocarina_manager:start(game)
   self.game = game
-  sol.menu.start(game, self, true)
+  sol.menu.start(game:get_map(), self, true)
 end
 
 -- The Ocarina
@@ -141,10 +140,10 @@ end
 
 function ocarina_manager:check_learning_session()
   for t, n in ipairs(played_note) do
-      if played_note[t] ~= note_to_memorize[t - 1] then
-	   success = -1
-	   learning_greyscale_note_correct = 0
-	   self:song_is_error()
+    if played_note[t] ~= note_to_memorize[t - 1] then
+	 success = -1
+	 learning_greyscale_note_correct = 0
+	 self:song_is_error()
 	end
   end
   success = success + 1
@@ -355,6 +354,7 @@ function ocarina_manager:start_learn_song(index)
 	  self.can_draw_text = true
 	  text_x = 220
 	else
+	  -- text_x = 154
 	  self.ocarina_se1:set_text_key("ocarina.learn.memorize_this.type." .. song_name_type)
 	  self.ocarina_se2:set_text_key("quest_status.caption.ocarina_song_" .. self.indexed_song_to_learn + 1)
 	  self.can_draw_text = true
@@ -471,7 +471,7 @@ function ocarina_manager:start_song_effect(index)
 	  self:return_no_effect()
 	else
 	  if not g.has_played_sun_song then
-	    g:set_time_flow(15) --20
+	    g:set_time_flow(10) --20
 	    g.has_played_sun_song = true
 	  end
 	  self:stop_ocarina()
@@ -538,7 +538,7 @@ function ocarina_manager:return_no_effect()
 end
 
 function ocarina_manager:create_warp_sprite_entity(time_to_create_trail, tr)
-  local game = sol.main.game
+  local game = self.game
   local hero = game:get_hero()
   local map = game:get_map()
 
@@ -604,7 +604,7 @@ function ocarina_manager:create_warp_sprite_entity(time_to_create_trail, tr)
 end
 
 function ocarina_manager:warp_from_ocarina(tr)
-  local game = sol.main.game
+  local game = self.game
   local map = game:get_map()
   local hero = game:get_hero()
   self.surface = sol.surface.create(320, 240)
@@ -712,14 +712,15 @@ end
 
 function ocarina_manager:on_command_pressed(command)
   local game = self.game
+  local soundfont = self.ocarina_soundfont
   
   local function do_sustain(input)
     if sustain ~= nil then sustain:stop() end
-    sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
+    sol.audio.play_sound("/items/ocarina/soundfont/".. soundfont .."/"..input)
 	
     sustain = sol.timer.start(183, function()
 	  if game:is_command_pressed(input) and not game:is_command_pressed("attack") or self.song_played then
-	    sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..input)
+	    sol.audio.play_sound("/items/ocarina/soundfont/".. soundfont .."/"..input)
 		return true
 	  else
 		return false
@@ -737,7 +738,7 @@ function ocarina_manager:on_command_pressed(command)
 		elseif command == "attack" then
 		  if sustain ~= nil then sustain:stop() end
 		    self:stop_ocarina()
-		end
+		  end
 	  end
       elseif self.can_control and self.learning_new_song and self.disable_input and self.avoid_restart and not self.song_played then
 	    if command == "action" then
@@ -763,22 +764,18 @@ function ocarina_manager:on_command_pressed(command)
 end
 
 function ocarina_manager:simulate_ocarina(pointer)
-  local value
-  if pointer == 0 then value = "right" 
-  elseif pointer == 1 then value = "up" 
-  elseif pointer == 2 then value = "left" 
-  elseif pointer == 3 then value = "down" 
-  elseif pointer == 4 then value = "action"
-  end 
-  
-  if self.ocarina_soundfont == "ocarina" then sfont_delay = 183
-  elseif self.ocarina_soundfont == "malon" then sfont_delay = 80 end
+  pointer = input_array[pointer]
+  local soundfont = self.ocarina_soundfont
+
+  if soundfont == "ocarina" then sfont_delay = 183
+  elseif soundfont == "malon" then sfont_delay = 80 
+  end
   
   if sustain ~= nil then sustain:stop() end
-  sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..value)
+  sol.audio.play_sound("/items/ocarina/soundfont/".. soundfont .."/".. pointer)
   if self.ocarina_soundfont ~= "harp" then
 	sustain = sol.timer.start(sfont_delay, function()
-	   sol.audio.play_sound("/items/ocarina/soundfont/"..self.ocarina_soundfont.."/"..value)
+	   sol.audio.play_sound("/items/ocarina/soundfont/".. soundfont .."/"..pointer)
 	   return true
 	end)
   end
@@ -791,9 +788,10 @@ function ocarina_manager:on_finished()
   for i = 0, #played_note do 
 	played_note[i] = nil
 	note_to_memorize[i] = nil
-    time_between_note[i] = nil 
+	time_between_note[i] = nil 
   end
   
+  self.can_control = false
   self.can_play = false
   self.song_played = false
   self.learning_new_song = false
@@ -804,8 +802,11 @@ function ocarina_manager:on_finished()
   self.indexed_song_to_learn = nil
   self.ocarina_soundfont = nil
   song_played = nil
+  song_delay = nil
   
-  song_delay, note = 0, 0
+  delay_new = 800
+  time_played = 0
+  note =  0
   
   if not game:is_current_scene_cutscene() then game:show_cutscene_bars(false) game:get_hero():unfreeze() end
   game:set_hud_enabled(true)
@@ -840,19 +841,21 @@ function ocarina_manager:on_draw(dst_surface)
   end
  
   for i = 0, #note_to_memorize do
-    if note_to_memorize[i] ~= nil then
+    local n = note_to_memorize
+    if n[i] ~= nil then
 	  if self.can_control then
-		note_greyscale:draw_region(17 * note_to_memorize[i], 17, 17, 17, dst_surface, 63 + (i * 26), y_position[note_to_memorize[i]])
+		note_greyscale:draw_region(17 * n[i], 17, 17, 17, dst_surface, 63 + (i * 26), y_position[n[i]])
 	    if self.disable_input then
 	      self.error_img:draw(dst_surface, 74, 169)
 	    end
 	    for l = 0, #button do
-          if played_note[l] ~= nil then
-	        button[l - 1]:draw_region(17 * played_note[l] , 0, 17, 17, dst_surface, 63 + ((l - 1)* 26), y_position[played_note[l]])
+		  local p = played_note
+          if p[l] ~= nil then
+	        button[l - 1]:draw_region(17 * p[l] , 0, 17, 17, dst_surface, 63 + ((l - 1)* 26), y_position[p[l]])
           end
         end
 	  else	 
-	    button[i]:draw_region(17 * note_to_memorize[i], 0, 17, 17, dst_surface, 63 + (i * 26), y_position[note_to_memorize[i]])
+	    button[i]:draw_region(17 * n[i], 0, 17, 17, dst_surface, 63 + (i * 26), y_position[n[i]])
 	  end
     end
   end

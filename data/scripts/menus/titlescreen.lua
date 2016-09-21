@@ -102,20 +102,20 @@ function title_screen:on_command_pressed(command)
 	 self.state = 2
      sol.audio.play_sound("scene/title/press_start_2")
      game:fade_audio(0, 10)
-	 sol.main.game:set_item_on_use(true)
+	 game:set_item_on_use(true)
      self.surface:fade_in(40, function()
+	   sol.audio.play_music(nil)
+	   sol.audio.set_music_volume(game:get_value("old_volume") or 70)
        game:stop_tone_system()
        game:clear_fog()
-	   game:set_pause_allowed(false)
 	   game.building_file_select = true
        sol.menu.start(game, savegame_menu)
-       sol.audio.set_music_volume(game:get_value("old_volume") or 70)
 	   sol.timer.stop_all(self)
 	   sol.menu.stop(self)
      end)
     end
   end 
-return true
+  return true
 end
 
 function title_screen:switch_press_space()
@@ -134,27 +134,29 @@ function title_screen:wait_time_before_keypress()
 end
 
 sol.timer.start(title_screen, 8000, function()
-  if not title_screen.draw_title_name then
-    title_screen.draw_title_name = true       
-	title_screen.sprite_sparkle:fade_in(60)
-    title_screen.title_screen_logo_img:fade_in(60, function()
-      title_screen:move_sword()
-	  if not title_screen.draw_game_name_ef0 then
-        title_screen.draw_game_name_ef0 = true
-	    title_screen.game_name_effect:fade_in(50, function()
-		  if not title_screen.draw_game_name then
-		    title_screen.draw_game_name = true
-		    title_screen.game_name:fade_in(20)
+  local self = title_screen
+
+  if not self.draw_title_name then
+    self.draw_title_name = true       
+	self.sprite_sparkle:fade_in(60)
+    self.title_screen_logo_img:fade_in(60, function()
+      self:move_sword()
+	  if not self.draw_game_name_ef0 then
+        self.draw_game_name_ef0 = true
+	    self.game_name_effect:fade_in(50, function()
+		  if not self.draw_game_name then
+		    self.draw_game_name = true
+		    self.game_name:fade_in(20)
 		  end
 		end)
 	  end
-      if not title_screen.draw_copyright then
-        title_screen.draw_copyright = true
-        title_screen.website_img:fade_in(60, function()
-          if not title_screen.draw_press_space then
-            title_screen.draw_press_space = true
-            title_screen:switch_press_space()
-            title_screen.state = 1
+      if not self.draw_copyright then
+        self.draw_copyright = true
+        self.website_img:fade_in(60, function()
+          if not self.draw_press_space then
+            self.draw_press_space = true
+            self:switch_press_space()
+            self.state = 1
           end
         end)
       end

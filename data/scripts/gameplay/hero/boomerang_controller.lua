@@ -1,6 +1,5 @@
 local boomerang_controller = {
   slot = "item_1",          -- Slot of the Item, replaced dynamically
-  opposite_slot = "item_2", -- Slot of the opposite Item, replaced dynamically
   boomerang = nil,          -- Boomerang Entity
   distance = 150,           -- Max Distance
   speed = 164,              -- Speed of the Boomerang
@@ -11,7 +10,7 @@ local boomerang_controller = {
 
 -- Set which build-in hero state can interrupt this item
 local state = {"swimming", "jumping", "falling", "stairs", "hurt", "plunging", "treasure"}
-local alt_state = {"swimming", "jumping", "stairs", "plunging"} --todo test hookshot
+local alt_state = {"swimming", "jumping", "stairs", "plunging"}
 -- Set which item is compatible for the fast item switching feature
 local items = {"hookshot", "bow", "dominion_rod"}
 -- Set script related variable
@@ -80,7 +79,7 @@ function boomerang_controller:start_ground_check()
   local function end_by_collision() 
     local state = hero:get_state()
 	force_stop = true
-    if state == "treasure" then  print("test") ended_by_pickable = true end
+    if state == "treasure" then ended_by_pickable = true end
 	self.canceled_active = true
 	if state == "stairs" then
 	  hero:restore_state_stairs()
@@ -103,7 +102,6 @@ function boomerang_controller:start_ground_check()
 
 	-- Check if the item has changed
 	self.slot = item and "item_2" or "item_1"
-	self.opposite_slot = item and "item_1" or "item_2"
 	
 	-- Check if the boomerang is still assigned on a slot
 	if not self.game:is_suspended() then
@@ -269,7 +267,7 @@ function boomerang_controller:create_boomerang()
 	  if hero:get_state() == "free" then
  	    if game:is_using_item() then
 	      self.state = 0
-	      -- self.canceled_active = false
+	      self.canceled_active = false -- this was off
 		  force_stop = false
 		  sol.audio.play_sound("common/item_show") 
 	      sol.menu.stop(self)
@@ -280,11 +278,15 @@ function boomerang_controller:create_boomerang()
 	  end
 	  
 	  if not self.canceled_active then 
-	    hero:set_walking_speed(50)
-	    self.state = 1
-	    set_aminations(hero, 1)
-	    if game:is_command_pressed(self.slot) then script:on_command_pressed(self.slot) end
-
+	    if sol.menu.is_started(self) then
+	      hero:set_walking_speed(50)
+	      self.state = 1
+	      set_aminations(hero, 1)
+	      if game:is_command_pressed(self.slot) then script:on_command_pressed(self.slot) end
+		else
+		  sol.menu.stop(self)
+		  return
+		end
 	  else
 	    -- The item is not active anymore
 	    self.canceled_active = false
@@ -387,7 +389,7 @@ function boomerang_controller:on_command_pressed(command)
   
   local suspended = game:is_suspended()
   local another_item = game.is_going_to_another_item
-  local opposite = self.opposite_slot:sub(6, 7)
+  local opposite = self.slot == "item_1" and "1" or "2"
   local item_name = game:get_item_assigned(opposite) or nil
   local state = self.state
   local item_opposite = item_name ~= nil and item_name:get_name() or nil
@@ -476,8 +478,6 @@ end
 function boomerang_controller:on_finished()
   local game = self.game
   local hero = self.hero
-  game:set_ability("shield", hero.shield)
-  hero.shield = nil
   
   self.state = 0
   
@@ -510,6 +510,9 @@ function boomerang_controller:on_finished()
   
   if game.is_using_lantern then
     hero:set_fixed_animations("lantern_stopped", "lantern_walking")
+  else
+    game:set_ability("shield", hero.shield)
+    hero.shield = nil
   end
   
   sol.timer.stop_all(self)

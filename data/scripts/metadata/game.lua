@@ -220,7 +220,7 @@ function game_metatable:add_mail(name)
   self:set_value("mail_" .. value .. "_obtained", true)
   self:set_value("mail_" .. value .. "_opened", false)
   self:set_value("mail_" .. value .. "_highlighted", false)
-  self:set_value("total_mail", self:get_value("total_mail") or 0 + 1)
+
   mail_bag:add_amount(1)
   
   self:get_hero():start_treasure("mail")

@@ -1,5 +1,6 @@
 local bottle_manager = {
   btl = nil,
+  var = 0
 }
 
 local delay
@@ -48,24 +49,31 @@ function bottle_manager:use_bottle(bottle_id, variant, game)
       width = 8,
       height = 8,
       direction = direction4,
-      model = "bottle"
+      model = "item/bottle/bottle",
     }
     bottle.slot = bottle_id
 	
-  elseif var == 2  then
+  elseif var == 2  then -- Plain Water
     self:pour_object(var)
 	
-  -- Red Potion
-  elseif var == 3 then
+  elseif var == 3 then  -- Red Potion
     self:drink(game:get_max_life(), 0, "life")
+	
+  elseif var == 4 then	-- green potion
+    self:drink_session(0, game:get_max_magic(), "magic")
+	
+  elseif var == 5 then -- grandma's soup
+    self:drink_session(game:get_max_life(), game:get_max_magic(), "grandma_soup")
+	
+  elseif var == 6 then -- revitalizing potion
+    self:drink_session(game:get_max_life() / 2, game:get_max_magic() / 2, "revitalizing")
+	divider = 2
 	
   -- Fairy
   elseif var == 7 then
     self:pour_object(var)
-	
- 
-  
   end
+  
 end
 
 function bottle_manager:pour_object(object)
@@ -83,12 +91,13 @@ function bottle_manager:pour_object(object)
     width = 8,
     height = 8,
     direction = direction4,
-    model = "object/bottle/" .. object
+    model = "item/bottle/" .. object
   }
   
-  hero:set_animation("bottle_pouring_start", function()
-    hero:set_animation("bottle_pouring_sequence", function()
-      hero:set_animation("bottle_pouring_waiting_event")
+  local prefix = "bottle_pouring_"
+  hero:set_animation(prefix .. "start", function()
+    hero:set_animation(prefix .. "sequence", function()
+      hero:set_animation(prefix .. "waiting_event")
 	  sol.timer.start(1000, function()
 	    self.btl:set_variant(1)
 	    game:show_cutscene_bars(false)
@@ -107,9 +116,9 @@ function bottle_manager:drink(target_life, target_magic, target)
   
   game:set_pause_allowed(false)
   
-  if target == "life" or target == "grandma_soup" or target == "revitalizing" then 
+  if target ~= "magic" then 
     target_obj = game:get_max_life()
-  elseif target == "magic" then
+  else
     target_obj = game:get_max_magic()
   end
 
@@ -125,7 +134,7 @@ function bottle_manager:drink(target_life, target_magic, target)
   potion:set_drawn_in_y_order(true)
   game:show_cutscene_bars(true)
   
-  local potion_sprite = potion:create_sprite("entities/misc/item/bottle/drinking_potion")
+  local potion_sprite = potion:create_sprite("entities/item_bottle_drinking_potion")
   potion_sprite:set_animation("start_" .. variant)
   hero:set_animation("bottle_drink_start")
 
@@ -135,9 +144,9 @@ function bottle_manager:drink(target_life, target_magic, target)
 	hero:set_animation("bottle_drink_loop")
 	potion_sprite:set_animation("drinking_full_"..variant)
 	sol.audio.play_sound("characters/link/voice/drinking")
-	drink_se = sol.timer.start(1000, function()
+	sol.timer.start(1000, function()
       sol.audio.play_sound("characters/link/voice/drinking")
-	return true
+	  return hero:get_amination() == "bottle_drink_loop"
 	end)
   end)
 	
@@ -181,7 +190,7 @@ end
 function bottle_manager:retrieve_delay_time(target)
   local game = self.game
 
-  if target == "life" or target == "grandma_soup" or target == "revitalizing" then
+  if target ~= "magic" then
     if game:get_max_life() <= 20 then
 	  delay = 150
     elseif game:get_max_life() <= 40 then

@@ -25,13 +25,11 @@ function transition:on_started()
 	end)
   elseif self.fade_type == "out" then
     self.surface:fade_out(self.duration, function()
-	  if game:get_map().on_transition_finished then game:get_map().on_transition_finished() end
 	  sol.menu.stop(self)
 	end)
-  else error("Transition ".. self.fade_type .." doesn't seems to exist. Please refer to surface fading method.")
   end
 end
 
 function transition:on_draw(dst_surface)
-  self.surface:draw(dst_surface, 0, 0)
+  self.surface:draw(dst_surface)
 end

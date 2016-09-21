@@ -1,3 +1,5 @@
+-- This file should be updates each time you add a new ressource
+
 local text = {
   "£The Legend of Zelda:",
   "£Eternal Struggle",
@@ -54,7 +56,7 @@ local text = {
   "Wrightmat",
   "",
     
-  "£Map Designers",
+  "£Level Design",
   "MetalZelda",
   "GanonDark",
   "Zephir",
@@ -93,7 +95,7 @@ local text = {
   "Wrightmat", 
   "",
   
-  "£Enemy Designers - AI",
+  "£Enemies",
   "MetalZelda",
   "Nintendo", 
   "",
@@ -106,9 +108,6 @@ local text = {
   "",
   
   "£Gameplay Analysts",
-  "Diarandor",
-  "Wrightmat",
-  "Christopho",
   "",
   
   "£Translators",
@@ -147,11 +146,7 @@ local text = {
   "Chaos Project",
   "Zelda Fan Game Central",
   "People that supported this project",
-  "",
-  
-  
-  -- , , ,Copyright C- All Rights Reserved.,The Legend of Zelda is a Trademark of Nintendo.Corp,This fan game was made for a non-profit goal and for fair use, , , , , , , , , ,£Thank you for playing, hope you enjoyed it."}
- 
+  "", 
  }
  
  return text

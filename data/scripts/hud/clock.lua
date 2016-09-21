@@ -1,19 +1,31 @@
-local clock = {
-  audio_mgr = require("scripts/gameplay/audio/hyrule_field_audio_mgr")
-}
+local clock = {}
 local has_started = false
 
 function clock:new(game)
   local object = {}
   setmetatable(object, self)
   self.__index = self
-
-  object:initialize(game)
+  
+  self:initialize(game)
 
   return object
 end
 
 function clock:initialize(game)
+  function game:set_clock_enabled(boolean)
+    if boolean then
+	  sol.menu.start(game, clock, true)
+	  self.clock_was_enabled = true
+	else
+	  sol.menu.stop(clock)
+	  self.clock_was_enabled = false
+	end
+  end
+
+  function game:was_clock_enabled()
+    return self.clock_was_enabled
+  end
+
   local horizontal_alignment = "center"
   local vertical_alignment = "middle"
   local font = "clock"
@@ -33,7 +45,7 @@ function clock:initialize(game)
   self.time_system_minute_indicator = sol.surface.create("hud/clock/minute_indicator.png") 
   self.time_system_time_indicator = sol.surface.create("day_night_indicator.png", true) 
   
-  self.clock_moon:set_direction(game:get_value("current_moon_phase"))
+  self.clock_moon:set_direction(game:get_value("current_moon_phase") or 0)
   
   -- Used to display the current hour.
   self.time_system_hour_sun = sol.text_surface.create{
@@ -49,7 +61,9 @@ function clock:initialize(game)
 	font = font, 
 	text = self.hour_text,
   }	
+
 end
+
 
 function clock:on_started()
   self:check_time()
@@ -63,11 +77,7 @@ function clock:check_time()
   local hour = game:get_value("current_hour")
   local sun = self.time_system_hour_sun
   local moon = self.time_system_hour_moon
-  self.current_time = 1
-  
-  if hour > 5 and hour < 18 then
-    self.current_time = 0
-  end
+  self.current_time = (hour > 5 and hour < 18) and 0 or 1
   
   if (hour >= 12 and hour <= 16) then
     self.clock_moon:set_direction(self.game:get_value("current_day"))
@@ -106,7 +116,7 @@ function clock:check()
    local ccos = math.cos(radians)
    local inc = math.floor(minute + 1 / game.time_flow)
    
-   game:set_value("current_minute", game:get_value("current_minute") + 1)
+   game:set_value("current_minute", minute + 1)
    minute = game:get_value("current_minute")
    
   if (hour == 17 or hour == 5) and minute == 60 then
@@ -157,36 +167,28 @@ function clock:check()
   
   -- A New day is rising, play a intro music only if we are in Hyrule Fields
   if has_started and game:get_map():get_world() == "field" then	
-	if hour == 19 and minute == 60 then
-	  self.audio_mgr:play_night()
+    
+	if (hour == 19 and minute == 60) or (hour == 5 and minute == 30) then
+	  game.is_in_field = false
+	  game:start_field_audio()
 	end
 	
-    if hour == 5 and minute == 30 then
-      self.audio_mgr:play_dawn()
-    end  
-
     if hour == 6 and minute == 30 then 
-	  self.game:set_value("time_of_day", "day")
+	  game:set_value("time_of_day", "day")
       local folder = "hyrule_field/"
-	  local track = 0
 	  
-	  local function do_track(num)
-	    sol.audio.play_music(folder .. "dawn_intro_" .. num, function()
-		  if num == 1 then
-		    clock.audio_mgr:check_partition()
-		    return
-		  end
-		  do_track(num + 1)
-		end)
-	  end
+	  sol.timer.start(math.random(200, 5000), function()
+	    game:get_map():check_night()
+	  end)
 	  
       sol.audio.play_music(folder .. "dawn", function()
-	    do_track(0)
+	    game.is_in_field = false
+	    game:start_field_audio()
 	  end)
     end	
   end
   
-  self.timer = sol.timer.start(self, self.game.time_flow, function()
+  self.timer = sol.timer.start(self, game.time_flow, function()
     self:check()
   end)
   self.timer:set_suspended_with_map(self:need_halt_increment())
@@ -212,7 +214,6 @@ function clock:hide_clock()
 end
 
 function clock:on_finished()
-  self.audio_mgr = nil
   has_started = false
   sol.timer.stop_all(self)
   self.timer = nil

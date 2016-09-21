@@ -4,8 +4,23 @@ function map_name:new(game)
   local object = {}
   setmetatable(object, self)
   self.__index = self
+  
+  self:initialize(game)
 
   return object
+end
+
+function map_name:initialize(game)
+  -- Map Name control
+  function game:show_map_name(name, display_extra)
+    sol.menu.start(self, map_name, false)
+    map_name:show_name(name, display_extra or nil)
+  end
+
+  function game:clear_map_name()
+    sol.menu.stop(map_name)
+    map_name:clear()
+  end
 end
 
 function map_name:show_name(name, extra)
@@ -64,16 +79,18 @@ function map_name:show_name(name, extra)
 	end
   end		
 		
-  self.timer = sol.timer.start(sol.main, 500, function()
+  self.timer = sol.timer.start(self, 500, function()
 	self.map_name_surface:fade_in(40)
   end) 
+  self.timer:set_suspended_with_map(false)
   
-  self.timer0 = sol.timer.start(sol.main, 3500, function()
+  self.timer0 = sol.timer.start(self, 3500, function()
 	self.map_name_surface:fade_out(40, function()
 	  self.map_name_surface:clear()
 	  self.name = nil
 	end)
   end)
+  self.timer0:set_suspended_with_map(false)
 end
 
 function map_name:on_paused()

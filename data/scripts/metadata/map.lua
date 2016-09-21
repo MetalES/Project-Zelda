@@ -1,5 +1,13 @@
 local map_metatable = sol.main.get_metatable("map")
 
+function map_metatable:check_night()
+  local game = self:get_game()
+  
+  for entity in self:get_entities("night_") do
+    entity:set_enabled(game:get_time_of_day() ~= "day")
+  end
+end
+
 function map_metatable:create_collision(x, y, layer)
   local collision = self:create_custom_entity({ 
     x = x, 
@@ -102,20 +110,36 @@ function map_metatable:spawn_chest(entity, sound_to_play, switch, after_combat, 
       end)
 
 	  sol.timer.start(5000, function()
-		chest_effect:get_sprite():fade_out(10, function() m:stop() chest_effect:remove() entity:set_drawn_in_y_order(true) end) 
+		chest_effect:get_sprite():fade_out(10, function() 
+		  m:stop()
+		  chest_effect:remove()
+		  entity:set_drawn_in_y_order(true) 
+		end) 
 	  end)
 
 	  sol.timer.start(7500, function()
+	    if self.on_chest_spawned ~= nil then 
+		  self:on_chest_spawned(entity:get_name()) 
+		  return
+		end
 		if music_if_fade ~= nil then
 		  game:fade_audio(game:get_value("old_volume"), 10)
 		  sol.audio.play_music(music_if_fade)
 		end
-		game:show_cutscene_bars(false)
+		if not game:is_using_item() then
+		  game:show_cutscene_bars(false)
+		end
         game:set_hud_enabled(true)
         game:set_clock_enabled(true)
 	  end)
     end)
   end, 200, 7500, true)
+end
+
+function map_metatable:spawn_falling_chest(entity, switch)
+
+  local sound 
+
 end
   
 function map_metatable:on_finished()

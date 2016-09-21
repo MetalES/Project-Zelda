@@ -97,7 +97,9 @@ function hero_meta:on_state_changed(state)
   local life = game:get_life()
   local max_life = game:get_max_life()
   local sword = game:get_ability("sword")
-
+  
+  local cload_darkness = game:get_item("cloak_darkness"):get_state()
+  
   local random_sword_snd = math.random(4)
   local random_snd = math.random(2)
   local random_swordattack_spin_snd = math.random(0, 2)
@@ -110,7 +112,7 @@ function hero_meta:on_state_changed(state)
   -- The hero is swinging the sword.
   if state == "sword swinging" then
     start_push_pull_sound(self, false) 
-	if game:get_value("item_cloak_darkness_state") == 1 then
+	if cloak_darkness == 1 then
 	  sword_sound_id(self, "cloak_attack" .. random_sword_snd)
 	else
 	  sword_sound_id(self, "attack" .. random_sword_snd) 
@@ -136,7 +138,7 @@ function hero_meta:on_state_changed(state)
   
   -- The hero is spin attacking.
   if state == "sword spin attack" then
-	if game:get_value("item_cloak_darkness_state") ~= 0 then
+	if cloak_darkness ~= 0 then
 	  play_sound("cloak_spin" .. random_swordattack_spin_snd)
 	else
 	  play_sound("spin" .. random_swordattack_spin_snd)

@@ -3,7 +3,6 @@
 local item_icon = {}
 
 function item_icon:new(game, slot)
-
   local object = {}
   setmetatable(object, self)
   self.__index = self

@@ -12,7 +12,7 @@ function chest_system:disable_hud_element()
   self.game:show_cutscene_bars(true)
   self.game:set_clock_enabled(false)
   self.game:set_pause_allowed(false)
-  self.game:set_hud_enabled(false)
+  self.game.hud:set_enabled(false)
 end
 
 function chest_system:start_movement(dir, max_distance, x, y)
@@ -126,7 +126,7 @@ function chest_system:start_open_chest(type_of_chest, entity)
 	  end)
 	  
 	  sol.timer.start(self, 6900, function()
-	    game:set_hud_enabled(true)
+	    game.hud:set_enabled(true)
 		game:set_clock_enabled(true)
 		hero:set_direction(2)
 	  end)
@@ -143,7 +143,7 @@ function chest_system:start_open_chest(type_of_chest, entity)
 		game:set_suspended(false)
 		hero:get_sprite():set_ignore_suspend(false)
 		game:set_value(savegame, true)
-		self:reload_minimap()
+		game:reload_minimap()
 		sol.menu.stop(self)
 	  end)
 
@@ -213,21 +213,13 @@ function chest_system:start_open_chest(type_of_chest, entity)
 		game:set_suspended(false)
 		game:set_pause_allowed(true)
 		game:set_value(savegame, true)
-		self:reload_minimap()
+		game:reload_minimap()
 		sol.menu.stop(self)
 	  end)
 	  
     elseif hero:get_direction() ~= direction and not game_svg then
 	  self:wrong_direction()
     end
-  end
-end
-
-function chest_system:reload_minimap()
-  for _, menu in ipairs(self.game.hud) do
-    if menu.load_map ~= nil then
-	  menu:load_map()
-	end
   end
 end
 
