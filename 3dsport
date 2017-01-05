@@ -1,0 +1,13 @@
+This is a file regarding how I see a 3ds port of Solarus.
+
+- The New3DS is more prone to correctly run any Solarus games (256mb ram, 10mb vram, 266mhz cpu), clock speed can vary as well.
+  -> Zelda ES will need some fix, starting a game consume 300mb of ram
+- Solarus use layers as a mapping feature, why not using it for the 3d effect, more depths can be cool, Kirby's adventure 3d use the same method.
+- 3DS is 2 screens, 1 screen = 1 surface, why not add another argument in on_draw() like
+
+on_draw(topscreen, touchscreen)
+
+so HUD or other stuffs (maps, dungeons things, inventory) can be drawn on this screen, on_mouse_button_pressed will be simulated by the touchscreen.
+This can be some nice addition ...
+
+The only thing, LuaJIT isn't ported on 3DS
